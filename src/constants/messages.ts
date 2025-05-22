@@ -3,6 +3,10 @@ export const USER_MESSAGES = {
   NAME_IS_REQUIRED: 'Name is required',
   NAME_MUST_BE_A_STRING: 'Name must be a string',
   NAME_LENGTH_MUST_BE_FROM_1_TO_100: 'Name length must be from 1 to 100',
+  PHONE_IS_REQUIRED: 'Phone is required',
+  PHONE_ALREADY_EXISTS: 'Phone already exists',
+  PHONE_IS_WRONG_FORMAT: 'Phone is wrong format',
+  PHONE_MUST_BE_A_STRING: 'Phone must be a string',
   EMAIL_ALREADY_EXISTS: 'Email already exists',
   EMAIL_IS_REQUIRED: 'Email is required',
   EMAIL_IS_INVALID: 'Email is invalid',
@@ -23,8 +27,10 @@ export const USER_MESSAGES = {
   LOGOUT_SUCCESS: 'Logout success',
   REGISTER_SUCCESS: 'Register success',
   EMAIL_OR_PASSWORD_IS_INCORRECT: 'Email or password is incorrect',
+  PHONE_OR_PASSWORD_IS_INCORRECT: 'Phone or password is incorrect',
   ACCESS_TOKEN_IS_REQUIRED: 'Access token is required',
   REFRESH_TOKEN_IS_REQUIRED: 'Refresh token is required',
   REFRESH_TOKEN_IS_INVALID: 'Refresh token is invalid',
-  USED_REFRESH_TOKEN_OR_NOT_EXIST: 'Used refresh token or not exist'
+  USED_REFRESH_TOKEN_OR_NOT_EXIST: 'Used refresh token or not exist',
+  REFRESH_TOKEN_SUCCESS: 'Refresh token success'
 } as const

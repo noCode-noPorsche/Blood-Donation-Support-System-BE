@@ -14,27 +14,57 @@ import { ErrorWithStatus } from '~/models/Error'
 export const loginValidator = validate(
   checkSchema(
     {
-      email: {
+      // email: {
+      //   notEmpty: {
+      //     errorMessage: USER_MESSAGES.EMAIL_IS_REQUIRED
+      //   },
+      //   isEmail: {
+      //     errorMessage: USER_MESSAGES.EMAIL_IS_INVALID
+      //   },
+      //   trim: true,
+      //   custom: {
+      //     options: async (value, { req }) => {
+      //       const user = await databaseService.users.findOne({
+      //         email: value,
+      //         password: hashPassword(req.body.password)
+      //       })
+      //       if (user === null) {
+      //         throw new Error(USER_MESSAGES.EMAIL_OR_PASSWORD_IS_INCORRECT)
+      //       }
+      //       req.user = user
+      //       return true
+      //     }
+      //   }
+      // },
+      phone: {
         notEmpty: {
-          errorMessage: USER_MESSAGES.EMAIL_IS_REQUIRED
+          errorMessage: USER_MESSAGES.PHONE_IS_REQUIRED
         },
-        isEmail: {
-          errorMessage: USER_MESSAGES.EMAIL_IS_INVALID
+        isString: {
+          errorMessage: USER_MESSAGES.PHONE_MUST_BE_A_STRING
         },
-        trim: true,
+
+        isLength: {
+          options: {
+            min: 10,
+            max: 12
+          },
+          errorMessage: USER_MESSAGES.PHONE_IS_WRONG_FORMAT
+        },
         custom: {
           options: async (value, { req }) => {
             const user = await databaseService.users.findOne({
-              email: value,
+              phone: value,
               password: hashPassword(req.body.password)
             })
             if (user === null) {
-              throw new Error(USER_MESSAGES.EMAIL_OR_PASSWORD_IS_INCORRECT)
+              throw new Error(USER_MESSAGES.PHONE_OR_PASSWORD_IS_INCORRECT)
             }
             req.user = user
             return true
           }
-        }
+        },
+        trim: true
       },
       password: {
         notEmpty: {
@@ -69,7 +99,7 @@ export const loginValidator = validate(
 export const registerValidator = validate(
   checkSchema(
     {
-      name: {
+      full_name: {
         notEmpty: {
           errorMessage: USER_MESSAGES.NAME_IS_REQUIRED
         },
@@ -82,6 +112,31 @@ export const registerValidator = validate(
             max: 100
           },
           errorMessage: USER_MESSAGES.NAME_LENGTH_MUST_BE_FROM_1_TO_100
+        },
+        trim: true
+      },
+      phone: {
+        notEmpty: {
+          errorMessage: USER_MESSAGES.PHONE_IS_REQUIRED
+        },
+        isString: {
+          errorMessage: USER_MESSAGES.PHONE_MUST_BE_A_STRING
+        },
+        isLength: {
+          options: {
+            min: 10,
+            max: 12
+          },
+          errorMessage: USER_MESSAGES.PHONE_IS_WRONG_FORMAT
+        },
+        custom: {
+          options: async (value) => {
+            const isExistPhone = await usersService.checkPhoneExist(value)
+            if (isExistPhone) {
+              throw new Error(USER_MESSAGES.PHONE_ALREADY_EXISTS)
+            }
+            return true
+          }
         },
         trim: true
       },
