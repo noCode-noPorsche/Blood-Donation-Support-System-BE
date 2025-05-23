@@ -22,6 +22,7 @@ externalDocs:
   url: https://swagger.io
 servers:
   - url: http://localhost:8080
+  - url: https://be-t8i8.onrender.com
 tags:
   - name: users
     description: Operations about user
