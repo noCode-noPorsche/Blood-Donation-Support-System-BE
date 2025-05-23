@@ -16,10 +16,14 @@ import { wrapAsync } from '~/utils/handler'
 const usersRouter = express.Router()
 
 /**
- * Description. Login
- * Path: /login
- * METHOD: POST
- * Body : { name: string, email: string, password: string }
+ * @openapi
+ * /users/login:
+ *  post:
+ *    description:
+ *    tags:
+ *      - Users
+ *    requestBody:
+ *      description: Information Login
  */
 usersRouter.post('/login', loginValidator, wrapAsync(loginController))
 /**

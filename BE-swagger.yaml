@@ -1,0 +1,179 @@
+openapi: 3.0.4
+info:
+  title: Blood Donation Support System - OpenAPI 3.0
+  description: |-
+    This is a sample Pet Store Server based on the OpenAPI 3.0 specification.  You can find out more about
+    Swagger at [https://swagger.io](https://swagger.io). In the third iteration of the pet store, we've switched to the design first approach!
+    You can now help us improve the API whether it's by making changes to the definition itself or to the code.
+    That way, with time, we can improve the API in general, and expose some of the new features in OAS3.
+
+    Some useful links:
+    - [The Pet Store repository](https://github.com/swagger-api/swagger-petstore)
+    - [The source API definition for the Pet Store](https://github.com/swagger-api/swagger-petstore/blob/master/src/main/resources/openapi.yaml)
+  termsOfService: https://swagger.io/terms/
+  contact:
+    email: apiteam@swagger.io
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.12
+externalDocs:
+  description: Find out more about Swagger
+  url: https://swagger.io
+servers:
+  - url: http://localhost:8080
+tags:
+  - name: users
+    description: Operations about user
+paths:
+  /users/login:
+    post:
+      tags:
+        - users
+      summary: Login
+      description: Login into system
+      operationId: login
+      requestBody:
+        description: Information login
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginBody'
+        required: true
+      responses:
+        '200':
+          description: Login Successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessAuthentication'
+
+        '422':
+          description: Invalid Input
+        '401':
+          description: UnAuthorization
+  /users/me:
+    get:
+      tags:
+        - users
+      summary: Profile
+      description: Get user information
+      operationId: profile
+      responses:
+        default:
+          description: Get user information success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+        '401':
+          description: UnAuthorization
+      security:
+        - BearerAuth: []
+
+components:
+  schemas:
+    LoginBody:
+      type: object
+      properties:
+        phone:
+          type: string
+          example: 0987654321
+        password:
+          type: string
+          example: Duc@123123
+    SuccessAuthentication:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Login success
+        result:
+          type: object
+          properties:
+            access_token:
+              type: string
+              example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjgyZjdiZTM1N2FlNzVhMGI5NmI3YWM1IiwidG9rZW5fdHlwZSI6MCwicm9sZSI6IlN0YWZmIiwiaWF0IjoxNzQ3OTQ0ODk0LCJleHAiOjE3NDc5NDU3OTR9.WpOyu0HlgqU2fg7ElIakw-JVM5TWIUaVb-syRrgovOI
+            refresh_token:
+              type: string
+              example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjgyZjdiZTM1N2FlNzVhMGI5NmI3YWM1IiwidG9rZW5fdHlwZSI6MCwicm9sZSI6IlN0YWZmIiwiaWF0IjoxNzQ3OTQ0ODk0LCJleHAiOjE3NDc5NDU3OTR9.WpOyu0HlgqU2fg7ElIakw-JVM5TWIUaVb-syRrgovOI
+    User:
+      type: object
+      properties:
+        _id:
+          type: string
+          format: MongoId
+          example: 682f6a3fdb3fb589d23e7654
+        full_name:
+          type: string
+          example: Dustin Tsan
+        email:
+          type: string
+          example: dustintsan1@gmail.com
+        date_of_birth:
+          type: string
+          format: date-time
+          example: 2025-05-21T17:48:12.171Z
+        password:
+          type: string
+          format: password
+          example: ca4d92564868432ce3f81f2ef8a9afb0bb7ba211ab924a8db40cfe18720d87dc
+        role:
+          $ref: '#/components/schemas/UserRole'
+        gender:
+          $ref: '#/components/schemas/UserGender'
+        blood_group_id:
+          type: string
+          nullable: true
+          example: null
+        number_of_donation:
+          type: integer
+          example: 0
+        number_of_request:
+          type: integer
+          example: 0
+        weight:
+          type: number
+          example: 0
+        location:
+          type: string
+          example: ''
+        phone:
+          type: string
+          example: ''
+        avatar_url:
+          type: string
+          example: ''
+        created_at:
+          type: string
+          format: date-time
+          example: 2025-05-22T18:17:35.277Z
+        updated_at:
+          type: string
+          format: date-time
+          example: 2025-05-22T18:17:35.277Z
+        email_verify_token:
+          type: string
+          example: ''
+        forgot_password_token:
+          type: string
+          example: ''
+        verify:
+          type: integer
+          enum: [0, 1]
+          description: 0 - Unverified, 1 - Verified
+          example: 0
+    UserRole:
+      type: string
+      enum: [Other, Male, Female]
+      example: Male
+    UserGender:
+      type: string
+      enum: [Admin, Staff, Customer]
+      example: Admin
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
