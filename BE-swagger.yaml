@@ -24,13 +24,13 @@ servers:
   - url: http://localhost:8080
   - url: https://be-t8i8.onrender.com
 tags:
-  - name: users
+  - name: Users
     description: Operations about user
 paths:
   /users/login:
     post:
       tags:
-        - users
+        - Users
       summary: Login
       description: Login into system
       operationId: login
@@ -53,10 +53,62 @@ paths:
           description: Invalid Input
         '401':
           description: UnAuthorization
+  /users/logout: 
+    post: 
+      tags:
+        - Users
+      summary: Logout
+      description: Logout system
+      operationId: Logout
+      requestBody:
+        description: Information Logout
+        content:
+          application/json:
+            schema: 
+              $ref: "#/components/schemas/LogoutBody"
+        required: true
+      responses:
+        "200": 
+          description: Logout Successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: Logout success
+        "401": 
+          description: UnAuthorization
+      security:
+        - BearerAuth: []
+  /users/refresh-token: 
+    post: 
+      tags:
+        - Users
+      summary: Refresh Token
+      description: Refresh token when Access token expired
+      operationId: Refresh Token
+      requestBody:
+        description: Information Refresh Token
+        content:
+          application/json:
+            schema: 
+              $ref: "#/components/schemas/LogoutBody"
+        required: true
+      responses:
+        "200": 
+          description: Refresh token success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessAuthentication"
+        "401": 
+          description: UnAuthorization
   /users/me:
     get:
       tags:
-        - users
+        - Users
       summary: Profile
       description: Get user information
       operationId: profile
@@ -72,7 +124,6 @@ paths:
           description: UnAuthorization
       security:
         - BearerAuth: []
-
 components:
   schemas:
     LoginBody:
@@ -84,12 +135,18 @@ components:
         password:
           type: string
           example: Duc@123123
+    LogoutBody: 
+      type: object
+      properties:
+        refresh_token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjgyZjdiZTM1N2FlNzVhMGI5NmI3YWM1IiwidG9rZW5fdHlwZSI6MCwicm9sZSI6IlN0YWZmIiwiaWF0IjoxNzQ3OTQ0ODk0LCJleHAiOjE3NDc5NDU3OTR9.WpOyu0HlgqU2fg7ElIakw-JVM5TWIUaVb-syRrgovOI
     SuccessAuthentication:
       type: object
       properties:
         message:
           type: string
-          example: Login success
+          example: success
         result:
           type: object
           properties:
