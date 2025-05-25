@@ -23,6 +23,7 @@ externalDocs:
 servers:
   - url: http://localhost:8080
   - url: https://be-t8i8.onrender.com
+  - url: '/'
 tags:
   - name: Users
     description: Operations about user
@@ -53,8 +54,8 @@ paths:
           description: Invalid Input
         '401':
           description: UnAuthorization
-  /users/logout: 
-    post: 
+  /users/logout:
+    post:
       tags:
         - Users
       summary: Logout
@@ -64,26 +65,26 @@ paths:
         description: Information Logout
         content:
           application/json:
-            schema: 
-              $ref: "#/components/schemas/LogoutBody"
+            schema:
+              $ref: '#/components/schemas/LogoutBody'
         required: true
       responses:
-        "200": 
+        '200':
           description: Logout Successful
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  message: 
+                  message:
                     type: string
                     example: Logout success
-        "401": 
+        '401':
           description: UnAuthorization
       security:
         - BearerAuth: []
-  /users/refresh-token: 
-    post: 
+  /users/refresh-token:
+    post:
       tags:
         - Users
       summary: Refresh Token
@@ -93,17 +94,17 @@ paths:
         description: Information Refresh Token
         content:
           application/json:
-            schema: 
-              $ref: "#/components/schemas/LogoutBody"
+            schema:
+              $ref: '#/components/schemas/LogoutBody'
         required: true
       responses:
-        "200": 
+        '200':
           description: Refresh token success
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SuccessAuthentication"
-        "401": 
+                $ref: '#/components/schemas/SuccessAuthentication'
+        '401':
           description: UnAuthorization
   /users/me:
     get:
@@ -135,7 +136,7 @@ components:
         password:
           type: string
           example: Duc@123123
-    LogoutBody: 
+    LogoutBody:
       type: object
       properties:
         refresh_token:
