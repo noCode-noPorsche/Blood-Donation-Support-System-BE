@@ -2,7 +2,14 @@ import { NextFunction, Request, Response } from 'express'
 import { ParamsDictionary } from 'express-serve-static-core'
 import { ObjectId } from 'mongodb'
 import { USER_MESSAGES } from '~/constants/messages'
-import { LogoutReqBody, RefreshTokenReqBody, RegisterReqBody, TokenPayload } from '~/models/requests/User.requests'
+import {
+  ChangePasswordReqBody,
+  LogoutReqBody,
+  RefreshTokenReqBody,
+  RegisterReqBody,
+  TokenPayload,
+  UpdateMeReqBody
+} from '~/models/requests/User.requests'
 import User from '~/models/schemas/User.schemas'
 import usersService from '~/services/user.services'
 
@@ -46,4 +53,33 @@ export const refreshTokenController = async (
     message: USER_MESSAGES.REFRESH_TOKEN_SUCCESS,
     result
   })
+}
+
+export const getMeController = async (req: Request, res: Response) => {
+  const { user_id } = req.decode_authorization as TokenPayload
+  const result = await usersService.getMe(user_id)
+  res.json({
+    message: USER_MESSAGES.GET_PROFILE_SUCCESS,
+    result
+  })
+}
+
+export const updateMeController = async (req: Request<ParamsDictionary, any, UpdateMeReqBody>, res: Response) => {
+  const { user_id } = req.decode_authorization as TokenPayload
+  const { body } = req
+  const result = await usersService.updateMe(user_id, body)
+  res.json({
+    message: USER_MESSAGES.UPDATE_PROFILE_SUCCESS,
+    result
+  })
+}
+
+export const changePasswordController = async (
+  req: Request<ParamsDictionary, any, ChangePasswordReqBody>,
+  res: Response
+) => {
+  const { user_id } = req.decode_authorization as TokenPayload
+  const { password } = req.body
+  const result = await usersService.changePassword(user_id, password)
+  res.json(result)
 }

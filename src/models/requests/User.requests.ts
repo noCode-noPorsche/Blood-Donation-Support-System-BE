@@ -26,3 +26,18 @@ export interface LogoutReqBody {
 export interface RefreshTokenReqBody {
   refresh_token: string
 }
+
+export interface UpdateMeReqBody {
+  full_name?: string
+  date_of_birth?: string
+  gender?: UserGender
+  avatar_url?: string
+  weight?: number
+  blood_group?: string
+}
+
+export interface ChangePasswordReqBody {
+  old_password: string
+  password: string
+  confirm_password: string
+}

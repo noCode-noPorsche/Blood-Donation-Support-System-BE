@@ -1,16 +1,23 @@
 import express from 'express'
+import { filterMiddleware } from '~/controllers/common.middleware'
 import {
+  changePasswordController,
+  getMeController,
   loginController,
   logoutController,
   refreshTokenController,
-  registerController
+  registerController,
+  updateMeController
 } from '~/controllers/user.controllers'
 import {
   accessTokenValidator,
+  changePasswordValidator,
   loginValidator,
   refreshTokenValidator,
-  registerValidator
+  registerValidator,
+  updateMeValidator
 } from '~/middlewares/user.middlewares'
+import { UpdateMeReqBody } from '~/models/requests/User.requests'
 import { wrapAsync } from '~/utils/handler'
 
 const usersRouter = express.Router()
@@ -50,5 +57,37 @@ usersRouter.post('/logout', accessTokenValidator, refreshTokenValidator, wrapAsy
  * Body : { refresh_token: string }
  */
 usersRouter.post('/refresh-token', refreshTokenValidator, wrapAsync(refreshTokenController))
+
+/**
+ * Description. Get My Profile
+ * Path: /me
+ * METHOD: GET
+ * Header: { Authorization: Bearer <access_token>}
+ */
+usersRouter.get('/me', accessTokenValidator, wrapAsync(getMeController))
+
+/**
+ * Description. Update My Profile
+ * Path: /me
+ * METHOD: PATCH
+ * Header: { Authorization: Bearer <access_token>}
+ * Body : UserSchema
+ */
+usersRouter.patch(
+  '/me',
+  accessTokenValidator,
+  updateMeValidator,
+  filterMiddleware<UpdateMeReqBody>(['avatar_url', 'blood_group', 'weight', 'date_of_birth', 'gender', 'full_name']),
+  wrapAsync(updateMeController)
+)
+
+/**
+ * Description. Change Password
+ * Path: /change-password
+ * METHOD: POST
+ * Header: { Authorization: Bearer <access_token>}
+ * Body : UserSchema
+ */
+usersRouter.post('/change-password', accessTokenValidator, changePasswordValidator, wrapAsync(changePasswordController))
 
 export default usersRouter

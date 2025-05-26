@@ -1,5 +1,5 @@
 import { ObjectId } from 'mongodb'
-import { UserGender, UserRole, UserVerifyStatus } from '~/constants/enum'
+import { UserGender, UserRole } from '~/constants/enum'
 
 interface UserType {
   _id?: ObjectId
@@ -18,10 +18,7 @@ interface UserType {
   avatar_url?: string
   created_at?: Date
   updated_at?: Date
-
-  email_verify_token?: string //jwt hoặc "" nếu đã xác thực email
-  forgot_password_token?: string //jwt hoặc "" nếu đã xác thực email
-  verify?: UserVerifyStatus
+  forgot_password_token?: string
 }
 
 export default class User {
@@ -41,10 +38,7 @@ export default class User {
   avatar_url: string
   created_at: Date
   updated_at: Date
-
-  email_verify_token: string //jwt hoặc "" nếu đã xác thực email
-  forgot_password_token: string //jwt hoặc "" nếu đã xác thực email
-  verify: UserVerifyStatus
+  forgot_password_token: string
 
   constructor(user: UserType) {
     const date = new Date()
@@ -64,9 +58,6 @@ export default class User {
     this.avatar_url = user.avatar_url || ''
     this.created_at = user.created_at || date
     this.updated_at = user.updated_at || date
-
-    this.email_verify_token = user.email_verify_token || ''
     this.forgot_password_token = user.forgot_password_token || ''
-    this.verify = user.verify || UserVerifyStatus.Unverified
   }
 }

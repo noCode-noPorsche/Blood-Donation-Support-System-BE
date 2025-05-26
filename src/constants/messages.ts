@@ -22,6 +22,7 @@ export const USER_MESSAGES = {
     'Confirm password must be 6-50 characters long and contain at least 1 lowercase letter, 1 uppercase letter, 1 number, and 1 symbol',
   CONFIRM_PASSWORD_MUST_BE_THE_SAME_AS_PASSWORD: 'Confirm password must be the same as password',
   DATE_OF_BIRTH_MUST_BE_ISO8601: 'Date of birth must be ISO8601',
+  GENDER_MUST_BE_ONE_OF_THE_FOLLOWING_VALUES: 'Gender must be one of the following values',
   USER_NOT_FOUND: 'User not found',
   LOGIN_SUCCESS: 'Login success',
   LOGOUT_SUCCESS: 'Logout success',
@@ -32,5 +33,16 @@ export const USER_MESSAGES = {
   REFRESH_TOKEN_IS_REQUIRED: 'Refresh token is required',
   REFRESH_TOKEN_IS_INVALID: 'Refresh token is invalid',
   USED_REFRESH_TOKEN_OR_NOT_EXIST: 'Used refresh token or not exist',
-  REFRESH_TOKEN_SUCCESS: 'Refresh token success'
+  REFRESH_TOKEN_SUCCESS: 'Refresh token success',
+  GET_PROFILE_SUCCESS: 'Get profile success',
+  UPDATE_PROFILE_SUCCESS: 'Update profile success',
+  NAME_LENGTH_MUST_BE_FROM_1_TO_50: 'Name length must be from 1 to 50',
+  WEIGHT_MUST_BE_A_NUMBER: 'Weight must be a number',
+  BLOOD_GROUP_MUST_BE_A_STRING: 'Blood group must be a string',
+  AVATAR_MUST_BE_A_STRING: 'Avatar must be a string',
+  AVATAR_LENGTH_MUST_BE_LESS_THAN_200: 'Avatar length must be less than 200',
+  AVATAR_MUST_BE_A_URL: 'Avatar must be a URL',
+  WEIGHT_MUST_BE_AN_INTEGER_BETWEEN_1_AND_500: 'Weight must be an integer between 1 and 500',
+  OLD_PASSWORD_NOT_MATCH: 'Old password not match',
+  CHANGE_PASSWORD_SUCCESS: 'Change password success'
 } as const

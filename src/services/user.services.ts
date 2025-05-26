@@ -5,7 +5,7 @@ import { ObjectId } from 'mongodb'
 import { config } from 'dotenv'
 import { USER_MESSAGES } from '~/constants/messages'
 import { TokenType, UserRole } from '~/constants/enum'
-import { RegisterReqBody } from '~/models/requests/User.requests'
+import { RegisterReqBody, UpdateMeReqBody } from '~/models/requests/User.requests'
 import databaseService from './database.services'
 import RefreshToken from '~/models/schemas/RefreshToken.schemas'
 config()
@@ -18,6 +18,7 @@ class UsersService {
         token_type: TokenType.AccessToken,
         role
       },
+      privateKey: process.env.JWT_SECRET_ACCESS_TOKEN as string,
       options: {
         expiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN as `${number}${'m' | 'h' | 'd'}`
       }
@@ -31,6 +32,7 @@ class UsersService {
         token_type: TokenType.RefreshToken,
         role
       },
+      privateKey: process.env.JWT_SECRET_REFRESH_TOKEN as string,
       options: {
         expiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN as `${number}${'m' | 'h' | 'd'}`
       }
@@ -112,6 +114,44 @@ class UsersService {
   async checkPhoneExist(phone: string) {
     const user = await databaseService.users.findOne({ phone })
     return Boolean(user)
+  }
+
+  async getMe(user_id: string) {
+    const user = await databaseService.users.findOne(
+      { _id: new ObjectId(user_id) },
+      { projection: { password: 0, forgot_password_token: 0 } }
+    )
+    return user
+  }
+
+  async updateMe(user_id: string, payload: UpdateMeReqBody) {
+    const user = await databaseService.users.findOneAndUpdate(
+      { _id: new ObjectId(user_id) },
+      {
+        $set: {
+          ...payload,
+          date_of_birth: new Date(payload.date_of_birth as string)
+        },
+        $currentDate: {
+          updated_at: true
+        }
+      },
+      {
+        returnDocument: 'after',
+        projection: { password: 0, forgot_password_token: 0 }
+      }
+    )
+    return user
+  }
+
+  async changePassword(user_id: string, password: string) {
+    await databaseService.users.updateOne(
+      { _id: new ObjectId(user_id) },
+      { $set: { password: hashPassword(password) }, $currentDate: { updated_at: true } }
+    )
+    return {
+      message: USER_MESSAGES.CHANGE_PASSWORD_SUCCESS
+    }
   }
 }
 
