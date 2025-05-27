@@ -1,5 +1,11 @@
 import express from 'express'
-import { createBloodGroupController, getBloodGroupsController } from '~/controllers/blood.controllers'
+import {
+  createBloodComponentController,
+  createBloodGroupController,
+  getBloodComponentsController,
+  getBloodGroupsController
+} from '~/controllers/blood.controllers'
+import { createBloodComponentValidator, createBloodGroupValidator } from '~/middlewares/blood.middleware'
 import { isAdminValidator } from '~/middlewares/user.middlewares'
 import { wrapAsync } from '~/utils/handler'
 
@@ -18,6 +24,26 @@ bloodRouter.get('/blood-groups', wrapAsync(getBloodGroupsController))
  * METHOD: POST
  * Body : { name: BloodGroup }
  */
-bloodRouter.post('/blood-groups', isAdminValidator, wrapAsync(createBloodGroupController))
+bloodRouter.post('/blood-groups', isAdminValidator, createBloodGroupValidator, wrapAsync(createBloodGroupController))
+
+/**
+ * Description. Get all blood components
+ * Path: /blood-components
+ * METHOD: GET
+ */
+bloodRouter.get('/blood-components', wrapAsync(getBloodComponentsController))
+
+/**
+ * Description. Create a new blood component
+ * Path: /blood-components
+ * METHOD: POST
+ * Body : { name: BloodComponent }
+ */
+bloodRouter.post(
+  '/blood-components',
+  isAdminValidator,
+  createBloodComponentValidator,
+  wrapAsync(createBloodComponentController)
+)
 
 export default bloodRouter

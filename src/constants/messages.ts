@@ -47,3 +47,20 @@ export const USER_MESSAGES = {
   CHANGE_PASSWORD_SUCCESS: 'Change password success',
   USER_NOT_AUTHORIZED: 'User not authorized'
 } as const
+
+export const BLOOD_MESSAGES = {
+  CREATE_BLOOD_GROUP_SUCCESS: 'Create blood group success',
+  BLOOD_GROUP_NOT_FOUND: 'Blood group not found',
+  BLOOD_GROUP_ALREADY_EXIST: 'Blood group already exists',
+  BLOOD_GROUP_MUST_BE_A_STRING: 'Blood group must be a string',
+  BLOOD_GROUP_IS_REQUIRED: 'Blood group is required',
+  BLOOD_GROUP_IS_INVALID: 'Blood group is invalid',
+  GET_BLOOD_COMPONENTS_SUCCESS: 'Get blood components success',
+  GET_BLOOD_GROUPS_SUCCESS: 'Get blood groups success',
+  CREATE_BLOOD_COMPONENT_SUCCESS: 'Create blood component success',
+  BLOOD_COMPONENT_NOT_FOUND: 'Blood component not found',
+  BLOOD_COMPONENT_ALREADY_EXIST: 'Blood component already exists',
+  BLOOD_COMPONENT_MUST_BE_A_STRING: 'Blood component must be a string',
+  BLOOD_COMPONENT_IS_REQUIRED: 'Blood component is required',
+  BLOOD_COMPONENT_IS_INVALID: 'Blood component is invalid'
+} as const

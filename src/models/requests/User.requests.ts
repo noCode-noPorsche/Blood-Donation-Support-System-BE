@@ -1,4 +1,5 @@
 import { JwtPayload } from 'jsonwebtoken'
+import { ObjectId } from 'mongodb'
 import { TokenType, UserGender, UserRole } from '~/constants/enum'
 
 export interface RegisterReqBody {
@@ -10,6 +11,7 @@ export interface RegisterReqBody {
   full_name: string
   gender: UserGender
   phone: string
+  blood_group_id?: string
 }
 
 export interface TokenPayload extends JwtPayload {
@@ -32,7 +34,7 @@ export interface UpdateMeReqBody {
   gender?: UserGender
   avatar_url?: string
   weight?: number
-  blood_group?: string
+  blood_group_id?: ObjectId
 }
 
 export interface ChangePasswordReqBody {

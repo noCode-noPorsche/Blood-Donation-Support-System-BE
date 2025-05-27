@@ -16,7 +16,7 @@ export enum UserRole {
   Customer = 'Customer'
 }
 
-export enum BloodGroup {
+export enum BloodGroupEnum {
   APositive = 'A+',
   ANegative = 'A-',
   BPositive = 'B+',
@@ -27,7 +27,7 @@ export enum BloodGroup {
   ONegative = 'O-'
 }
 
-export enum BloodComponent {
+export enum BloodComponentEnum {
   RedBloodCells = 'Red Blood Cells',
   WhiteBloodCells = 'White Blood Cells',
   Platelets = 'Platelets',

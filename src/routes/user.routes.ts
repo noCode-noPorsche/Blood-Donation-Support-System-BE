@@ -77,7 +77,15 @@ usersRouter.patch(
   '/update-me',
   accessTokenValidator,
   updateMeValidator,
-  filterMiddleware<UpdateMeReqBody>(['avatar_url', 'blood_group', 'weight', 'date_of_birth', 'gender', 'full_name']),
+  filterMiddleware<UpdateMeReqBody>([
+    'avatar_url',
+    'blood_group_id',
+    'weight',
+    'date_of_birth',
+    'gender',
+    'full_name',
+    'blood_group_id'
+  ]),
   wrapAsync(updateMeController)
 )
 

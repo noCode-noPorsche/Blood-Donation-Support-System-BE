@@ -48,7 +48,8 @@ class UsersService {
       ...payload,
       date_of_birth: new Date(payload.date_of_birth),
       password: hashPassword(payload.password),
-      role: UserRole.Customer
+      role: UserRole.Customer,
+      blood_group_id: payload.blood_group_id ? new ObjectId(payload.blood_group_id) : undefined
     })
 
     const result = await databaseService.users.insertOne(newUser)
@@ -118,11 +119,39 @@ class UsersService {
   }
 
   async getMe(user_id: string) {
-    const user = await databaseService.users.findOne(
-      { _id: new ObjectId(user_id) },
-      { projection: { password: 0, forgot_password_token: 0 } }
-    )
-    return user
+    const users = await databaseService.users
+      .aggregate([
+        {
+          $match: {
+            _id: new ObjectId(user_id)
+          }
+        },
+        {
+          $lookup: {
+            from: 'blood_groups',
+            localField: 'blood_group_id',
+            foreignField: '_id',
+            as: 'blood_group'
+          }
+        },
+        {
+          $unwind: {
+            path: '$blood_group',
+            preserveNullAndEmptyArrays: true
+          }
+        },
+        {
+          $project: {
+            password: 0,
+            forgot_password_token: 0,
+            'blood_group._id': 0,
+            'blood_group.created_at': 0,
+            'blood_group.updated_at': 0
+          }
+        }
+      ])
+      .toArray()
+    return users[0]
   }
 
   async updateMe(user_id: string, payload: UpdateMeReqBody) {
