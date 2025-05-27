@@ -44,5 +44,6 @@ export const USER_MESSAGES = {
   AVATAR_MUST_BE_A_URL: 'Avatar must be a URL',
   WEIGHT_MUST_BE_AN_INTEGER_BETWEEN_1_AND_500: 'Weight must be an integer between 1 and 500',
   OLD_PASSWORD_NOT_MATCH: 'Old password not match',
-  CHANGE_PASSWORD_SUCCESS: 'Change password success'
+  CHANGE_PASSWORD_SUCCESS: 'Change password success',
+  USER_NOT_AUTHORIZED: 'User not authorized'
 } as const

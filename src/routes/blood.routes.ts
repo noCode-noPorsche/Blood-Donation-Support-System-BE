@@ -1,5 +1,6 @@
 import express from 'express'
 import { createBloodGroupController, getBloodGroupsController } from '~/controllers/blood.controllers'
+import { isAdminValidator } from '~/middlewares/user.middlewares'
 import { wrapAsync } from '~/utils/handler'
 
 const bloodRouter = express.Router()
@@ -17,6 +18,6 @@ bloodRouter.get('/blood-groups', wrapAsync(getBloodGroupsController))
  * METHOD: POST
  * Body : { name: BloodGroup }
  */
-bloodRouter.post('/blood-groups', wrapAsync(createBloodGroupController))
+bloodRouter.post('/blood-groups', isAdminValidator, wrapAsync(createBloodGroupController))
 
 export default bloodRouter
