@@ -8,8 +8,7 @@ info:
     That way, with time, we can improve the API in general, and expose some of the new features in OAS3.
 
     Some useful links:
-    - [The Pet Store repository](https://github.com/swagger-api/swagger-petstore)
-    - [The source API definition for the Pet Store](https://github.com/swagger-api/swagger-petstore/blob/master/src/main/resources/openapi.yaml)
+    - [The Blood Donation Support System repository](https://github.com/blood-donation-support/be)
   termsOfService: https://swagger.io/terms/
   contact:
     email: apiteam@swagger.io
@@ -45,6 +44,32 @@ paths:
       responses:
         '200':
           description: Login Successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessAuthentication'
+
+        '422':
+          description: Invalid Input
+        '401':
+          description: UnAuthorization
+  /users/register:
+    post:
+      tags:
+        - Users
+      summary: Register
+      description: Register into system
+      operationId: register
+      requestBody:
+        description: Information register
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterBody'
+        required: true
+      responses:
+        '200':
+          description: Register Successful
           content:
             application/json:
               schema:
@@ -125,8 +150,139 @@ paths:
           description: UnAuthorization
       security:
         - BearerAuth: []
+  /users/update-me:
+    patch:
+      tags:
+        - Users
+      summary: Update Profile
+      description: Update user information
+      operationId: updateProfile
+      requestBody:
+        description: Information update profile
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateMeBody'
+      responses:
+        default:
+          description: Update user information success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+        '401':
+          description: UnAuthorization
+      security:
+        - BearerAuth: []
+  /users/change-password:
+    post:
+      tags:
+        - Users
+      summary: Change Password
+      description: Change password
+      operationId: changePassword
+      requestBody:
+        description: Information change password
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordBody'
+      responses:
+        default:
+          description: Change password success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessAuthentication'
+        '401':
+          description: UnAuthorization
+      security:
+        - BearerAuth: []
 components:
   schemas:
+    RegisterBody:
+      type: object
+      properties:
+        phone:
+          type: string
+          example: 0987654321
+        email:
+          type: string
+          example: dustintsan1@gmail.com
+        password:
+          type: string
+          example: Duc@123123
+        confirm_password:
+          type: string
+          example: Duc@123123
+        full_name:
+          type: string
+          example: Duc Nguyen
+        date_of_birth:
+          type: string
+          example: 2025-05-21T17:48:12.171Z
+        role:
+          $ref: '#/components/schemas/UserRole'
+        gender:
+          $ref: '#/components/schemas/UserGender'
+        weight:
+          type: number
+          example: 0
+        location:
+          type: string
+          example: ''
+        avatar_url:
+          type: string
+          example: ''
+        blood_group_id:
+          type: string
+          example: ''
+        number_of_donation:
+          type: integer
+          example: 0
+        number_of_request:
+          type: integer
+          example: 0
+        created_at:
+          type: string
+          format: date-time
+          example: 2025-05-21T17:48:12.171Z
+        updated_at:
+          type: string
+          format: date-time
+    ChangePasswordBody:
+      type: object
+      properties:
+        old_password:
+          type: string
+          example: Duc@123123
+        password:
+          type: string
+          example: Duc@123123
+        confirm_password:
+          type: string
+          example: Duc@123123
+    UpdateMeBody:
+      type: object
+      properties:
+        full_name:
+          type: string
+          example: Duc Nguyen
+        date_of_birth:
+          type: string
+          example: 2025-05-21T17:48:12.171Z
+        gender:
+          $ref: '#/components/schemas/UserGender'
+        weight:
+          type: number
+          example: 0
+        avatar_url:
+          type: string
+          example: ''
+        location:
+          type: string
+          example: ''
     LoginBody:
       type: object
       properties:
@@ -174,10 +330,6 @@ components:
           type: string
           format: date-time
           example: 2025-05-21T17:48:12.171Z
-        password:
-          type: string
-          format: password
-          example: ca4d92564868432ce3f81f2ef8a9afb0bb7ba211ab924a8db40cfe18720d87dc
         role:
           $ref: '#/components/schemas/UserRole'
         gender:
@@ -212,22 +364,11 @@ components:
           type: string
           format: date-time
           example: 2025-05-22T18:17:35.277Z
-        email_verify_token:
-          type: string
-          example: ''
-        forgot_password_token:
-          type: string
-          example: ''
-        verify:
-          type: integer
-          enum: [0, 1]
-          description: 0 - Unverified, 1 - Verified
-          example: 0
-    UserRole:
+    UserGender:
       type: string
       enum: [Other, Male, Female]
       example: Male
-    UserGender:
+    UserRole:
       type: string
       enum: [Admin, Staff, Customer]
       example: Admin

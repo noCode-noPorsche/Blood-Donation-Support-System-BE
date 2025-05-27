@@ -68,13 +68,13 @@ usersRouter.get('/me', accessTokenValidator, wrapAsync(getMeController))
 
 /**
  * Description. Update My Profile
- * Path: /me
+ * Path: /update-me
  * METHOD: PATCH
  * Header: { Authorization: Bearer <access_token>}
  * Body : UserSchema
  */
 usersRouter.patch(
-  '/me',
+  '/update-me',
   accessTokenValidator,
   updateMeValidator,
   filterMiddleware<UpdateMeReqBody>(['avatar_url', 'blood_group', 'weight', 'date_of_birth', 'gender', 'full_name']),
