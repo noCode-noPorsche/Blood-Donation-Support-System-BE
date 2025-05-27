@@ -1,5 +1,5 @@
 import express from 'express'
-import { filterMiddleware } from '~/controllers/common.middleware'
+import { filterMiddleware } from '~/middlewares/common.middleware'
 import {
   changePasswordController,
   getMeController,

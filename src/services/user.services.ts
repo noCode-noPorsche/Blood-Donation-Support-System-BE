@@ -47,7 +47,8 @@ class UsersService {
     const newUser = new User({
       ...payload,
       date_of_birth: new Date(payload.date_of_birth),
-      password: hashPassword(payload.password)
+      password: hashPassword(payload.password),
+      role: UserRole.Customer
     })
 
     const result = await databaseService.users.insertOne(newUser)

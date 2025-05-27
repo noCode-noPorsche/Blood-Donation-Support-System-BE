@@ -2,6 +2,8 @@ import { Collection, Db, MongoClient } from 'mongodb'
 import { config } from 'dotenv'
 import User from '~/models/schemas/User.schemas'
 import RefreshToken from '~/models/schemas/RefreshToken.schemas'
+import BloodGroup from '~/models/schemas/BloodGroup.schemas'
+import BloodComponent from '~/models/schemas/BloodComponet.schemas'
 
 config()
 const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@blooddonation.mfyc9dy.mongodb.net/?retryWrites=true&w=majority&appName=BloodDonation`
@@ -28,6 +30,12 @@ class DatabaseService {
   }
   get refreshToken(): Collection<RefreshToken> {
     return this.db.collection(process.env.DB_REFRESH_TOKENS_COLLECTION as string)
+  }
+  get bloodGroups(): Collection<BloodGroup> {
+    return this.db.collection(process.env.DB_BLOOD_GROUPS_COLLECTION as string)
+  }
+  get bloodComponents(): Collection<BloodComponent> {
+    return this.db.collection(process.env.DB_BLOOD_COMPONENTS_COLLECTION as string)
   }
 }
 

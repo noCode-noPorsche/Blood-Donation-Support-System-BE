@@ -2,6 +2,7 @@ import express from 'express'
 import { defaultErrorHandler } from './middlewares/error.middlewares'
 import databaseService from './services/database.services'
 import usersRouter from './routes/user.routes'
+import bloodRouter from './routes/blood.routes'
 import cors from 'cors'
 import YAML from 'yaml'
 import fs from 'fs'
@@ -46,6 +47,7 @@ app.get('/', (req, res) => {
 })
 
 app.use('/users', usersRouter)
+app.use('/blood', bloodRouter)
 app.use(defaultErrorHandler)
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
