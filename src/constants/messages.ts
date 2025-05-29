@@ -64,3 +64,24 @@ export const BLOOD_MESSAGES = {
   BLOOD_COMPONENT_IS_REQUIRED: 'Blood component is required',
   BLOOD_COMPONENT_IS_INVALID: 'Blood component is invalid'
 } as const
+
+export const DONATION_MESSAGES = {
+  REGISTRATION_SUCCESS: 'Registration success',
+
+
+  REGISTRATION_MUST_BE_A_STRING: 'Registration must be a string',
+  REGISTRATION_IS_REQUIRED: 'Registration is required',
+  REGISTRATION_IS_INVALID: 'Registration is invalid',
+  USERID_IS_INVALID:'Invalid user ID',
+
+  GET_DONATION_REGISTRATIONS_SUCCESS: 'Get donation registrations success',
+  GET_DONATION_REGISTRATION_SUCCESS: 'Get donation registration success',
+  UPDATE_DONATION_REGISTRATION_SUCCESS: 'Update donation registration success',
+  DELETE_DONATION_REGISTRATION_SUCCESS: 'Delete donation registration success',
+  DONATION_REGISTRATION_NOT_FOUND:'Donation registration not found',
+  DONATION_REQUEST_PROCESS_NOT_FOUND: 'Donation request process not found',
+  DONATON_REGISTRATION_ID_INVALID :'Invalid donation registration ID',
+  GET_DONATION_REQUEST_PROCESS_SUCCESS: 'Get donation  requests process success',
+  DONATION_REQUEST_PROCESS_ID_INVALID:'Invalid donation request process ID',
+   UPDATE_DONATION_REQUEST_PROCESS_SUCCESS: 'Update donation registration success',
+}
