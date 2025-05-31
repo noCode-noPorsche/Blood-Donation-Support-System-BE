@@ -3,6 +3,7 @@ import databaseService from './database.services'
 import { BloodComponentEnum, BloodGroupEnum } from '~/constants/enum'
 import BloodGroup from '~/models/schemas/BloodGroup.schemas'
 import BloodComponent from '~/models/schemas/BloodComponent.schemas'
+import { ObjectId } from 'mongodb'
 
 class BloodService {
   async getBloodGroups() {
@@ -35,6 +36,16 @@ class BloodService {
 
   async isBloodComponentExist(name: BloodComponentEnum) {
     const bloodComponent = await databaseService.bloodComponents.findOne({ name })
+    return !!bloodComponent
+  }
+
+  async isBloodGroupIdExist(id: string) {
+    const bloodGroup = await databaseService.bloodGroups.findOne({ _id: new ObjectId(id) })
+    return !!bloodGroup
+  }
+
+  async isBloodComponentIdExist(id: string) {
+    const bloodComponent = await databaseService.bloodComponents.findOne({ _id: new ObjectId(id) })
     return !!bloodComponent
   }
 }

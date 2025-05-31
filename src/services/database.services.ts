@@ -4,6 +4,8 @@ import User from '~/models/schemas/User.schemas'
 import RefreshToken from '~/models/schemas/RefreshToken.schemas'
 import BloodGroup from '~/models/schemas/BloodGroup.schemas'
 import BloodComponent from '~/models/schemas/BloodComponent.schemas'
+import DonationRegister from '~/models/schemas/DonationRegister.schemas'
+import DonationRequestProcess from '~/models/schemas/DonationRequestProcess.schemas'
 
 config()
 const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@blooddonation.mfyc9dy.mongodb.net/?retryWrites=true&w=majority&appName=BloodDonation`
@@ -36,6 +38,12 @@ class DatabaseService {
   }
   get bloodComponents(): Collection<BloodComponent> {
     return this.db.collection(process.env.DB_BLOOD_COMPONENTS_COLLECTION as string)
+  }
+  get donationRegistrations(): Collection<DonationRegister> {
+    return this.db.collection(process.env.DB_DONATION_REGISTRATIONS_COLLECTION as string)
+  }
+  get donationRequestProcess(): Collection<DonationRequestProcess> {
+    return this.db.collection(process.env.DB_DONATION_REQUEST_PROCESSES_COLLECTION as string)
   }
 }
 

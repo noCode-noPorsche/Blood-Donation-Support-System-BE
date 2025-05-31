@@ -5,7 +5,7 @@ import { hashPassword } from '~/utils/crypto'
 import { verifyToken } from '~/utils/jwt'
 import { HTTP_STATUS } from '~/constants/httpStatus'
 import { JsonWebTokenError } from 'jsonwebtoken'
-import { capitalize, max } from 'lodash'
+import { capitalize } from 'lodash'
 import { Request } from 'express'
 import { validate } from '~/utils/validation'
 import usersService from '~/services/user.services'
@@ -379,6 +379,92 @@ export const isAdminValidator = validate(
               })
               ;(req as Request).decode_authorization = decode_authorization
               if (decode_authorization.role !== UserRole.Admin) {
+                throw new ErrorWithStatus({
+                  message: USER_MESSAGES.USER_NOT_AUTHORIZED,
+                  status: HTTP_STATUS.FORBIDDEN
+                })
+              }
+            } catch (error) {
+              throw new ErrorWithStatus({
+                message: capitalize((error as JsonWebTokenError).message),
+                status: HTTP_STATUS.UNAUTHORIZED
+              })
+            }
+            return true
+          }
+        }
+      }
+    },
+    ['headers']
+  )
+)
+
+export const isStaffValidator = validate(
+  checkSchema(
+    {
+      Authorization: {
+        notEmpty: {
+          errorMessage: USER_MESSAGES.ACCESS_TOKEN_IS_REQUIRED
+        },
+        custom: {
+          options: async (value: string, { req }) => {
+            const access_token = value.split(' ')[1]
+            if (!access_token) {
+              throw new ErrorWithStatus({
+                message: USER_MESSAGES.ACCESS_TOKEN_IS_REQUIRED,
+                status: HTTP_STATUS.UNAUTHORIZED
+              })
+            }
+            try {
+              const decode_authorization = await verifyToken({
+                token: access_token,
+                secretOrPublicKey: process.env.JWT_SECRET_ACCESS_TOKEN as string
+              })
+              ;(req as Request).decode_authorization = decode_authorization
+              if (decode_authorization.role !== UserRole.Staff) {
+                throw new ErrorWithStatus({
+                  message: USER_MESSAGES.USER_NOT_AUTHORIZED,
+                  status: HTTP_STATUS.FORBIDDEN
+                })
+              }
+            } catch (error) {
+              throw new ErrorWithStatus({
+                message: capitalize((error as JsonWebTokenError).message),
+                status: HTTP_STATUS.UNAUTHORIZED
+              })
+            }
+            return true
+          }
+        }
+      }
+    },
+    ['headers']
+  )
+)
+
+export const isStaffOrAdminValidator = validate(
+  checkSchema(
+    {
+      Authorization: {
+        notEmpty: {
+          errorMessage: USER_MESSAGES.ACCESS_TOKEN_IS_REQUIRED
+        },
+        custom: {
+          options: async (value: string, { req }) => {
+            const access_token = value.split(' ')[1]
+            if (!access_token) {
+              throw new ErrorWithStatus({
+                message: USER_MESSAGES.ACCESS_TOKEN_IS_REQUIRED,
+                status: HTTP_STATUS.UNAUTHORIZED
+              })
+            }
+            try {
+              const decode_authorization = await verifyToken({
+                token: access_token,
+                secretOrPublicKey: process.env.JWT_SECRET_ACCESS_TOKEN as string
+              })
+              ;(req as Request).decode_authorization = decode_authorization
+              if (decode_authorization.role !== UserRole.Staff && decode_authorization.role !== UserRole.Admin) {
                 throw new ErrorWithStatus({
                   message: USER_MESSAGES.USER_NOT_AUTHORIZED,
                   status: HTTP_STATUS.FORBIDDEN

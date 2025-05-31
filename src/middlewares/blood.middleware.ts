@@ -1,5 +1,4 @@
-import { Request, Response, NextFunction } from 'express'
-import { checkSchema, validationResult } from 'express-validator'
+import { checkSchema } from 'express-validator'
 import { BloodComponentEnum, BloodGroupEnum } from '~/constants/enum'
 import { HTTP_STATUS } from '~/constants/httpStatus'
 import { BLOOD_MESSAGES } from '~/constants/messages'

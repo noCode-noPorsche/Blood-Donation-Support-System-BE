@@ -33,3 +33,15 @@ export enum BloodComponentEnum {
   Platelets = 'Platelets',
   Plasma = 'Plasma'
 }
+
+export enum DonationRegisterStatus {
+  Pending = 'Pending',
+  Approved = 'Approved',
+  Rejected = 'Rejected'
+}
+
+export enum DonationRequestProcessStatus {
+  Pending = 'Pending',
+  Approved = 'Approved',
+  Rejected = 'Rejected'
+}
