@@ -25,7 +25,8 @@ import {
   UpdateDonationRegistrationReqParams,
   UpdateDonationRequestProcessReqBody,
   UpdateStatusDonationRequestProcessReqBody
-} from '~/models/requests/Donation.request'
+} from '~/models/requests/Donation.requests'
+
 import { wrapAsync } from '~/utils/handler'
 
 const donationRouter = express.Router()
