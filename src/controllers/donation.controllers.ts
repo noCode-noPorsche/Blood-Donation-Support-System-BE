@@ -13,7 +13,7 @@ import {
   UpdateStatusDonationRegistrationReqBody,
   UpdateStatusDonationRequestProcessReqBody,
   UpdateStatusDonationRequestProcessReqParams
-} from '~/models/requests/Donation.request'
+} from '~/models/requests/Donation.requests'
 import { TokenPayload } from '~/models/requests/User.requests'
 import donationService from '~/services/donation.services'
 

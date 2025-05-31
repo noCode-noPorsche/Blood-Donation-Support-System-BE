@@ -6,7 +6,7 @@ import {
   RegisterDonationReqBody,
   UpdateDonationRegistrationReqBody,
   UpdateDonationRequestProcessReqBody
-} from '~/models/requests/Donation.request'
+} from '~/models/requests/Donation.requests'
 import { DonationRegisterStatus, DonationRequestProcessStatus } from '~/constants/enum'
 
 class DonationService {
