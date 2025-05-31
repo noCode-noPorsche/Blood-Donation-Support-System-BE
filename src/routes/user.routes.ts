@@ -33,6 +33,7 @@ const usersRouter = express.Router()
  *      description: Information Login
  */
 usersRouter.post('/login', loginValidator, wrapAsync(loginController))
+
 /**
  * Description. Register a new user
  * Path: /register

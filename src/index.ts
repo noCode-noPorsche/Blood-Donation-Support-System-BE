@@ -48,8 +48,8 @@ app.get('/', (req, res) => {
 })
 
 app.use('/users', usersRouter)
-app.use('/blood', bloodRouter)
-app.use('/donation', donationRouter)
+app.use('/bloods', bloodRouter)
+app.use('/donations', donationRouter)
 app.use(defaultErrorHandler)
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))

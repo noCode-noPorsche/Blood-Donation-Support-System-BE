@@ -67,21 +67,33 @@ export const BLOOD_MESSAGES = {
 
 export const DONATION_MESSAGES = {
   REGISTRATION_SUCCESS: 'Registration success',
-
-
   REGISTRATION_MUST_BE_A_STRING: 'Registration must be a string',
   REGISTRATION_IS_REQUIRED: 'Registration is required',
   REGISTRATION_IS_INVALID: 'Registration is invalid',
-  USERID_IS_INVALID:'Invalid user ID',
-
+  USERID_IS_INVALID: 'Invalid user ID',
   GET_DONATION_REGISTRATIONS_SUCCESS: 'Get donation registrations success',
   GET_DONATION_REGISTRATION_SUCCESS: 'Get donation registration success',
   UPDATE_DONATION_REGISTRATION_SUCCESS: 'Update donation registration success',
   DELETE_DONATION_REGISTRATION_SUCCESS: 'Delete donation registration success',
-  DONATION_REGISTRATION_NOT_FOUND:'Donation registration not found',
+  DONATION_REGISTRATION_NOT_FOUND: 'Donation registration not found',
   DONATION_REQUEST_PROCESS_NOT_FOUND: 'Donation request process not found',
-  DONATON_REGISTRATION_ID_INVALID :'Invalid donation registration ID',
-  GET_DONATION_REQUEST_PROCESS_SUCCESS: 'Get donation  requests process success',
-  DONATION_REQUEST_PROCESS_ID_INVALID:'Invalid donation request process ID',
-   UPDATE_DONATION_REQUEST_PROCESS_SUCCESS: 'Update donation registration success',
+  DONATION_REGISTRATION_ID_INVALID: 'Invalid donation registration ID',
+  GET_DONATION_REQUEST_PROCESS_SUCCESS: 'Get donation requests process success',
+  DONATION_REQUEST_PROCESS_ID_INVALID: 'Invalid donation request process ID',
+  UPDATE_DONATION_REQUEST_PROCESS_SUCCESS: 'Update donation request process success',
+  START_DATE_DONATION_IS_INVALID: 'Start date donation is invalid',
+  USER_ID_IS_REQUIRED: 'User ID is required',
+  USER_ID_IS_INVALID: 'User ID is invalid',
+  STATUS_IS_REQUIRED: 'Status is required',
+  STATUS_IS_INVALID: 'Status is invalid',
+  GET_ALL_DONATION_REGISTRATIONS_SUCCESS: 'Get all donation registrations success',
+  STATUS_MUST_BE_A_STRING: 'Status must be a string',
+  START_DATE_DONATION_IS_REQUIRED: 'Start date donation is required',
+  GET_ALL_DONATION_REQUEST_PROCESS_SUCCESS: 'Get all donation requests process success',
+  VOLUME_COLLECTED_IS_REQUIRED: 'Volume collected is required',
+  VOLUME_COLLECTED_MUST_BE_A_NUMBER: 'Volume collected must be a number',
+  VOLUME_COLLECTED_MUST_BE_POSITIVE: 'Volume collected must be positive',
+  DONATION_DATE_IS_INVALID: 'Donation date is invalid',
+  DESCRIPTION_MUST_BE_A_STRING: 'Description must be a string',
+  DESCRIPTION_LENGTH_MUST_BE_LESS_THAN_500: 'Description length must be less than 500'
 }

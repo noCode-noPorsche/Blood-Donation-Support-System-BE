@@ -1,127 +1,173 @@
 import express from 'express'
-import { get, update } from 'lodash';
-import { deleteDonationRegistrationController, getDonationRegistrationController, getDonationRegistrationsController, getDonationRequestProcessesController, registerDonationController, updateDonationRegistrationController, updateDonationRequestProcessController } from '~/controllers/donation.controllers';
-import { createDonationValidator } from '~/middlewares/donation.middleware';
-import { accessTokenValidator, isAdminValidator } from '~/middlewares/user.middlewares';
-import { wrapAsync } from "~/utils/handler";
+import {
+  createDonationRegistrationController,
+  deleteDonationRegistrationController,
+  getAllDonationRegistrationsController,
+  getAllDonationRequestProcessesController,
+  getDonationRegistrationByUserIdController,
+  getDonationRequestProcessesController,
+  updateDonationRegistrationController,
+  updateDonationRequestProcessController,
+  updateStatusDonationRegistrationController,
+  updateStatusDonationRequestProcessController
+  // updateDonationRequestProcessController
+} from '~/controllers/donation.controllers'
+import { filterMiddleware } from '~/middlewares/common.middleware'
+import {
+  createDonationValidator,
+  updateDonationRegistrationValidator,
+  updateDonationRequestProcessValidator,
+  updateStatusDonationRegistrationValidator,
+  updateStatusDonationRequestProcessValidator
+} from '~/middlewares/donation.middleware'
+import { accessTokenValidator, isAdminValidator, isStaffOrAdminValidator } from '~/middlewares/user.middlewares'
+import {
+  UpdateDonationRegistrationReqParams,
+  UpdateDonationRequestProcessReqBody,
+  UpdateStatusDonationRequestProcessReqBody
+} from '~/models/requests/Donation.request'
+import { wrapAsync } from '~/utils/handler'
+
 const donationRouter = express.Router()
 
 /**
- * @openapi
- * /registerDonation:
- *   post:
- *     summary: Đăng ký hiến máu
- *     tags:
- *       - Donation
- *     
- *     responses:
- *       200:
- *         description: Đăng ký thành công
- *       400:
- *         description: Lỗi dữ liệu
+ * Description. Create a new donation
+ * Path: /donation-registration
+ * METHOD: POST
+ * Body : { user_id: string, blood_group_id: string, blood_component_id: string, start_date_donation: Date, status: DonationRegisterStatus }
+ * Header: { Authorization: Bearer <access_token>}
  */
-
-donationRouter.post('/registerDonation', accessTokenValidator,createDonationValidator, wrapAsync(registerDonationController))
+donationRouter.post(
+  '/donation-registration',
+  accessTokenValidator,
+  createDonationValidator,
+  wrapAsync(createDonationRegistrationController)
+)
 
 /**
- * @openapi
- * /donationRegistrations:
- *   get:
- *     summary: Lấy danh sách đăng ký hiến máu
- *     tags:
- *       - Donation
- *     responses:
- *       200:
- *         description: Danh sách đăng ký hiến máu
+ * Description. Get all donation registrations for staff or admin
+ * Path: /donation-registration
+ * METHOD: GET
  */
-donationRouter.get('/donationRegistrations', accessTokenValidator, wrapAsync(getDonationRegistrationsController))
+donationRouter.get('/donation-registration', isStaffOrAdminValidator, wrapAsync(getAllDonationRegistrationsController))
 
 /**
- * @openapi
- * /donationRegistration:
- *   get:
- *     summary: Lấy danh sách đăng ký hiến máu by user_id
- *     tags:
- *       - Donation
- *     responses:
- *       200:
- *         description: Danh sách đăng ký hiến máu
+ * Description. Get donation registration by user id
+ * Path: /donation-registration/:user_id
+ * METHOD: GET
  */
-donationRouter.get('/donationRegistration', accessTokenValidator, wrapAsync(getDonationRegistrationController))
+donationRouter.get(
+  '/donation-registration/:user_id',
+  accessTokenValidator,
+  wrapAsync(getDonationRegistrationByUserIdController)
+)
 
 /**
- * @openapi
- * /donationRegistration/{id}:
- *   patch:
- *    summary: Cập nhật trạng thái đăng ký hiến máu
- * *    tags:
- *      - Donation
- * *    parameters:
- *      - in: path
- *        name: id
- *       required: true
- *      responses:
- *       200:
- *        description: Cập nhật thành công
- */ 
-
-donationRouter.patch('/donationRegistration/:id', accessTokenValidator, wrapAsync(updateDonationRegistrationController))
+ * Description. Update status a donation registration for staff or admin
+ * Path: /donation-registration/:id
+ * METHOD: PATCH
+ * Body : { status: DonationRegisterStatus }
+ */
+donationRouter.patch(
+  '/donation-registration-status/:id',
+  isStaffOrAdminValidator,
+  updateStatusDonationRegistrationValidator,
+  filterMiddleware<UpdateDonationRegistrationReqParams>(['status']),
+  wrapAsync(updateStatusDonationRegistrationController)
+)
 
 /**
- * @openapi
- * /donationRegistration/{id}:
- *  delete:
- *   summary: Xóa đăng ký hiến máu
- * *   tags:
- *     - Donation
- * *   responses:
- *      200:
- *       description: Xóa thành công
+ * Description. Update information a donation registration for customer
+ * Path: /donation-registration/:id
+ * METHOD: PATCH
+ * Body : { blood_group_id: string, blood_component_id: string, start_date_donation: Date }
  */
-donationRouter.delete('/donationRegistration/:id', accessTokenValidator,isAdminValidator, wrapAsync(deleteDonationRegistrationController))
+donationRouter.patch(
+  '/donation-registration/:id',
+  accessTokenValidator,
+  updateDonationRegistrationValidator,
+  filterMiddleware<UpdateDonationRegistrationReqParams>([
+    'blood_group_id',
+    'blood_component_id',
+    'start_date_donation'
+  ]),
+  wrapAsync(updateDonationRegistrationController)
+)
+
+//Note
+/**
+ * Description. Delete a donation registration
+ * Path: /donation-registration/:id
+ * METHOD: DELETE
+ */
+donationRouter.delete(
+  '/donation-registration/:id',
+  accessTokenValidator,
+  isAdminValidator,
+  wrapAsync(deleteDonationRegistrationController)
+)
 
 /**
- * @openapi
- * /donationRequestProcesses:
- *  get:
- *  summary: Lấy danh sách quá trình đăng ký hiến máu
- * *  tags:
- *    - Donation
- * *  responses:
- *    200:
- *      description: Danh sách quá trình đăng ký hiến máu
- * 
+ * Description. Get all donation request processes for staff or admin
+ * Path: /donation-request-process
+ * METHOD: GET
  */
-donationRouter.get('/donationRequestProcesses', accessTokenValidator, wrapAsync(getDonationRequestProcessesController))
+donationRouter.get(
+  '/donation-request-process',
+  isStaffOrAdminValidator,
+  wrapAsync(getAllDonationRequestProcessesController)
+)
 
 /**
- * @openapi
- * /donationRequestProcess/{id}:
- *  patch:
- *   summary: Cập nhật quá trình đăng ký hiến máu
- * *   tags:
- *     - Donation
- * *   parameters:
- *      - in: path
- *        name: id
- *       required: true
- *      responses:
- *       200:
- *        description: Cập nhật thành công
+ * Description. Get donation request process by user id
+ * Path: /donation-request-process/:user_id
+ * METHOD: GET
  */
-donationRouter.patch('/donationRequestProcess/:id', accessTokenValidator, isAdminValidator, wrapAsync(updateDonationRequestProcessController))
+donationRouter.get(
+  '/donation-request-process/:user_id',
+  accessTokenValidator,
+  wrapAsync(getDonationRequestProcessesController)
+)
 
 /**
- * @openapi
- * /donationRequestProcess/{id}:
- *  delete:
- *   summary: Xóa quá trình đăng ký hiến máu
- * *   tags:
- *     - Donation
- * *   responses:
- *      200:
- *       description: Xóa thành công
+ * Description. Update status a donation request process for staff or admin
+ * Path: /donation-request-process-status/:id
+ * METHOD: PATCH
+ * Body : { status: DonationRequestProcessStatus }
  */
-donationRouter.delete('/donationRequestProcess/:id', accessTokenValidator, isAdminValidator, wrapAsync(deleteDonationRegistrationController))
+donationRouter.patch(
+  '/donation-request-process-status/:id',
+  isStaffOrAdminValidator,
+  updateStatusDonationRequestProcessValidator,
+  filterMiddleware<UpdateStatusDonationRequestProcessReqBody>(['status']),
+  wrapAsync(updateStatusDonationRequestProcessController)
+)
+
+/**
+ * Description. Update a donation request process
+ * Path: /donation-request-process/:id
+ * METHOD: PATCH
+ * Body : { status: string }
+ */
+donationRouter.patch(
+  '/donation-request-process/:id',
+  isStaffOrAdminValidator,
+  updateDonationRequestProcessValidator,
+  filterMiddleware<UpdateDonationRequestProcessReqBody>(['status', 'description', 'donation_date', 'volume_collected']),
+  wrapAsync(updateDonationRequestProcessController)
+)
+
+//not use
+/**
+ * Description. Delete a donation request process
+ * Path: /donation-request-process/:id
+ * METHOD: DELETE
+ */
+donationRouter.delete(
+  '/donation-request-process/:id',
+  accessTokenValidator,
+  isAdminValidator,
+  wrapAsync(deleteDonationRegistrationController)
+)
 
 export default donationRouter
