@@ -15,6 +15,8 @@ tags:
     description: Operations about donation registrations
   - name: Donation Request Processes
     description: Operations about donation request processes
+  - name: Blogs
+    description: Operations about blogs
 paths:
   /users/login:
     post:
@@ -525,6 +527,131 @@ paths:
           description: UnAuthorization
       security:
         - BearerAuth: []
+  /blogs:
+    get:
+      tags:
+        - Blogs
+      summary: Get All Blogs
+      description: Get all blogs
+      operationId: getAllBlogs
+      responses:
+        default:
+          description: Get all blogs success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Blog'
+        '401':
+          description: UnAuthorization
+      security:
+        - BearerAuth: []
+
+    post:
+      tags:
+        - Blogs
+      summary: Create Blog (only admin)
+      description: Create a new blog (only admin)
+      operationId: createBlog
+      requestBody:
+        description: Information create blog
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBlogReqBody'
+        required: true
+      responses:
+        default:
+          description: Create blog success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Blog'
+        '401':
+          description: UnAuthorization
+      security:
+        - BearerAuth: []
+  /blogs/{id}:
+    get:
+      tags:
+        - Blogs
+      summary: Get Blog by ID
+      description: Get blog by id
+      operationId: getBlogById
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: MongoId
+      responses:
+        default:
+          description: Get blog by id success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Blog'
+        '401':
+          description: UnAuthorization
+      security:
+        - BearerAuth: []
+    patch:
+      tags:
+        - Blogs
+      summary: Update Blog (only admin)
+      description: Update blog (only admin)
+      operationId: updateBlog
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: MongoId
+      requestBody:
+        description: Information update blog
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateBlogReqBody'
+        required: true
+      responses:
+        default:
+          description: Update blog success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Blog'
+        '401':
+          description: UnAuthorization
+      security:
+        - BearerAuth: []
+    delete:
+      tags:
+        - Blogs
+      summary: Delete Blog (only admin)
+      description: Delete blog (only admin)
+      operationId: deleteBlog
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: MongoId
+      responses:
+        default:
+          description: Delete blog success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Blog'
+        '401':
+          description: UnAuthorization
+      security:
+        - BearerAuth: []
 components:
   schemas:
     RegisterBody:
@@ -883,6 +1010,58 @@ components:
       properties:
         status:
           $ref: '#/components/schemas/DonationProcessStatus'
+    Blog:
+      type: object
+      properties:
+        _id:
+          type: string
+          format: MongoId
+          example: 682f6a3fdb3fb589d23e7654
+        title:
+          type: string
+          example: ''
+        content:
+          type: string
+          example: ''
+        author:
+          type: string
+          example: ''
+        created_at:
+          type: string
+          format: date-time
+          example: 2025-05-21T17:48:12.171Z
+        updated_at:
+          type: string
+          format: date-time
+          example: 2025-05-21T17:48:12.171Z
+        image:
+          type: string
+          example: 'link image'
+    CreateBlogReqBody:
+      type: object
+      properties:
+        title:
+          type: string
+          example: ''
+        content:
+          type: string
+          example: ''
+        image:
+          type: string
+          example: 'link image'
+    UpdateBlogReqBody:
+      type: object
+      properties:
+        title:
+          type: string
+          example: ''
+        content:
+          type: string
+          example: ''
+        image:
+          type: string
+          example: 'link image'
+
   securitySchemes:
     BearerAuth:
       type: http

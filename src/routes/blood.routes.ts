@@ -5,7 +5,7 @@ import {
   getBloodComponentsController,
   getBloodGroupsController
 } from '~/controllers/blood.controllers'
-import { createBloodComponentValidator, createBloodGroupValidator } from '~/middlewares/blood.middleware'
+import { createBloodComponentValidator, createBloodGroupValidator } from '~/middlewares/blood.middlewares'
 import { isAdminValidator } from '~/middlewares/user.middlewares'
 import { wrapAsync } from '~/utils/handler'
 

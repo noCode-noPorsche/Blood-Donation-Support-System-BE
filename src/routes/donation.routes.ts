@@ -12,14 +12,14 @@ import {
   updateStatusDonationRequestProcessController
   // updateDonationRequestProcessController
 } from '~/controllers/donation.controllers'
-import { filterMiddleware } from '~/middlewares/common.middleware'
+import { filterMiddleware } from '~/middlewares/common.middlewares'
 import {
   createDonationValidator,
   updateDonationRegistrationValidator,
   updateDonationRequestProcessValidator,
   updateStatusDonationRegistrationValidator,
   updateStatusDonationRequestProcessValidator
-} from '~/middlewares/donation.middleware'
+} from '~/middlewares/donation.middlewares'
 import { accessTokenValidator, isAdminValidator, isStaffOrAdminValidator } from '~/middlewares/user.middlewares'
 import {
   UpdateDonationRegistrationReqParams,

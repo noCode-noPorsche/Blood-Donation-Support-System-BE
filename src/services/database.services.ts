@@ -6,6 +6,7 @@ import BloodGroup from '~/models/schemas/BloodGroup.schemas'
 import BloodComponent from '~/models/schemas/BloodComponent.schemas'
 import DonationRegister from '~/models/schemas/DonationRegister.schemas'
 import DonationRequestProcess from '~/models/schemas/DonationRequestProcess.schemas'
+import Blog from '~/models/schemas/Blog.schemas'
 
 config()
 const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@blooddonation.mfyc9dy.mongodb.net/?retryWrites=true&w=majority&appName=BloodDonation`
@@ -44,6 +45,9 @@ class DatabaseService {
   }
   get donationRequestProcess(): Collection<DonationRequestProcess> {
     return this.db.collection(process.env.DB_DONATION_REQUEST_PROCESSES_COLLECTION as string)
+  }
+  get blogs(): Collection<Blog> {
+    return this.db.collection(process.env.DB_BLOGS_COLLECTION as string)
   }
 }
 

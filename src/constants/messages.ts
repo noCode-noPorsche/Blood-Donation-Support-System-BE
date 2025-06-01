@@ -97,3 +97,24 @@ export const DONATION_MESSAGES = {
   DESCRIPTION_MUST_BE_A_STRING: 'Description must be a string',
   DESCRIPTION_LENGTH_MUST_BE_LESS_THAN_500: 'Description length must be less than 500'
 }
+
+export const BLOG_MESSAGES = {
+  CREATE_BLOG_SUCCESS: 'Create blog success',
+  BLOG_NOT_FOUND: 'Blog not found',
+  BLOG_ALREADY_EXIST: 'Blog already exists',
+  BLOG_MUST_BE_A_STRING: 'Blog must be a string',
+  BLOG_IS_REQUIRED: 'Blog is required',
+  TITLE_IS_REQUIRED: 'Title is required',
+  CONTENT_IS_REQUIRED: 'Content is required',
+  IMAGE_IS_REQUIRED: 'Image is required',
+  AUTHOR_IS_REQUIRED: 'Author is required',
+  TITLE_MUST_BE_A_STRING: 'Title must be a string',
+  CONTENT_MUST_BE_A_STRING: 'Content must be a string',
+  IMAGE_MUST_BE_A_STRING: 'Image must be a string',
+  AUTHOR_MUST_BE_A_STRING: 'Author must be a string',
+  GET_ALL_BLOGS_SUCCESS: 'Get all blogs success',
+  GET_BLOG_SUCCESS: 'Get blog success',
+  UPDATE_BLOG_SUCCESS: 'Update blog success',
+  DELETE_BLOG_SUCCESS: 'Delete blog success',
+  IMAGE_MUST_BE_A_URL: 'Image must be a URL'
+}
