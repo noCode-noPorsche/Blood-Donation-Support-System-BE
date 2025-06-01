@@ -33,13 +33,13 @@ const donationRouter = express.Router()
 
 /**
  * Description. Create a new donation
- * Path: /donation-registration
+ * Path: /donation-registrations
  * METHOD: POST
  * Body : { user_id: string, blood_group_id: string, blood_component_id: string, start_date_donation: Date, status: DonationRegisterStatus }
  * Header: { Authorization: Bearer <access_token>}
  */
 donationRouter.post(
-  '/donation-registration',
+  '/donation-registrations',
   accessTokenValidator,
   createDonationValidator,
   wrapAsync(createDonationRegistrationController)
@@ -47,30 +47,30 @@ donationRouter.post(
 
 /**
  * Description. Get all donation registrations for staff or admin
- * Path: /donation-registration
+ * Path: /donation-registrations
  * METHOD: GET
  */
-donationRouter.get('/donation-registration', isStaffOrAdminValidator, wrapAsync(getAllDonationRegistrationsController))
+donationRouter.get('/donation-registrations', isStaffOrAdminValidator, wrapAsync(getAllDonationRegistrationsController))
 
 /**
  * Description. Get donation registration by user id
- * Path: /donation-registration/:user_id
+ * Path: /donation-registrations/:user_id
  * METHOD: GET
  */
 donationRouter.get(
-  '/donation-registration/:user_id',
+  '/donation-registrations/:user_id',
   accessTokenValidator,
   wrapAsync(getDonationRegistrationByUserIdController)
 )
 
 /**
  * Description. Update status a donation registration for staff or admin
- * Path: /donation-registration/:id
+ * Path: /donation-registrations/:id/status
  * METHOD: PATCH
  * Body : { status: DonationRegisterStatus }
  */
 donationRouter.patch(
-  '/donation-registration-status/:id',
+  '/donation-registrations/:id/status',
   isStaffOrAdminValidator,
   updateStatusDonationRegistrationValidator,
   filterMiddleware<UpdateDonationRegistrationReqParams>(['status']),
@@ -79,12 +79,12 @@ donationRouter.patch(
 
 /**
  * Description. Update information a donation registration for customer
- * Path: /donation-registration/:id
+ * Path: /donation-registrations/:id
  * METHOD: PATCH
  * Body : { blood_group_id: string, blood_component_id: string, start_date_donation: Date }
  */
 donationRouter.patch(
-  '/donation-registration/:id',
+  '/donation-registrations/:id',
   accessTokenValidator,
   updateDonationRegistrationValidator,
   filterMiddleware<UpdateDonationRegistrationReqParams>([
@@ -110,34 +110,34 @@ donationRouter.delete(
 
 /**
  * Description. Get all donation request processes for staff or admin
- * Path: /donation-request-process
+ * Path: /donation-request-processes
  * METHOD: GET
  */
 donationRouter.get(
-  '/donation-request-process',
+  '/donation-request-processes',
   isStaffOrAdminValidator,
   wrapAsync(getAllDonationRequestProcessesController)
 )
 
 /**
  * Description. Get donation request process by user id
- * Path: /donation-request-process/:user_id
+ * Path: /donation-request-processes/:user_id
  * METHOD: GET
  */
 donationRouter.get(
-  '/donation-request-process/:user_id',
+  '/donation-request-processes/:user_id',
   accessTokenValidator,
   wrapAsync(getDonationRequestProcessesController)
 )
 
 /**
  * Description. Update status a donation request process for staff or admin
- * Path: /donation-request-process-status/:id
+ * Path: /donation-request-processes/:id/status
  * METHOD: PATCH
  * Body : { status: DonationRequestProcessStatus }
  */
 donationRouter.patch(
-  '/donation-request-process-status/:id',
+  '/donation-request-processes/:id/status',
   isStaffOrAdminValidator,
   updateStatusDonationRequestProcessValidator,
   filterMiddleware<UpdateStatusDonationRequestProcessReqBody>(['status']),
@@ -145,13 +145,13 @@ donationRouter.patch(
 )
 
 /**
- * Description. Update a donation request process
- * Path: /donation-request-process/:id
+ * Description. Update a donation request process for staff or admin
+ * Path: /donation-request-processes/:id
  * METHOD: PATCH
- * Body : { status: string }
+ * Body : { status: string, description: string, donation_date: Date, volume_collected: number }
  */
 donationRouter.patch(
-  '/donation-request-process/:id',
+  '/donation-request-processes/:id',
   isStaffOrAdminValidator,
   updateDonationRequestProcessValidator,
   filterMiddleware<UpdateDonationRequestProcessReqBody>(['status', 'description', 'donation_date', 'volume_collected']),
@@ -161,11 +161,11 @@ donationRouter.patch(
 //not use
 /**
  * Description. Delete a donation request process
- * Path: /donation-request-process/:id
+ * Path: /donation-request-processes/:id
  * METHOD: DELETE
  */
 donationRouter.delete(
-  '/donation-request-process/:id',
+  '/donation-request-processes/:id',
   accessTokenValidator,
   isAdminValidator,
   wrapAsync(deleteDonationRegistrationController)

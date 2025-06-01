@@ -1,31 +1,20 @@
 openapi: 3.0.4
 info:
-  title: Blood Donation Support System - OpenAPI 3.0
-  description: |-
-    This is a sample Pet Store Server based on the OpenAPI 3.0 specification.  You can find out more about
-    Swagger at [https://swagger.io](https://swagger.io). In the third iteration of the pet store, we've switched to the design first approach!
-    You can now help us improve the API whether it's by making changes to the definition itself or to the code.
-    That way, with time, we can improve the API in general, and expose some of the new features in OAS3.
-
-    Some useful links:
-    - [The Blood Donation Support System repository](https://github.com/blood-donation-support/be)
-  termsOfService: https://swagger.io/terms/
-  contact:
-    email: apiteam@swagger.io
-  license:
-    name: Apache 2.0
-    url: https://www.apache.org/licenses/LICENSE-2.0.html
-  version: 1.0.12
-externalDocs:
-  description: Find out more about Swagger
-  url: https://swagger.io
+  title: Blood Donation Support System - OpenAPI 1.0
+  version: v1
 servers:
   - url: http://localhost:8080
-  - url: https://be-t8i8.onrender.com
   - url: '/'
+  - url: https://be-t8i8.onrender.com
 tags:
   - name: Users
     description: Operations about user
+  - name: Bloods
+    description: Operations about blood
+  - name: Donation Registrations
+    description: Operations about donation registrations
+  - name: Donation Request Processes
+    description: Operations about donation request processes
 paths:
   /users/login:
     post:
@@ -195,6 +184,343 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SuccessAuthentication'
+        '401':
+          description: UnAuthorization
+      security:
+        - BearerAuth: []
+  /bloods/blood-groups:
+    get:
+      tags:
+        - Bloods
+      summary: Get All Blood Groups
+      description: Get all blood groups
+      operationId: getAllBloodGroups
+      responses:
+        default:
+          description: Get all blood groups success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BloodGroup'
+        '404':
+          description: Blood group not found
+    post:
+      tags:
+        - Bloods
+      summary: Create Blood Group
+      description: Create a new blood group (only admin)
+      operationId: createBloodGroup
+      requestBody:
+        description: Information create blood group
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBloodGroupBody'
+        required: true
+      responses:
+        '200':
+          description: Create blood group success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BloodGroup'
+        '422':
+          description: Invalid Input
+        '401':
+          description: UnAuthorization
+      security:
+        - BearerAuth: []
+  /bloods/blood-components:
+    get:
+      tags:
+        - Bloods
+      summary: Get All Blood Components
+      description: Get all blood components
+      operationId: getAllBloodComponents
+      responses:
+        default:
+          description: Get all blood components success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BloodComponent'
+        '404':
+          description: Blood component not found
+    post:
+      tags:
+        - Bloods
+      summary: Create Blood Component
+      description: Create a new blood component (only admin)
+      operationId: createBloodComponent
+      requestBody:
+        description: Information create blood component
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBloodComponentBody'
+        required: true
+      responses:
+        '200':
+          description: Create blood component success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Blood component created successfully
+        '422':
+          description: Invalid Input
+        '401':
+          description: UnAuthorization
+      security:
+        - BearerAuth: []
+  /donations/donation-registrations:
+    post:
+      tags:
+        - Donation Registrations
+      summary: Create Donation Registration
+      description: Create a new donation registration
+      operationId: createDonationRegistration
+      requestBody:
+        description: Information create donation registration
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDonationRegistrationBody'
+        required: true
+      responses:
+        '200':
+          description: Create donation registration success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DonationRegistration'
+        '422':
+          description: Invalid Input
+        '401':
+          description: UnAuthorization
+      security:
+        - BearerAuth: []
+
+    get:
+      tags:
+        - Donation Registrations
+      summary: Get All Donation Registrations for Staff or Admin
+      description: Get all donation registrations for staff or admin
+      operationId: getAllDonationRegistrations
+      responses:
+        default:
+          description: Get all donation registrations success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DonationRegistration'
+        '401':
+          description: UnAuthorization
+      security:
+        - BearerAuth: []
+  /donations/donation-registrations/{user_id}:
+    get:
+      tags:
+        - Donation Registrations
+      summary: Get Donation Registration by User ID
+      description: Get donation registration by user id
+      operationId: getDonationRegistrationByUserId
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+            format: MongoId
+      responses:
+        default:
+          description: Get donation registration by user id success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DonationRegistration'
+        '401':
+          description: UnAuthorization
+      security:
+        - BearerAuth: []
+  /donations/donation-registrations/{id}/status:
+    patch:
+      tags:
+        - Donation Registrations
+      summary: Update Status Donation Registration
+      description: Update status donation registration
+      operationId: updateStatusDonationRegistration
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: MongoId
+      requestBody:
+        description: Information update status donation registration
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateStatusDonationRegistrationReqBody'
+        required: true
+      responses:
+        default:
+          description: Update status donation registration success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DonationRegistration'
+        '401':
+          description: UnAuthorization
+      security:
+        - BearerAuth: []
+  /donations/donation-registrations/{id}:
+    patch:
+      tags:
+        - Donation Registrations
+      summary: Update Donation Registration
+      description: Update donation registration
+      operationId: updateDonationRegistration
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: MongoId
+      requestBody:
+        description: Information update donation registration
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateDonationRegistrationReqBody'
+        required: true
+      responses:
+        default:
+          description: Update donation registration success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DonationRegistration'
+        '401':
+          description: UnAuthorization
+      security:
+        - BearerAuth: []
+  /donations/donation-request-processes:
+    get:
+      tags:
+        - Donation Request Processes
+      summary: Get All Donation Request Processes for Staff or Admin
+      description: Get all donation request processes for staff or admin
+      operationId: getAllDonationRequestProcesses
+      responses:
+        default:
+          description: Get all donation request processes success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DonationRequestProcess'
+        '401':
+          description: UnAuthorization
+      security:
+        - BearerAuth: []
+  /donations/donation-request-processes/{user_id}:
+    get:
+      tags:
+        - Donation Request Processes
+      summary: Get Donation Request Processes by User ID
+      description: Get donation request processes by user id
+      operationId: getDonationRequestProcessesByUserId
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+            format: MongoId
+      responses:
+        default:
+          description: Get donation request processes by user id success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DonationRequestProcess'
+        '401':
+          description: UnAuthorization
+      security:
+        - BearerAuth: []
+  /donations/donation-request-processes/{id}/status:
+    patch:
+      tags:
+        - Donation Request Processes
+      summary: Update Status Donation Request Processes
+      description: Update status donation request processes
+      operationId: updateStatusDonationRequestProcesses
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: MongoId
+      requestBody:
+        description: Information update status donation request processes
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateStatusDonationRequestProcessBody'
+        required: true
+      responses:
+        default:
+          description: Update status donation request processes success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DonationRequestProcess'
+        '401':
+          description: UnAuthorization
+      security:
+        - BearerAuth: []
+  /donations/donation-request-processes/{id}:
+    patch:
+      tags:
+        - Donation Request Processes
+      summary: Update Donation Request Processes
+      description: Update donation request processes
+      operationId: updateDonationRequestProcesses
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: MongoId
+          required: true
+      requestBody:
+        description: Information update donation request processes
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DonationRequestProcessReqBody'
+        required: true
+      responses:
+        default:
+          description: Update donation request processes success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DonationRequestProcess'
         '401':
           description: UnAuthorization
       security:
@@ -372,6 +698,191 @@ components:
       type: string
       enum: [Admin, Staff, Customer]
       example: Admin
+    DonationRegistrationStatus:
+      type: string
+      enum: [Pending, Approved, Rejected]
+      example: Pending
+    DonationProcessStatus:
+      type: string
+      enum: [Pending, Approved, Rejected]
+      example: Pending
+    BloodGroupEnum:
+      type: string
+      enum: [A+, A-, B+, B-, AB+, AB-, O+, O-]
+      example: A+
+    BloodComponentEnum:
+      type: string
+      enum: [Whole Blood, Red Blood Cells, Plasma, Platelets]
+      example: Whole Blood
+    BloodGroup:
+      type: object
+      properties:
+        _id:
+          type: string
+          format: MongoId
+          example: 682f6a3fdb3fb589d23e7654
+        name:
+          $ref: '#/components/schemas/BloodGroupEnum'
+        created_at:
+          type: string
+          format: date-time
+          example: 2025-05-21T17:48:12.171Z
+        updated_at:
+          type: string
+          format: date-time
+          example: 2025-05-21T17:48:12.171Z
+    BloodComponent:
+      type: object
+      properties:
+        _id:
+          type: string
+          format: MongoId
+          example: 682f6a3fdb3fb589d23e7654
+        name:
+          $ref: '#/components/schemas/BloodComponentEnum'
+        created_at:
+          type: string
+          format: date-time
+          example: 2025-05-21T17:48:12.171Z
+        updated_at:
+          type: string
+          format: date-time
+          example: 2025-05-21T17:48:12.171Z
+    CreateBloodGroupBody:
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/BloodGroupEnum'
+    CreateBloodComponentBody:
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/BloodComponentEnum'
+    CreateDonationRegistrationBody:
+      type: object
+      properties:
+        blood_group_id:
+          type: string
+          format: MongoId
+          example: 682f6a3fdb3fb589d23e7654
+        blood_component_id:
+          type: string
+          format: MongoId
+          example: 682f6a3fdb3fb589d23e7654
+        start_date_donation:
+          type: string
+          format: date-time
+          example: 2025-05-21T17:48:12.171Z
+        status:
+          $ref: '#/components/schemas/DonationRegistrationStatus'
+    DonationRegistration:
+      type: object
+      properties:
+        _id:
+          type: string
+          format: MongoId
+          example: 682f6a3fdb3fb589d23e7654
+        user_id:
+          type: string
+          format: MongoId
+          example: 682f6a3fdb3fb589d23e7654
+        blood_group_id:
+          type: string
+          format: MongoId
+          example: 682f6a3fdb3fb589d23e7654
+        blood_component_id:
+          type: string
+          format: MongoId
+          example: 682f6a3fdb3fb589d23e7654
+        start_date_donation:
+          type: string
+          format: date-time
+          example: 2025-05-21T17:48:12.171Z
+        status:
+          $ref: '#/components/schemas/DonationRegistrationStatus'
+        created_at:
+          type: string
+          format: date-time
+          example: 2025-05-21T17:48:12.171Z
+        updated_at:
+          type: string
+          format: date-time
+          example: 2025-05-21T17:48:12.171Z
+    UpdateStatusDonationRegistrationReqBody:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/DonationRegistrationStatus'
+    UpdateDonationRegistrationReqBody:
+      type: object
+      properties:
+        blood_group_id:
+          type: string
+          format: MongoId
+          example: 682f6a3fdb3fb589d23e7654
+        blood_component_id:
+          type: string
+          format: MongoId
+          example: 682f6a3fdb3fb589d23e7654
+        start_date_donation:
+          type: string
+          format: date-time
+          example: 2025-05-21T17:48:12.171Z
+    DonationRequestProcess:
+      type: object
+      properties:
+        _id:
+          type: string
+          format: MongoId
+          example: 682f6a3fdb3fb589d23e7654
+        donation_registration_id:
+          type: string
+          format: MongoId
+          example: 682f6a3fdb3fb589d23e7654
+        user_id:
+          type: string
+          format: MongoId
+          example: 682f6a3fdb3fb589d23e7654
+        donation_date:
+          type: string
+          format: date-time
+          example: 2025-05-21T17:48:12.171Z
+        volume_collected:
+          type: number
+          example: 0
+        status:
+          $ref: '#/components/schemas/DonationProcessStatus'
+        created_at:
+          type: string
+          format: date-time
+          example: 2025-05-21T17:48:12.171Z
+        updated_at:
+          type: string
+          format: date-time
+          example: 2025-05-21T17:48:12.171Z
+        description:
+          type: string
+          example: ''
+    DonationRequestProcessReqBody:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/DonationProcessStatus'
+        description:
+          type: string
+          example: ''
+        donation_date:
+          type: string
+          format: date-time
+          example: 2025-05-21T17:48:12.171Z
+        volume_collected:
+          type: number
+          example: 0
+    UpdateStatusDonationRequestProcessBody:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/DonationProcessStatus'
   securitySchemes:
     BearerAuth:
       type: http

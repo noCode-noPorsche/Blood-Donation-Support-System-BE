@@ -1,5 +1,5 @@
 {
-  "watch": ["src", ".env"],
+  "watch": ["src", ".env", "BE-swagger.yaml"],
   "ext": ".ts,.js,.yaml,.json",
   "ignore": [],
   "exec": "tsx ./src/index.ts"

@@ -19,7 +19,7 @@ const bloodRouter = express.Router()
 bloodRouter.get('/blood-groups', wrapAsync(getBloodGroupsController))
 
 /**
- * Description. Create a new blood group
+ * Description. Create a new blood group (only admin)
  * Path: /blood-groups
  * METHOD: POST
  * Body : { name: BloodGroup }
@@ -34,7 +34,7 @@ bloodRouter.post('/blood-groups', isAdminValidator, createBloodGroupValidator, w
 bloodRouter.get('/blood-components', wrapAsync(getBloodComponentsController))
 
 /**
- * Description. Create a new blood component
+ * Description. Create a new blood component (only admin)
  * Path: /blood-components
  * METHOD: POST
  * Body : { name: BloodComponent }
