@@ -119,27 +119,7 @@ export const updateDonationRegistrationValidator = validate(
   )
 )
 
-// export const updateDonationStatusValidator = validate(
-//   checkSchema(
-//     {
-//       status: {
-//         notEmpty: {
-//           errorMessage: 'Status is required'
-//         },
-//         isString: {
-//           errorMessage: 'Status must be a string'
-//         },
-//         isIn: {
-//           options: [['pending', 'completed', 'cancelled']], // Hoặc enum nếu có
-//           errorMessage: 'Invalid status value'
-//         }
-//       }
-//     },
-//     ['body']
-//   )
-// )
-
-export const updateDonationRequestProcessValidator = validate(
+export const updateDonationProcessValidator = validate(
   checkSchema(
     {
       status: {
@@ -159,9 +139,10 @@ export const updateDonationRequestProcessValidator = validate(
           errorMessage: DONATION_MESSAGES.VOLUME_COLLECTED_IS_REQUIRED
         },
         isFloat: {
-          options: { min: 0 },
+          options: { min: 0, max: 350 },
           errorMessage: DONATION_MESSAGES.VOLUME_COLLECTED_MUST_BE_POSITIVE
-        }
+        },
+        toFloat: true
       },
       donation_date: {
         notEmpty: undefined,

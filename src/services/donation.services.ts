@@ -9,6 +9,8 @@ import {
 } from '~/models/requests/Donation.requests'
 import { DonationRegisterStatus, DonationProcessStatus, HealthCheckStatus } from '~/constants/enum'
 import HealthCheck from '~/models/schemas/HealthCheck'
+import { ErrorWithStatus } from '~/models/Error'
+import { DONATION_MESSAGES } from '~/constants/messages'
 
 class DonationService {
   async registerDonation({ user_id, payload }: { user_id: string; payload: RegisterDonationReqBody }) {
@@ -36,7 +38,7 @@ class DonationService {
     const newHealthCheck = new HealthCheck({
       _id: healthCheckId,
       user_id: new ObjectId(user_id),
-      blood_group_id: new ObjectId(resultUser?.blood_group_id),
+      blood_group_id: new ObjectId(payload.blood_group_id ? payload.blood_group_id : resultUser?.blood_group_id),
       donation_register_id: resultRegistration.insertedId,
       donation_process_id: donationRequestProcessId,
       weight: 0,
@@ -57,6 +59,7 @@ class DonationService {
       _id: donationRequestProcessId,
       user_id: new ObjectId(user_id),
       donation_registration_id: resultRegistration.insertedId,
+      blood_group_id: new ObjectId(payload.blood_group_id ? payload.blood_group_id : resultUser?.blood_group_id),
       health_check_id: healthCheckId,
       volume_collected: 0,
       description: '',
@@ -173,15 +176,6 @@ class DonationService {
     return donationRegister
   }
 
-  async updateStatusDonationRegistration({ id, status }: { id: string; status: DonationRegisterStatus }) {
-    const result = await databaseService.donationRegistrations.findOneAndUpdate(
-      { _id: new ObjectId(id) },
-      { $set: { status }, $currentDate: { updated_at: true } },
-      { returnDocument: 'after' }
-    )
-    return result
-  }
-
   async updateDonationRegistration({ id, payload }: { id: string; payload: UpdateDonationRegistrationReqBody }) {
     const result = await databaseService.donationRegistrations.findOneAndUpdate(
       { _id: new ObjectId(id) },
@@ -277,12 +271,37 @@ class DonationService {
     return donationProcesses
   }
 
-  async updateDonationRequestProcess({ id, payload }: { id: string; payload: UpdateDonationProcessReqBody }) {
+  async updateDonationProcess({ id, payload }: { id: string; payload: UpdateDonationProcessReqBody }) {
+    const donationProcessResult = await databaseService.donationProcesses.findOne({
+      _id: new ObjectId(id)
+    })
+
+    const healthCheckResult = await databaseService.healthChecks.findOne({
+      _id: new ObjectId(donationProcessResult?.health_check_id)
+    })
+
+    const isHealthCheckNotApproved = [HealthCheckStatus.Pending, HealthCheckStatus.Rejected].includes(
+      healthCheckResult?.status as HealthCheckStatus
+    )
+    const isTryingToApprove = payload.status === DonationProcessStatus.Approved
+
+    if (isHealthCheckNotApproved && isTryingToApprove) {
+      throw new ErrorWithStatus({
+        message:
+          DONATION_MESSAGES.BLOOD_DONATION_REQUEST_CANNOT_BE_APPROVED_IF_HEALTH_CHECK_RESULTS_ARE_NOT_SATISFACTORY,
+        status: 400
+      })
+    }
+
     const result = await databaseService.donationProcesses.findOneAndUpdate(
       { _id: new ObjectId(id) },
       {
         $set: {
           ...payload,
+          status: payload.status || DonationProcessStatus.Pending,
+          blood_group_id: new ObjectId(payload.blood_group_id)
+            ? new ObjectId(payload.blood_group_id)
+            : healthCheckResult?.blood_group_id,
           donation_date: payload.donation_date || new Date(),
           volume_collected: Number(payload.volume_collected)
         },
@@ -290,6 +309,25 @@ class DonationService {
       },
       { returnDocument: 'after' }
     )
+
+    if (result) {
+      const userResult = await databaseService.users.findOne({
+        _id: new ObjectId(donationProcessResult?.user_id)
+      })
+      if (userResult) {
+        await databaseService.users.findOneAndUpdate(
+          { _id: new ObjectId(userResult._id) },
+          {
+            $set: {
+              blood_group_id: payload.blood_group_id ? new ObjectId(payload.blood_group_id) : userResult.blood_group_id,
+              number_of_donations: userResult?.number_of_donations ? userResult.number_of_donations + 1 : 1
+            },
+            $currentDate: { updated_at: true }
+          }
+        )
+      }
+    }
+
     return result
   }
 
@@ -310,18 +348,12 @@ class DonationService {
 
   async getDonationProcesses() {
     const donationProcesses = await databaseService.donationProcesses.find({}).toArray()
-    return donationProcesses.map((process: any) => new DonationRequestProcess(process))
+    return donationProcesses.map((process: DonationRequestProcess) => new DonationRequestProcess(process))
   }
 
   async getDonationProcess(donationProcessId: string) {
-    let parsedDonationRequestProcessId: ObjectId
-    try {
-      parsedDonationRequestProcessId = new ObjectId(donationProcessId)
-    } catch (err) {
-      return false
-    }
     const donationRequestProcess = await databaseService.donationProcesses.findOne({
-      _id: parsedDonationRequestProcessId
+      _id: new ObjectId(donationProcessId)
     })
     if (!donationRequestProcess) {
       return null
@@ -329,6 +361,7 @@ class DonationService {
     return new DonationRequestProcess(donationRequestProcess)
   }
 
+  //not use
   async deleteDonationProcess(id: string) {
     let parsedId: ObjectId
     try {

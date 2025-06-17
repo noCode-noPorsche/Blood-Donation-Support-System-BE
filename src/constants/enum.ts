@@ -46,6 +46,7 @@ export enum DonationProcessStatus {
   Approved = 'Approved',
   Rejected = 'Rejected'
 }
+
 export enum HealthCheckStatus {
   Approved = 'Approved',
   Rejected = 'Rejected',

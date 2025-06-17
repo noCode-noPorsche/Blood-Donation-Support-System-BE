@@ -49,11 +49,11 @@ app.get('/', (req, res) => {
   })
 })
 
-app.use('/users', usersRouter)
-app.use('/bloods', bloodRouter)
-app.use('/donations', donationRouter)
-app.use('/health-check', healthCheckRouter)
-app.use('/blogs', blogRouter)
+app.use('/api/users', usersRouter)
+app.use('/api/bloods', bloodRouter)
+app.use('/api/donations', donationRouter)
+app.use('/api/health-checks', healthCheckRouter)
+app.use('/api/blogs', blogRouter)
 app.use(defaultErrorHandler)
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))

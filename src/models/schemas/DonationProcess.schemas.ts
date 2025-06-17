@@ -6,6 +6,7 @@ interface DonationProcessType {
   user_id: ObjectId
   donation_registration_id?: ObjectId
   health_check_id?: ObjectId
+  blood_group_id: ObjectId
   volume_collected?: number
   status: DonationProcessStatus
   donation_date?: Date
@@ -18,6 +19,7 @@ export default class DonationProcess {
   user_id: ObjectId
   donation_registration_id?: ObjectId
   health_check_id?: ObjectId
+  blood_group_id: ObjectId
   volume_collected?: number
   status: DonationProcessStatus
   donation_date?: Date
@@ -30,6 +32,7 @@ export default class DonationProcess {
     this.user_id = donationProcess.user_id
     this.donation_registration_id = donationProcess.donation_registration_id
     this.health_check_id = donationProcess.health_check_id || new ObjectId()
+    this.blood_group_id = donationProcess.blood_group_id || ''
     this.volume_collected = donationProcess.volume_collected
     this.status = donationProcess.status || DonationProcessStatus.Pending
     this.donation_date = donationProcess.donation_date || date

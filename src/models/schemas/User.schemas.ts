@@ -10,8 +10,8 @@ interface UserType {
   role: UserRole
   gender: UserGender
   blood_group_id?: ObjectId
-  number_of_donation?: number
-  number_of_request?: number
+  number_of_donations?: number
+  number_of_requests?: number
   weight: number
   location?: string
   phone: string
@@ -30,8 +30,8 @@ export default class User {
   role: UserRole
   gender: UserGender
   blood_group_id?: ObjectId
-  number_of_donation?: number
-  number_of_request?: number
+  number_of_donations?: number
+  number_of_requests?: number
   weight: number
   location: string
   phone: string
@@ -50,8 +50,8 @@ export default class User {
     this.role = user.role || UserRole.Customer
     this.gender = user.gender || UserGender.Other
     this.blood_group_id = user.blood_group_id
-    this.number_of_donation = user.number_of_donation || 0
-    this.number_of_request = user.number_of_request || 0
+    this.number_of_donations = user.number_of_donations || 0
+    this.number_of_requests = user.number_of_requests || 0
     this.weight = user.weight || 0
     this.location = user.location || ''
     this.phone = user.phone || ''

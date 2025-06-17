@@ -18,7 +18,7 @@ tags:
   - name: Blogs
     description: Operations about blogs
 paths:
-  /users/login:
+  /api/users/login:
     post:
       tags:
         - Users
@@ -44,7 +44,7 @@ paths:
           description: Invalid Input
         '401':
           description: UnAuthorization
-  /users/register:
+  /api/users/register:
     post:
       tags:
         - Users
@@ -70,7 +70,7 @@ paths:
           description: Invalid Input
         '401':
           description: UnAuthorization
-  /users/logout:
+  /api/users/logout:
     post:
       tags:
         - Users
@@ -99,7 +99,7 @@ paths:
           description: UnAuthorization
       security:
         - BearerAuth: []
-  /users/refresh-token:
+  /api/users/refresh-token:
     post:
       tags:
         - Users
@@ -122,7 +122,7 @@ paths:
                 $ref: '#/components/schemas/SuccessAuthentication'
         '401':
           description: UnAuthorization
-  /users/me:
+  /api/users/me:
     get:
       tags:
         - Users
@@ -141,7 +141,7 @@ paths:
           description: UnAuthorization
       security:
         - BearerAuth: []
-  /users/update-me:
+  /api/users/update-me:
     patch:
       tags:
         - Users
@@ -166,7 +166,7 @@ paths:
           description: UnAuthorization
       security:
         - BearerAuth: []
-  /users/change-password:
+  /api/users/change-password:
     post:
       tags:
         - Users
@@ -190,7 +190,7 @@ paths:
           description: UnAuthorization
       security:
         - BearerAuth: []
-  /bloods/blood-groups:
+  /api/bloods/blood-groups:
     get:
       tags:
         - Bloods
@@ -234,7 +234,7 @@ paths:
           description: UnAuthorization
       security:
         - BearerAuth: []
-  /bloods/blood-components:
+  /api/bloods/blood-components:
     get:
       tags:
         - Bloods
@@ -282,7 +282,7 @@ paths:
           description: UnAuthorization
       security:
         - BearerAuth: []
-  /donations/donation-registrations:
+  /api/donations/donation-registrations:
     post:
       tags:
         - Donation Registrations
@@ -329,7 +329,7 @@ paths:
           description: UnAuthorization
       security:
         - BearerAuth: []
-  /donations/donation-registrations/user:
+  /api/donations/donation-registrations/user:
     get:
       tags:
         - Donation Registrations
@@ -347,40 +347,7 @@ paths:
           description: UnAuthorization
       security:
         - BearerAuth: []
-  /donations/donation-registrations/{id}/status:
-    patch:
-      tags:
-        - Donation Registrations
-      summary: Update Status Donation Registration
-      description: Update status donation registration
-      operationId: updateStatusDonationRegistration
-      parameters:
-        - in: path
-          name: id
-          description: Mongo ObjectId (24 hex characters)
-          required: true
-          schema:
-            type: string
-            pattern: '^[a-fA-F0-9]{24}$'
-      requestBody:
-        description: Information update status donation registration
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UpdateStatusDonationRegistrationReqBody'
-        required: true
-      responses:
-        default:
-          description: Update status donation registration success
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DonationRegistration'
-        '401':
-          description: UnAuthorization
-      security:
-        - BearerAuth: []
-  /donations/donation-registrations/{id}:
+  /api/donations/donation-registrations/{id}:
     patch:
       tags:
         - Donation Registrations
@@ -412,7 +379,7 @@ paths:
           description: UnAuthorization
       security:
         - BearerAuth: []
-  /donations/donation-processes:
+  /api/donations/donation-processes:
     get:
       tags:
         - Donation Processes
@@ -432,14 +399,13 @@ paths:
           description: UnAuthorization
       security:
         - BearerAuth: []
-  /donations/donation-processes/user:
+  /api/donations/donation-processes/user:
     get:
       tags:
         - Donation Processes
       summary: Get Donation Processes by User ID Now
       description: Get donation processes by user id now
       operationId: getDonationProcessesByUserId
-
       responses:
         default:
           description: Get donation processes by user id success
@@ -451,7 +417,7 @@ paths:
           description: UnAuthorization
       security:
         - BearerAuth: []
-  /donations/donation-processes/{id}:
+  /api/donations/donation-processes/{id}:
     patch:
       tags:
         - Donation Processes
@@ -483,7 +449,27 @@ paths:
           description: UnAuthorization
       security:
         - BearerAuth: []
-  /blogs:
+  /api/health-checks/:
+    get:
+      tags:
+        - Health Checks
+      summary: Get All Health Checks for Admin or Staff
+      description: Get All Health Checks for Admin or Staff
+      operationId: healthCheck
+      responses:
+        default:
+          description: Get all health check success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/HealthCheck'
+        '401':
+          description: UnAuthorization
+      security:
+        - BearerAuth: []
+  /api/blogs:
     get:
       tags:
         - Blogs
@@ -528,7 +514,7 @@ paths:
           description: UnAuthorization
       security:
         - BearerAuth: []
-  /blogs/{id}:
+  /api/blogs/{id}:
     get:
       tags:
         - Blogs
@@ -677,6 +663,10 @@ components:
         location:
           type: string
           example: ''
+        blood_group_id:
+          type: string
+          format: MongoId
+          example: 682f6a3fdb3fb589d23e7654
     LoginBody:
       type: object
       properties:
@@ -874,11 +864,6 @@ components:
           type: string
           format: date-time
           example: 2025-05-21T17:48:12.171Z
-    UpdateStatusDonationRegistrationReqBody:
-      type: object
-      properties:
-        status:
-          $ref: '#/components/schemas/DonationRegistrationStatus'
     UpdateDonationRegistrationReqBody:
       type: object
       properties:
@@ -949,6 +934,72 @@ components:
       properties:
         status:
           $ref: '#/components/schemas/DonationProcessStatus'
+    HealthCheckStatus:
+      type: string
+      enum: [Pending, Approved, Rejected]
+      example: Pending
+    UnderlyingHealthConditionsEnum:
+      type: string
+      enum: [Diabetes, Hypertension, HeartDisease, Other]
+      example: Diabetes
+    HealthCheck:
+      type: object
+      properties:
+        _id:
+          type: string
+          format: MongoId
+          example: 682f6a3fdb3fb589d23e7654
+        user_id:
+          type: string
+          format: MongoId
+          example: 682f6a3fdb3fb589d23e7654
+        blood_group_id:
+          type: string
+          format: MongoId
+          example: 682f6a3fdb3fb589d23e7654
+        donation_registration_id:
+          type: string
+          format: MongoId
+          example: 682f6a3fdb3fb589d23e7654
+        donation_process_id:
+          type: string
+          format: MongoId
+          example: 682f6a3fdb3fb589d23e7654
+        weight:
+          type: number
+          example: 0
+        temperature:
+          type: number
+          example: 0
+        heart_rate:
+          type: number
+          example: 0
+        diastolic_blood_pressure:
+          type: number
+          example: 0
+        systolic_blood_pressure:
+          type: number
+          example: 0
+        hemoglobin:
+          type: number
+          example: 0
+        underlying_health_conditions:
+          type: array
+          items:
+            $ref: '#/components/schemas/UnderlyingHealthConditionsEnum'
+        description:
+          type: string
+          example: ''
+        status:
+          $ref: '#/components/schemas/HealthCheckStatus'
+        created_at:
+          type: string
+          format: date-time
+          example: 2025-05-21T17:48:12.171Z
+        updated_at:
+          type: string
+          format: date-time
+          example: 2025-05-21T17:48:12.171Z
     Blog:
       type: object
       properties:

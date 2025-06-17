@@ -7,15 +7,13 @@ import {
   getDonationProcessesController,
   getDonationRegistrationByUserIdController,
   updateDonationProcessController,
-  updateDonationRegistrationController,
-  updateStatusDonationRegistrationController
+  updateDonationRegistrationController
 } from '~/controllers/donation.controllers'
 import { filterMiddleware } from '~/middlewares/common.middlewares'
 import {
   createDonationValidator,
-  updateDonationRegistrationValidator,
-  updateDonationRequestProcessValidator,
-  updateStatusDonationRegistrationValidator
+  updateDonationProcessValidator,
+  updateDonationRegistrationValidator
 } from '~/middlewares/donation.middlewares'
 import { accessTokenValidator, isAdminValidator, isStaffOrAdminValidator } from '~/middlewares/user.middlewares'
 import { UpdateDonationProcessReqBody, UpdateDonationRegistrationReqParams } from '~/models/requests/Donation.requests'
@@ -54,20 +52,6 @@ donationRouter.get(
   '/donation-registrations/user',
   accessTokenValidator,
   wrapAsync(getDonationRegistrationByUserIdController)
-)
-
-/**
- * Description. Update status a donation registration for staff or admin
- * Path: /donation-registrations/:id/status
- * METHOD: PATCH
- * Body : { status: DonationRegisterStatus }
- */
-donationRouter.patch(
-  '/donation-registrations/:id/status',
-  isStaffOrAdminValidator,
-  updateStatusDonationRegistrationValidator,
-  filterMiddleware<UpdateDonationRegistrationReqParams>(['status']),
-  wrapAsync(updateStatusDonationRegistrationController)
 )
 
 /**
@@ -122,10 +106,16 @@ donationRouter.get('/donation-processes/user', accessTokenValidator, wrapAsync(g
  * Body : { status: string, description: string, donation_date: Date, volume_collected: number }
  */
 donationRouter.patch(
-  '/donation-request-processes/:id',
+  '/donation-processes/:id',
   isStaffOrAdminValidator,
-  updateDonationRequestProcessValidator,
-  filterMiddleware<UpdateDonationProcessReqBody>(['status', 'description', 'donation_date', 'volume_collected']),
+  updateDonationProcessValidator,
+  filterMiddleware<UpdateDonationProcessReqBody>([
+    'status',
+    'description',
+    'donation_date',
+    'volume_collected',
+    'blood_group_id'
+  ]),
   wrapAsync(updateDonationProcessController)
 )
 

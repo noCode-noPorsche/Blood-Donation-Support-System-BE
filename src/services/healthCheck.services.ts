@@ -107,6 +107,24 @@ class HealthCheckService {
       }
     )
 
+    if (result) {
+      const userResult = await databaseService.users.findOne({
+        _id: new ObjectId(user_id)
+      })
+      if (userResult) {
+        await databaseService.users.findOneAndUpdate(
+          { _id: new ObjectId(userResult._id) },
+          {
+            $set: {
+              blood_group_id: payload.blood_group_id ? new ObjectId(payload.blood_group_id) : userResult.blood_group_id,
+              weight: payload.weight ? payload.weight : userResult.weight
+            },
+            $currentDate: { updated_at: true }
+          }
+        )
+      }
+    }
+
     if (payload.status === HealthCheckStatus.Rejected) {
       await databaseService.donationProcesses.updateOne(
         { health_check_id: new ObjectId(id) },

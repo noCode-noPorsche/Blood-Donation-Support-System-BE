@@ -95,7 +95,9 @@ export const DONATION_MESSAGES = {
   VOLUME_COLLECTED_MUST_BE_POSITIVE: 'Volume collected must be positive',
   DONATION_DATE_IS_INVALID: 'Donation date is invalid',
   DESCRIPTION_MUST_BE_A_STRING: 'Description must be a string',
-  DESCRIPTION_LENGTH_MUST_BE_LESS_THAN_500: 'Description length must be less than 500'
+  DESCRIPTION_LENGTH_MUST_BE_LESS_THAN_500: 'Description length must be less than 500',
+  BLOOD_DONATION_REQUEST_CANNOT_BE_APPROVED_IF_HEALTH_CHECK_RESULTS_ARE_NOT_SATISFACTORY:
+    'Blood donation request cannot be approved if health check results are not satisfactory'
 } as const
 
 export const HEALTH_CHECK_MESSAGES = {

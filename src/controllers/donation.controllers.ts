@@ -49,25 +49,6 @@ export const getDonationRegistrationByUserIdController = async (req: Request, re
   })
 }
 
-export const updateStatusDonationRegistrationController = async (
-  req: Request<UpdateDonationRegistrationReqParams, any, UpdateStatusDonationRegistrationReqBody>,
-  res: Response
-) => {
-  const { id } = req.params
-  const { status } = req.body
-  const updatedRegistration = await donationService.updateStatusDonationRegistration({ id, status })
-
-  if (!updatedRegistration) {
-    res.status(404).json({ message: DONATION_MESSAGES.DONATION_REGISTRATION_NOT_FOUND })
-    return
-  }
-
-  res.json({
-    message: DONATION_MESSAGES.UPDATE_DONATION_REGISTRATION_SUCCESS,
-    result: updatedRegistration
-  })
-}
-
 export const updateDonationRegistrationController = async (
   req: Request<UpdateDonationRegistrationReqParams, any, UpdateDonationRegistrationReqBody>,
   res: Response
@@ -126,10 +107,10 @@ export const updateDonationProcessController = async (
   res: Response
 ) => {
   const { id } = req.params
-  const { status, description, donation_date, volume_collected } = req.body
-  const updatedProcess = await donationService.updateDonationRequestProcess({
+  const { body } = req
+  const updatedProcess = await donationService.updateDonationProcess({
     id,
-    payload: { status, description, donation_date, volume_collected }
+    payload: body
   })
 
   if (!updatedProcess) {
