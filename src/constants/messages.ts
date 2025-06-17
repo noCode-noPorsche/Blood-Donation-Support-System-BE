@@ -96,7 +96,53 @@ export const DONATION_MESSAGES = {
   DONATION_DATE_IS_INVALID: 'Donation date is invalid',
   DESCRIPTION_MUST_BE_A_STRING: 'Description must be a string',
   DESCRIPTION_LENGTH_MUST_BE_LESS_THAN_500: 'Description length must be less than 500'
-}
+} as const
+
+export const HEALTH_CHECK_MESSAGES = {
+  GET_ALL_HEALTH_CHECKS_SUCCESS: 'Get all health checks success',
+  HEALTH_CHECK_NOT_FOUND: 'Health check not found',
+  HEALTH_CHECK_ALREADY_EXIST: 'Health check already exists',
+  HEALTH_CHECK_MUST_BE_A_STRING: 'Health check must be a string',
+  HEALTH_CHECK_IS_REQUIRED: 'Health check is required',
+  HEALTH_CHECK_IS_INVALID: 'Health check is invalid',
+  CREATE_HEALTH_CHECK_SUCCESS: 'Create health check success',
+  UPDATE_HEALTH_CHECK_SUCCESS: 'Update health check success',
+  DELETE_HEALTH_CHECK_SUCCESS: 'Delete health check success',
+  HEALTH_CHECK_ID_INVALID: 'Invalid health check ID',
+  HEALTH_CHECK_NAME_IS_REQUIRED: 'Health check name is required',
+  HEALTH_CHECK_NAME_MUST_BE_A_STRING: 'Health check name must be a string',
+  HEALTH_CHECK_NAME_LENGTH_MUST_BE_LESS_THAN_100: 'Health check name length must be less than 100',
+  HEALTH_CHECK_DESCRIPTION_MUST_BE_A_STRING: 'Health check description must be a string',
+  HEALTH_CHECK_DESCRIPTION_LENGTH_MUST_BE_LESS_THAN_500: 'Health check description length must be less than 500',
+  HEALTH_CHECK_STATUS_MUST_BE_A_STRING: 'Health check status must be a string',
+  HEALTH_CHECK_STATUS_IS_REQUIRED: 'Health check status is required',
+  HEALTH_CHECK_STATUS_MUST_BE_ONE_OF_THE_FOLLOWING_VALUES: 'Health check status must be one of the following values',
+  HEALTH_CHECK_STATUS_VALUES: ['pending', 'in_progress', 'completed', 'failed'],
+  GET_HEALTH_CHECK_BY_USER_ID_SUCCESS: 'Get health check by user ID success',
+  GET_HEALTH_CHECK_BY_USER_ID_NOT_FOUND: 'Health check by user ID not found',
+  WEIGHT_IS_REQUIRED: 'Weight is required',
+  WEIGHT_MUST_BE_A_NUMBER: 'Weight must be a number',
+  WEIGHT_MUST_BE_POSITIVE: 'Weight must be positive',
+  TEMPERATURE_IS_REQUIRED: 'Temperature is required',
+  TEMPERATURE_MUST_BE_POSITIVE: 'Temperature must be positive',
+  TEMPERATURE_MUST_BE_A_NUMBER: 'Temperature must be a number',
+  HEART_RATE_IS_REQUIRED: 'Heart rate is required',
+  HEART_RATE_MUST_BE_POSITIVE: 'Heart rate must be positive',
+  HEART_RATE_MUST_BE_A_NUMBER: 'Heart rate must be a number',
+  DIASTOLIC_BLOOD_PRESSURE_IS_REQUIRED: 'Diastolic blood pressure is required',
+  DIASTOLIC_BLOOD_PRESSURE_MUST_BE_POSITIVE: 'Diastolic blood pressure must be positive',
+  DIASTOLIC_BLOOD_PRESSURE_MUST_BE_A_NUMBER: 'Diastolic blood pressure must be a number',
+  SYSTOLIC_BLOOD_PRESSURE_IS_REQUIRED: 'Systolic blood pressure is required',
+  SYSTOLIC_BLOOD_PRESSURE_MUST_BE_POSITIVE: 'Systolic blood pressure must be positive',
+  SYSTOLIC_BLOOD_PRESSURE_MUST_BE_A_NUMBER: 'Systolic blood pressure must be a number',
+  HEMOGLOBIN_IS_REQUIRED: 'Hemoglobin is required',
+  HEMOGLOBIN_MUST_BE_POSITIVE: 'Hemoglobin must be positive',
+  HEMOGLOBIN_MUST_BE_A_NUMBER: 'Hemoglobin must be a number',
+  DESCRIPTION_MUST_BE_A_STRING: 'Description must be a string',
+  DESCRIPTION_LENGTH_MUST_BE_LESS_THAN_500: 'Description length must be less than 500',
+  UNDERLYING_CONDITIONS_MUST_BE_AN_ARRAY: 'Underlying health conditions must be an array',
+  UNDERLYING_CONDITIONS_INVALID_VALUES: 'Underlying health conditions must contain valid values'
+} as const
 
 export const BLOG_MESSAGES = {
   CREATE_BLOG_SUCCESS: 'Create blog success',
@@ -117,4 +163,4 @@ export const BLOG_MESSAGES = {
   UPDATE_BLOG_SUCCESS: 'Update blog success',
   DELETE_BLOG_SUCCESS: 'Delete blog success',
   IMAGE_MUST_BE_A_URL: 'Image must be a URL'
-}
+} as const

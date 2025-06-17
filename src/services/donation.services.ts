@@ -7,40 +7,70 @@ import {
   UpdateDonationRegistrationReqBody,
   UpdateDonationRequestProcessReqBody
 } from '~/models/requests/Donation.requests'
-import { DonationRegisterStatus, DonationRequestProcessStatus } from '~/constants/enum'
+import { DonationRegisterStatus, DonationRequestProcessStatus, HealthCheckStatus } from '~/constants/enum'
+import HealthCheck from '~/models/schemas/HealthCheck'
 
 class DonationService {
   async registerDonation({ user_id, payload }: { user_id: string; payload: RegisterDonationReqBody }) {
     const donationRequestProcessId = new ObjectId()
+    const healthCheckId = new ObjectId()
+
+    const resultUser = await databaseService.users.findOne({ _id: new ObjectId(user_id) })
+
     const newDonationRegister = new DonationRegister({
       ...payload,
       user_id: new ObjectId(user_id),
-      status: DonationRegisterStatus.Pending,
+      status: DonationRegisterStatus.Approved,
       donation_request_process_id: donationRequestProcessId,
-      blood_group_id: new ObjectId(payload.blood_group_id),
-      blood_component_id: new ObjectId(payload.blood_component_id),
+      health_check_id: healthCheckId,
+      blood_group_id: new ObjectId(payload.blood_group_id ? payload.blood_group_id : resultUser?.blood_group_id),
+      blood_component_id: payload.blood_component_id
+        ? new ObjectId(payload.blood_component_id)
+        : ('' as unknown as ObjectId),
       start_date_donation: new Date(payload.start_date_donation),
-      created_date: new Date(),
-      updated_date: new Date()
+      created_at: new Date(),
+      updated_at: new Date()
     })
-
     const resultRegistration = await databaseService.donationRegistrations.insertOne(newDonationRegister)
 
+    const newHealthCheck = new HealthCheck({
+      _id: healthCheckId,
+      user_id: new ObjectId(user_id),
+      blood_group_id: new ObjectId(resultUser?.blood_group_id),
+      donation_register_id: resultRegistration.insertedId,
+      donation_register_process_id: donationRequestProcessId,
+      weight: 0,
+      temperature: 0,
+      heart_rate: 0,
+      diastolic_blood_pressure: 0,
+      systolic_blood_pressure: 0,
+      underlying_health_condition: [],
+      hemoglobin: 0,
+      description: '',
+      status: HealthCheckStatus.Pending,
+      created_at: new Date(),
+      updated_at: new Date()
+    })
+    const resultHealthCheck = await databaseService.healthChecks.insertOne(newHealthCheck)
+
     const newDonationRequestProcess = new DonationRequestProcess({
+      _id: donationRequestProcessId,
       user_id: new ObjectId(user_id),
       donation_registration_id: resultRegistration.insertedId,
+      health_check_id: healthCheckId,
       volume_collected: 0,
-      _id: donationRequestProcessId,
+      description: '',
       status: DonationRequestProcessStatus.Pending,
       donation_date: new Date(),
-      created_date: new Date(),
-      updated_date: new Date()
+      created_at: new Date(),
+      updated_at: new Date()
     })
-
     const resultProcess = await databaseService.donationRequestProcess.insertOne(newDonationRequestProcess)
+
     return {
       donationRegistration: resultRegistration,
-      donationRequestProcess: resultProcess
+      donationRequestProcess: resultProcess,
+      healthCheck: resultHealthCheck
     }
   }
 
@@ -146,7 +176,7 @@ class DonationService {
   async updateStatusDonationRegistration({ id, status }: { id: string; status: DonationRegisterStatus }) {
     const result = await databaseService.donationRegistrations.findOneAndUpdate(
       { _id: new ObjectId(id) },
-      { $set: { status }, $currentDate: { updated_date: true } },
+      { $set: { status }, $currentDate: { updated_at: true } },
       { returnDocument: 'after' }
     )
     return result
@@ -162,7 +192,7 @@ class DonationService {
           blood_component_id: new ObjectId(payload.blood_component_id),
           start_date_donation: new Date(payload.start_date_donation)
         },
-        $currentDate: { updated_date: true }
+        $currentDate: { updated_at: true }
       },
       { returnDocument: 'after' }
     )
@@ -250,7 +280,7 @@ class DonationService {
   async updateStatusDonationRequestProcess({ id, status }: { id: string; status: DonationRequestProcessStatus }) {
     const result = await databaseService.donationRequestProcess.findOneAndUpdate(
       { _id: new ObjectId(id) },
-      { $set: { status }, $currentDate: { updated_date: true } },
+      { $set: { status }, $currentDate: { updated_at: true } },
       { returnDocument: 'after' }
     )
     return result
@@ -265,7 +295,7 @@ class DonationService {
           donation_date: payload.donation_date || new Date(),
           volume_collected: Number(payload.volume_collected)
         },
-        $currentDate: { updated_date: true }
+        $currentDate: { updated_at: true }
       },
       { returnDocument: 'after' }
     )

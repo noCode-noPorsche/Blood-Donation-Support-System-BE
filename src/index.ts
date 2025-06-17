@@ -11,6 +11,7 @@ import swaggerUi from 'swagger-ui-express'
 import swaggerJsdoc from 'swagger-jsdoc'
 import donationRouter from './routes/donation.routes'
 import blogRouter from './routes/blog.routes'
+import healthCheckRouter from './routes/healthCheck.routes'
 
 const file = fs.readFileSync(path.resolve('BE-swagger.yaml'), 'utf8')
 const swaggerDocument = YAML.parse(file)
@@ -51,6 +52,7 @@ app.get('/', (req, res) => {
 app.use('/users', usersRouter)
 app.use('/bloods', bloodRouter)
 app.use('/donations', donationRouter)
+app.use('/health-check', healthCheckRouter)
 app.use('/blogs', blogRouter)
 app.use(defaultErrorHandler)
 

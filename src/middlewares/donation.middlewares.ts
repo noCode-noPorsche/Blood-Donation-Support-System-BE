@@ -7,12 +7,13 @@ import bloodService from '~/services/blood.services'
 import { validate } from '~/utils/validation'
 
 const bloodGroupSchema: ParamSchema = {
-  notEmpty: {
-    errorMessage: BLOOD_MESSAGES.BLOOD_GROUP_IS_REQUIRED
-  },
-  isString: {
-    errorMessage: BLOOD_MESSAGES.BLOOD_GROUP_MUST_BE_A_STRING
-  }
+  // notEmpty: {
+  //   errorMessage: BLOOD_MESSAGES.BLOOD_GROUP_IS_REQUIRED
+  // },
+  notEmpty: undefined
+  // isString: {
+  //   errorMessage: BLOOD_MESSAGES.BLOOD_GROUP_MUST_BE_A_STRING
+  // }
   // isIn: {
   //   options: [Object.values(BloodGroupEnum)],
   //   errorMessage: BLOOD_MESSAGES.BLOOD_GROUP_IS_INVALID
@@ -20,17 +21,19 @@ const bloodGroupSchema: ParamSchema = {
 }
 
 const bloodComponentSchema: ParamSchema = {
-  notEmpty: {
-    errorMessage: BLOOD_MESSAGES.BLOOD_COMPONENT_IS_REQUIRED
-  },
-  isString: {
-    errorMessage: BLOOD_MESSAGES.BLOOD_COMPONENT_MUST_BE_A_STRING
-  }
+  // notEmpty: {
+  //   errorMessage: BLOOD_MESSAGES.BLOOD_COMPONENT_IS_REQUIRED
+  // },
+  notEmpty: undefined
+  // isString: {
+  //   errorMessage: BLOOD_MESSAGES.BLOOD_COMPONENT_MUST_BE_A_STRING
+  // }
   // isIn: {
   //   options: [Object.values(BloodComponentEnum)],
   //   errorMessage: BLOOD_MESSAGES.BLOOD_COMPONENT_IS_INVALID
   // }
 }
+
 export const createDonationValidator = validate(
   checkSchema(
     {
