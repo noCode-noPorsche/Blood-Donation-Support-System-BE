@@ -1,6 +1,9 @@
 import { ObjectId } from 'mongodb'
 import databaseService from './database.services'
 import { UpdateHealthCheckReqBody } from '~/models/requests/HealthCheck.requests'
+import { ErrorWithStatus } from '~/models/Error'
+import { HEALTH_CHECK_MESSAGES } from '~/constants/messages'
+import { DonationProcessStatus, HealthCheckStatus } from '~/constants/enum'
 
 class HealthCheckService {
   async getAllHealthChecks() {
@@ -103,6 +106,20 @@ class HealthCheckService {
         returnDocument: 'after'
       }
     )
+
+    if (payload.status === HealthCheckStatus.Rejected) {
+      await databaseService.donationProcesses.updateOne(
+        { health_check_id: new ObjectId(id) },
+        {
+          $set: { status: DonationProcessStatus.Rejected },
+          $currentDate: { updated_at: true }
+        }
+      )
+    }
+
+    if (!result) {
+      throw new ErrorWithStatus({ message: HEALTH_CHECK_MESSAGES.HEALTH_CHECK_NOT_FOUND, status: 400 })
+    }
     return result
   }
 }

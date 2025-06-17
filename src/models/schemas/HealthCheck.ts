@@ -6,7 +6,7 @@ interface HealthCheckType {
   user_id: ObjectId
   blood_group_id: ObjectId
   donation_register_id: ObjectId
-  donation_register_process_id: ObjectId
+  donation_process_id: ObjectId
   weight?: number
   temperature?: number
   heart_rate?: number
@@ -25,7 +25,7 @@ export default class HealthCheck {
   user_id: ObjectId
   blood_group_id: ObjectId
   donation_register_id: ObjectId
-  donation_register_process_id: ObjectId
+  donation_process_id: ObjectId
   weight?: number
   temperature?: number
   heart_rate?: number
@@ -43,7 +43,7 @@ export default class HealthCheck {
     this.user_id = healthCheck.user_id
     this.blood_group_id = healthCheck.blood_group_id
     this.donation_register_id = healthCheck.donation_register_id
-    this.donation_register_process_id = healthCheck.donation_register_process_id || new ObjectId()
+    this.donation_process_id = healthCheck.donation_process_id || new ObjectId()
     this.weight = healthCheck.weight || 0
     this.temperature = healthCheck.temperature || 0
     this.heart_rate = healthCheck.heart_rate || 0

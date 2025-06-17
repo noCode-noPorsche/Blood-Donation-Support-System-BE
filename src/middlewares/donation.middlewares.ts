@@ -1,5 +1,5 @@
 import { checkSchema, ParamSchema } from 'express-validator'
-import { DonationRegisterStatus, DonationRequestProcessStatus } from '~/constants/enum'
+import { DonationRegisterStatus, DonationProcessStatus } from '~/constants/enum'
 import { HTTP_STATUS } from '~/constants/httpStatus'
 import { BLOOD_MESSAGES, DONATION_MESSAGES } from '~/constants/messages'
 import { ErrorWithStatus } from '~/models/Error'
@@ -119,26 +119,6 @@ export const updateDonationRegistrationValidator = validate(
   )
 )
 
-export const updateStatusDonationRequestProcessValidator = validate(
-  checkSchema(
-    {
-      status: {
-        notEmpty: {
-          errorMessage: DONATION_MESSAGES.STATUS_IS_REQUIRED
-        },
-        isString: {
-          errorMessage: DONATION_MESSAGES.STATUS_MUST_BE_A_STRING
-        },
-        isIn: {
-          options: [Object.values(DonationRequestProcessStatus)],
-          errorMessage: DONATION_MESSAGES.STATUS_IS_INVALID
-        }
-      }
-    },
-    ['body']
-  )
-)
-
 // export const updateDonationStatusValidator = validate(
 //   checkSchema(
 //     {
@@ -170,7 +150,7 @@ export const updateDonationRequestProcessValidator = validate(
           errorMessage: DONATION_MESSAGES.STATUS_MUST_BE_A_STRING
         },
         isIn: {
-          options: [Object.values(DonationRequestProcessStatus)],
+          options: [Object.values(DonationProcessStatus)],
           errorMessage: DONATION_MESSAGES.STATUS_IS_INVALID
         }
       },

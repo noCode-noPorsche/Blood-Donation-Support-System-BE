@@ -2,30 +2,23 @@ import express from 'express'
 import {
   createDonationRegistrationController,
   deleteDonationRegistrationController,
+  getAllDonationProcessesController,
   getAllDonationRegistrationsController,
-  getAllDonationRequestProcessesController,
+  getDonationProcessesController,
   getDonationRegistrationByUserIdController,
-  getDonationRequestProcessesController,
+  updateDonationProcessController,
   updateDonationRegistrationController,
-  updateDonationRequestProcessController,
-  updateStatusDonationRegistrationController,
-  updateStatusDonationRequestProcessController
-  // updateDonationRequestProcessController
+  updateStatusDonationRegistrationController
 } from '~/controllers/donation.controllers'
 import { filterMiddleware } from '~/middlewares/common.middlewares'
 import {
   createDonationValidator,
   updateDonationRegistrationValidator,
   updateDonationRequestProcessValidator,
-  updateStatusDonationRegistrationValidator,
-  updateStatusDonationRequestProcessValidator
+  updateStatusDonationRegistrationValidator
 } from '~/middlewares/donation.middlewares'
 import { accessTokenValidator, isAdminValidator, isStaffOrAdminValidator } from '~/middlewares/user.middlewares'
-import {
-  UpdateDonationRegistrationReqParams,
-  UpdateDonationRequestProcessReqBody,
-  UpdateStatusDonationRequestProcessReqBody
-} from '~/models/requests/Donation.requests'
+import { UpdateDonationProcessReqBody, UpdateDonationRegistrationReqParams } from '~/models/requests/Donation.requests'
 
 import { wrapAsync } from '~/utils/handler'
 
@@ -54,11 +47,11 @@ donationRouter.get('/donation-registrations', isStaffOrAdminValidator, wrapAsync
 
 /**
  * Description. Get donation registration by user id
- * Path: /donation-registrations/:user_id
+ * Path: /donation-registrations/user
  * METHOD: GET
  */
 donationRouter.get(
-  '/donation-registrations/:user_id',
+  '/donation-registrations/user',
   accessTokenValidator,
   wrapAsync(getDonationRegistrationByUserIdController)
 )
@@ -113,36 +106,14 @@ donationRouter.delete(
  * Path: /donation-request-processes
  * METHOD: GET
  */
-donationRouter.get(
-  '/donation-request-processes',
-  isStaffOrAdminValidator,
-  wrapAsync(getAllDonationRequestProcessesController)
-)
+donationRouter.get('/donation-processes', isStaffOrAdminValidator, wrapAsync(getAllDonationProcessesController))
 
 /**
- * Description. Get donation request process by user id
- * Path: /donation-request-processes/:user_id
+ * Description. Get donation process by user id
+ * Path: /donation-processes/user
  * METHOD: GET
  */
-donationRouter.get(
-  '/donation-request-processes/:user_id',
-  accessTokenValidator,
-  wrapAsync(getDonationRequestProcessesController)
-)
-
-/**
- * Description. Update status a donation request process for staff or admin
- * Path: /donation-request-processes/:id/status
- * METHOD: PATCH
- * Body : { status: DonationRequestProcessStatus }
- */
-donationRouter.patch(
-  '/donation-request-processes/:id/status',
-  isStaffOrAdminValidator,
-  updateStatusDonationRequestProcessValidator,
-  filterMiddleware<UpdateStatusDonationRequestProcessReqBody>(['status']),
-  wrapAsync(updateStatusDonationRequestProcessController)
-)
+donationRouter.get('/donation-processes/user', accessTokenValidator, wrapAsync(getDonationProcessesController))
 
 /**
  * Description. Update a donation request process for staff or admin
@@ -154,8 +125,8 @@ donationRouter.patch(
   '/donation-request-processes/:id',
   isStaffOrAdminValidator,
   updateDonationRequestProcessValidator,
-  filterMiddleware<UpdateDonationRequestProcessReqBody>(['status', 'description', 'donation_date', 'volume_collected']),
-  wrapAsync(updateDonationRequestProcessController)
+  filterMiddleware<UpdateDonationProcessReqBody>(['status', 'description', 'donation_date', 'volume_collected']),
+  wrapAsync(updateDonationProcessController)
 )
 
 //not use

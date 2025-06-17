@@ -41,7 +41,7 @@ export enum DonationRegisterStatus {
   Rejected = 'Rejected'
 }
 
-export enum DonationRequestProcessStatus {
+export enum DonationProcessStatus {
   Pending = 'Pending',
   Approved = 'Approved',
   Rejected = 'Rejected'

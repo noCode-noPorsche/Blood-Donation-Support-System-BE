@@ -3,8 +3,8 @@ info:
   title: Blood Donation Support System - OpenAPI 1.0
   version: v1
 servers:
-  - url: http://localhost:8080
   - url: '/'
+  - url: http://localhost:8080
   - url: https://be-t8i8.onrender.com
 tags:
   - name: Users
@@ -13,8 +13,8 @@ tags:
     description: Operations about blood
   - name: Donation Registrations
     description: Operations about donation registrations
-  - name: Donation Request Processes
-    description: Operations about donation request processes
+  - name: Donation Processes
+    description: Operations about donation processes
   - name: Blogs
     description: Operations about blogs
 paths:
@@ -329,20 +329,13 @@ paths:
           description: UnAuthorization
       security:
         - BearerAuth: []
-  /donations/donation-registrations/{user_id}:
+  /donations/donation-registrations/user:
     get:
       tags:
         - Donation Registrations
-      summary: Get Donation Registration by User ID
-      description: Get donation registration by user id
+      summary: Get Donation Registration by User ID Now
+      description: Get donation registration by user id now
       operationId: getDonationRegistrationByUserId
-      parameters:
-        - in: path
-          name: user_id
-          required: true
-          schema:
-            type: string
-            format: MongoId
       responses:
         default:
           description: Get donation registration by user id success
@@ -364,10 +357,11 @@ paths:
       parameters:
         - in: path
           name: id
+          description: Mongo ObjectId (24 hex characters)
           required: true
           schema:
             type: string
-            format: MongoId
+            pattern: '^[a-fA-F0-9]{24}$'
       requestBody:
         description: Information update status donation registration
         content:
@@ -418,90 +412,52 @@ paths:
           description: UnAuthorization
       security:
         - BearerAuth: []
-  /donations/donation-request-processes:
+  /donations/donation-processes:
     get:
       tags:
-        - Donation Request Processes
-      summary: Get All Donation Request Processes for Staff or Admin
-      description: Get all donation request processes for staff or admin
-      operationId: getAllDonationRequestProcesses
+        - Donation Processes
+      summary: Get All Donation Processes for Staff or Admin
+      description: Get all donation processes for staff or admin
+      operationId: getAllDonationProcesses
       responses:
         default:
-          description: Get all donation request processes success
+          description: Get all donation processes success
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/DonationRequestProcess'
+                  $ref: '#/components/schemas/DonationProcess'
         '401':
           description: UnAuthorization
       security:
         - BearerAuth: []
-  /donations/donation-request-processes/{user_id}:
+  /donations/donation-processes/user:
     get:
       tags:
-        - Donation Request Processes
-      summary: Get Donation Request Processes by User ID
-      description: Get donation request processes by user id
-      operationId: getDonationRequestProcessesByUserId
-      parameters:
-        - in: path
-          name: user_id
-          required: true
-          schema:
-            type: string
-            format: MongoId
+        - Donation Processes
+      summary: Get Donation Processes by User ID Now
+      description: Get donation processes by user id now
+      operationId: getDonationProcessesByUserId
+
       responses:
         default:
-          description: Get donation request processes by user id success
+          description: Get donation processes by user id success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DonationRequestProcess'
+                $ref: '#/components/schemas/DonationProcess'
         '401':
           description: UnAuthorization
       security:
         - BearerAuth: []
-  /donations/donation-request-processes/{id}/status:
+  /donations/donation-processes/{id}:
     patch:
       tags:
-        - Donation Request Processes
-      summary: Update Status Donation Request Processes
-      description: Update status donation request processes
-      operationId: updateStatusDonationRequestProcesses
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
-            format: MongoId
-      requestBody:
-        description: Information update status donation request processes
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UpdateStatusDonationRequestProcessBody'
-        required: true
-      responses:
-        default:
-          description: Update status donation request processes success
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DonationRequestProcess'
-        '401':
-          description: UnAuthorization
-      security:
-        - BearerAuth: []
-  /donations/donation-request-processes/{id}:
-    patch:
-      tags:
-        - Donation Request Processes
-      summary: Update Donation Request Processes
-      description: Update donation request processes
-      operationId: updateDonationRequestProcesses
+        - Donation Processes
+      summary: Update Donation Processes
+      description: Update donation processes
+      operationId: updateDonationProcesses
       parameters:
         - in: path
           name: id
@@ -510,19 +466,19 @@ paths:
             format: MongoId
           required: true
       requestBody:
-        description: Information update donation request processes
+        description: Information update donation processes
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DonationRequestProcessReqBody'
+              $ref: '#/components/schemas/DonationProcessReqBody'
         required: true
       responses:
         default:
-          description: Update donation request processes success
+          description: Update donation processes success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DonationRequestProcess'
+                $ref: '#/components/schemas/DonationProcess'
         '401':
           description: UnAuthorization
       security:
@@ -675,8 +631,6 @@ components:
         date_of_birth:
           type: string
           example: 2025-05-21T17:48:12.171Z
-        role:
-          $ref: '#/components/schemas/UserRole'
         gender:
           $ref: '#/components/schemas/UserGender'
         weight:
@@ -691,19 +645,6 @@ components:
         blood_group_id:
           type: string
           example: ''
-        number_of_donation:
-          type: integer
-          example: 0
-        number_of_request:
-          type: integer
-          example: 0
-        created_at:
-          type: string
-          format: date-time
-          example: 2025-05-21T17:48:12.171Z
-        updated_at:
-          type: string
-          format: date-time
     ChangePasswordBody:
       type: object
       properties:
@@ -900,8 +841,6 @@ components:
           type: string
           format: date-time
           example: 2025-05-21T17:48:12.171Z
-        status:
-          $ref: '#/components/schemas/DonationRegistrationStatus'
     DonationRegistration:
       type: object
       properties:
@@ -955,7 +894,7 @@ components:
           type: string
           format: date-time
           example: 2025-05-21T17:48:12.171Z
-    DonationRequestProcess:
+    DonationProcess:
       type: object
       properties:
         _id:
@@ -990,7 +929,7 @@ components:
         description:
           type: string
           example: ''
-    DonationRequestProcessReqBody:
+    DonationProcessReqBody:
       type: object
       properties:
         status:
@@ -1005,7 +944,7 @@ components:
         volume_collected:
           type: number
           example: 0
-    UpdateStatusDonationRequestProcessBody:
+    UpdateStatusDonationProcessBody:
       type: object
       properties:
         status:

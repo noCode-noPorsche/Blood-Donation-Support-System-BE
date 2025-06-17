@@ -1,13 +1,13 @@
 import { ObjectId } from 'mongodb'
 import DonationRegister from '~/models/schemas/DonationRegister.schemas'
-import DonationRequestProcess from '~/models/schemas/DonationRequestProcess.schemas'
+import DonationRequestProcess from '~/models/schemas/DonationProcess.schemas'
 import databaseService from './database.services'
 import {
   RegisterDonationReqBody,
-  UpdateDonationRegistrationReqBody,
-  UpdateDonationRequestProcessReqBody
+  UpdateDonationProcessReqBody,
+  UpdateDonationRegistrationReqBody
 } from '~/models/requests/Donation.requests'
-import { DonationRegisterStatus, DonationRequestProcessStatus, HealthCheckStatus } from '~/constants/enum'
+import { DonationRegisterStatus, DonationProcessStatus, HealthCheckStatus } from '~/constants/enum'
 import HealthCheck from '~/models/schemas/HealthCheck'
 
 class DonationService {
@@ -38,7 +38,7 @@ class DonationService {
       user_id: new ObjectId(user_id),
       blood_group_id: new ObjectId(resultUser?.blood_group_id),
       donation_register_id: resultRegistration.insertedId,
-      donation_register_process_id: donationRequestProcessId,
+      donation_process_id: donationRequestProcessId,
       weight: 0,
       temperature: 0,
       heart_rate: 0,
@@ -60,12 +60,12 @@ class DonationService {
       health_check_id: healthCheckId,
       volume_collected: 0,
       description: '',
-      status: DonationRequestProcessStatus.Pending,
+      status: DonationProcessStatus.Pending,
       donation_date: new Date(),
       created_at: new Date(),
       updated_at: new Date()
     })
-    const resultProcess = await databaseService.donationRequestProcess.insertOne(newDonationRequestProcess)
+    const resultProcess = await databaseService.donationProcesses.insertOne(newDonationRequestProcess)
 
     return {
       donationRegistration: resultRegistration,
@@ -199,8 +199,8 @@ class DonationService {
     return result
   }
 
-  async getAllDonationRequestProcesses() {
-    const donationRequestProcesses = await databaseService.donationRequestProcess
+  async getAllDonationProcesses() {
+    const donationProcesses = await databaseService.donationProcesses
       .aggregate([
         {
           $lookup: {
@@ -242,11 +242,11 @@ class DonationService {
         }
       ])
       .toArray()
-    return donationRequestProcesses
+    return donationProcesses
   }
 
-  async getDonationRequestProcessByUserId(user_id: string) {
-    const donationRequestProcesses = await databaseService.donationRequestProcess
+  async getDonationProcessByUserId(user_id: string) {
+    const donationProcesses = await databaseService.donationProcesses
       .aggregate([
         {
           $match: { user_id: new ObjectId(user_id) }
@@ -274,20 +274,11 @@ class DonationService {
         }
       ])
       .toArray()
-    return donationRequestProcesses
+    return donationProcesses
   }
 
-  async updateStatusDonationRequestProcess({ id, status }: { id: string; status: DonationRequestProcessStatus }) {
-    const result = await databaseService.donationRequestProcess.findOneAndUpdate(
-      { _id: new ObjectId(id) },
-      { $set: { status }, $currentDate: { updated_at: true } },
-      { returnDocument: 'after' }
-    )
-    return result
-  }
-
-  async updateDonationRequestProcess({ id, payload }: { id: string; payload: UpdateDonationRequestProcessReqBody }) {
-    const result = await databaseService.donationRequestProcess.findOneAndUpdate(
+  async updateDonationRequestProcess({ id, payload }: { id: string; payload: UpdateDonationProcessReqBody }) {
+    const result = await databaseService.donationProcesses.findOneAndUpdate(
       { _id: new ObjectId(id) },
       {
         $set: {
@@ -316,18 +307,20 @@ class DonationService {
     }
     return new DonationRegister(deletedRegistration)
   }
-  async getDonationRequestProcesses() {
-    const donationRequestProcesses = await databaseService.donationRequestProcess.find({}).toArray()
-    return donationRequestProcesses.map((process: any) => new DonationRequestProcess(process))
+
+  async getDonationProcesses() {
+    const donationProcesses = await databaseService.donationProcesses.find({}).toArray()
+    return donationProcesses.map((process: any) => new DonationRequestProcess(process))
   }
-  async getDonationRequestProcess(donationRequestProcessId: string) {
+
+  async getDonationProcess(donationProcessId: string) {
     let parsedDonationRequestProcessId: ObjectId
     try {
-      parsedDonationRequestProcessId = new ObjectId(donationRequestProcessId)
+      parsedDonationRequestProcessId = new ObjectId(donationProcessId)
     } catch (err) {
       return false
     }
-    const donationRequestProcess = await databaseService.donationRequestProcess.findOne({
+    const donationRequestProcess = await databaseService.donationProcesses.findOne({
       _id: parsedDonationRequestProcessId
     })
     if (!donationRequestProcess) {
@@ -336,14 +329,14 @@ class DonationService {
     return new DonationRequestProcess(donationRequestProcess)
   }
 
-  async deleteDonationRequestProcess(id: string) {
+  async deleteDonationProcess(id: string) {
     let parsedId: ObjectId
     try {
       parsedId = new ObjectId(id)
     } catch (err) {
       return false
     }
-    const deletedProcess = await databaseService.donationRequestProcess.findOneAndDelete({ _id: parsedId })
+    const deletedProcess = await databaseService.donationProcesses.findOneAndDelete({ _id: parsedId })
     if (!deletedProcess) {
       return null
     }
