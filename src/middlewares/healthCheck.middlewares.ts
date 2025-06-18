@@ -1,5 +1,5 @@
 import { checkSchema, ParamSchema } from 'express-validator'
-import { HealthCheckStatus, UnderlyingHealthCondition } from '~/constants/enum'
+import { BloodGroupEnum, HealthCheckStatus, UnderlyingHealthCondition } from '~/constants/enum'
 import { BLOOD_MESSAGES, HEALTH_CHECK_MESSAGES } from '~/constants/messages'
 import { validate } from '~/utils/validation'
 
@@ -10,10 +10,6 @@ const bloodGroupSchema: ParamSchema = {
   isString: {
     errorMessage: BLOOD_MESSAGES.BLOOD_GROUP_MUST_BE_A_STRING
   }
-  // isIn: {
-  //   options: [Object.values(BloodGroupEnum)],
-  //   errorMessage: BLOOD_MESSAGES.BLOOD_GROUP_IS_INVALID
-  // }
 }
 
 export const updateHealthCheckValidator = validate(

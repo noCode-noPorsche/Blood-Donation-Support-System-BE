@@ -97,11 +97,15 @@ class HealthCheckService {
       isRejectedDueToWeight = true
     }
 
+    console.log('first, ', resultUser?.blood_group_id)
+
     const result = await databaseService.healthChecks.findOneAndUpdate(
       { _id: new ObjectId(id) },
       {
         $set: {
-          blood_group_id: payload.blood_group_id ? new ObjectId(payload.blood_group_id) : resultUser?.blood_group_id,
+          blood_group_id: payload.blood_group_id
+            ? new ObjectId(payload.blood_group_id)
+            : new ObjectId(resultUser?.blood_group_id),
           weight: finalWeight,
           temperature: payload.temperature,
           heart_rate: payload.heart_rate,

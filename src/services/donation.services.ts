@@ -7,10 +7,17 @@ import {
   UpdateDonationProcessReqBody,
   UpdateDonationRegistrationReqBody
 } from '~/models/requests/Donation.requests'
-import { DonationRegisterStatus, DonationProcessStatus, HealthCheckStatus } from '~/constants/enum'
+import {
+  DonationRegisterStatus,
+  DonationProcessStatus,
+  HealthCheckStatus,
+  BloodUnitStatus,
+  BloodComponentEnum
+} from '~/constants/enum'
 import HealthCheck from '~/models/schemas/HealthCheck'
 import { ErrorWithStatus } from '~/models/Error'
 import { DONATION_MESSAGES } from '~/constants/messages'
+import BloodUnit from '~/models/schemas/BloodUnit.schemas'
 
 class DonationService {
   async registerDonation({ user_id, payload }: { user_id: string; payload: RegisterDonationReqBody }) {
@@ -271,7 +278,15 @@ class DonationService {
     return donationProcesses
   }
 
-  async updateDonationProcess({ id, payload }: { id: string; payload: UpdateDonationProcessReqBody }) {
+  async updateDonationProcess({
+    id,
+    payload,
+    user_id
+  }: {
+    id: string
+    payload: UpdateDonationProcessReqBody
+    user_id: string
+  }) {
     const donationProcessResult = await databaseService.donationProcesses.findOne({
       _id: new ObjectId(id)
     })
@@ -309,6 +324,42 @@ class DonationService {
       },
       { returnDocument: 'after' }
     )
+
+    if (result?.status === DonationProcessStatus.Approved) {
+      const now = new Date()
+      const bloodComponentDocs = await databaseService.bloodComponents
+        .find({
+          name: { $in: [BloodComponentEnum.RedBloodCells, BloodComponentEnum.Platelets, BloodComponentEnum.Plasma] }
+        })
+        .toArray()
+
+      const componentMap = bloodComponentDocs.reduce(
+        (acc, comp) => {
+          acc[comp.name] = comp._id
+          return acc
+        },
+        {} as Record<string, ObjectId>
+      )
+
+      const bloodUnits = [
+        BloodComponentEnum.RedBloodCells,
+        BloodComponentEnum.Platelets,
+        BloodComponentEnum.Plasma
+      ].map((name) => {
+        return new BloodUnit({
+          donation_process_id: new ObjectId(result._id),
+          request_process_id: null,
+          blood_group_id: result.blood_group_id,
+          blood_component_id: componentMap[name],
+          update_by: new ObjectId(user_id),
+          status: BloodUnitStatus.Available,
+          volume: 0
+          // expired_at: new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)
+        })
+      })
+
+      await databaseService.bloodUnits.insertMany(bloodUnits)
+    }
 
     if (result) {
       const userResult = await databaseService.users.findOne({

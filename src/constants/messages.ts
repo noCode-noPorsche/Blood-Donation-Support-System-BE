@@ -62,7 +62,17 @@ export const BLOOD_MESSAGES = {
   BLOOD_COMPONENT_ALREADY_EXIST: 'Blood component already exists',
   BLOOD_COMPONENT_MUST_BE_A_STRING: 'Blood component must be a string',
   BLOOD_COMPONENT_IS_REQUIRED: 'Blood component is required',
-  BLOOD_COMPONENT_IS_INVALID: 'Blood component is invalid'
+  BLOOD_COMPONENT_IS_INVALID: 'Blood component is invalid',
+  VOLUME_IS_REQUIRED: 'Volume is required',
+  VOLUME_MUST_BE_A_NUMBER: 'Volume must be a number',
+  VOLUME_MUST_BE_POSITIVE: 'Volume must be positive',
+  GET_BLOOD_UNITS_SUCCESS: 'Get blood units success',
+  GET_BLOOD_UNITS_FAIL: 'Get blood units fail',
+  UPDATE_BLOOD_UNITS_SUCCESS: 'Update blood units success',
+  UPDATE_BLOOD_UNITS_FAIL: 'Update blood units fail',
+  BLOOD_UNIT_STATUS_IS_REQUIRED: 'Blood unit status is required',
+  BLOOD_UNIT_STATUS_MUST_BE_A_STRING: 'Blood unit status status must be a string',
+  BLOOD_UNIT_STATUS_MUST_BE_ONE_OF_THE_FOLLOWING_VALUES: 'Blood unit status must be one of the followings values'
 } as const
 
 export const DONATION_MESSAGES = {
@@ -76,7 +86,7 @@ export const DONATION_MESSAGES = {
   UPDATE_DONATION_REGISTRATION_SUCCESS: 'Update donation registration success',
   DELETE_DONATION_REGISTRATION_SUCCESS: 'Delete donation registration success',
   DONATION_REGISTRATION_NOT_FOUND: 'Donation registration not found',
-  DONATION_REQUEST_PROCESS_NOT_FOUND: 'Donation request process not found',
+  DONATION_PROCESS_NOT_FOUND: 'Donation process not found',
   DONATION_REGISTRATION_ID_INVALID: 'Invalid donation registration ID',
   GET_DONATION_REQUEST_PROCESS_SUCCESS: 'Get donation requests process success',
   DONATION_REQUEST_PROCESS_ID_INVALID: 'Invalid donation request process ID',

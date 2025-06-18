@@ -107,14 +107,16 @@ export const updateDonationProcessController = async (
   res: Response
 ) => {
   const { id } = req.params
+  const { user_id } = req.decode_authorization as TokenPayload
   const { body } = req
   const updatedProcess = await donationService.updateDonationProcess({
     id,
-    payload: body
+    payload: body,
+    user_id
   })
 
   if (!updatedProcess) {
-    res.status(404).json({ message: DONATION_MESSAGES.DONATION_REQUEST_PROCESS_NOT_FOUND })
+    res.status(404).json({ message: DONATION_MESSAGES.DONATION_PROCESS_NOT_FOUND })
     return
   }
 
@@ -130,7 +132,7 @@ export const getDonationProcessesController = async (req: Request, res: Response
   const donationProcess = await donationService.getDonationProcessByUserId(user_id)
 
   if (donationProcess.length === 0) {
-    res.status(404).json({ message: DONATION_MESSAGES.DONATION_REQUEST_PROCESS_NOT_FOUND })
+    res.status(404).json({ message: DONATION_MESSAGES.DONATION_PROCESS_NOT_FOUND })
     return
   }
 
@@ -151,7 +153,7 @@ export const getDonationProcessController = async (req: Request, res: Response) 
   const donationProcess = await donationService.getDonationProcess(id)
 
   if (!donationProcess) {
-    res.status(404).json({ message: DONATION_MESSAGES.DONATION_REQUEST_PROCESS_NOT_FOUND })
+    res.status(404).json({ message: DONATION_MESSAGES.DONATION_PROCESS_NOT_FOUND })
     return
   }
 
