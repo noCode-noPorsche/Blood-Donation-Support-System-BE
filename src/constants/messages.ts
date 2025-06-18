@@ -157,6 +157,8 @@ export const HEALTH_CHECK_MESSAGES = {
   THE_MINIUM_WEIGHT_REQUIRED_TO_DONATION_BLOOD_IS_42KG: 'The minimum weight required to donate blood is 42kg'
 } as const
 
+export const REQUEST_MESSAGES = {} as const
+
 export const BLOG_MESSAGES = {
   CREATE_BLOG_SUCCESS: 'Create blog success',
   BLOG_NOT_FOUND: 'Blog not found',

@@ -1,11 +1,10 @@
 import { ObjectId } from 'mongodb'
-import databaseService from './database.services'
-import { UpdateHealthCheckReqBody } from '~/models/requests/HealthCheck.requests'
-import { ErrorWithStatus } from '~/models/Error'
-import { HEALTH_CHECK_MESSAGES, USER_MESSAGES } from '~/constants/messages'
 import { DonationProcessStatus, HealthCheckStatus } from '~/constants/enum'
+import { HEALTH_CHECK_MESSAGES, USER_MESSAGES } from '~/constants/messages'
+import { ErrorWithStatus } from '~/models/Error'
+import { UpdateHealthCheckReqBody } from '~/models/requests/HealthCheck.requests'
 import { calculateDonationVolume } from '~/utils/utils'
-import DonationProcess from '~/models/schemas/DonationProcess.schemas'
+import databaseService from './database.services'
 
 class HealthCheckService {
   async getAllHealthChecks() {

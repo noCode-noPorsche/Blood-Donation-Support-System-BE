@@ -1,36 +1,36 @@
 import { ObjectId } from 'mongodb'
-import DonationRegister from '~/models/schemas/DonationRegister.schemas'
-import DonationRequestProcess from '~/models/schemas/DonationProcess.schemas'
-import databaseService from './database.services'
 import {
-  RegisterDonationReqBody,
+  BloodComponentEnum,
+  BloodUnitStatus,
+  DonationProcessStatus,
+  DonationRegistrationStatus,
+  HealthCheckStatus
+} from '~/constants/enum'
+import { DONATION_MESSAGES } from '~/constants/messages'
+import { ErrorWithStatus } from '~/models/Error'
+import {
+  DonationRegistrationReqBody,
   UpdateDonationProcessReqBody,
   UpdateDonationRegistrationReqBody
 } from '~/models/requests/Donation.requests'
-import {
-  DonationRegisterStatus,
-  DonationProcessStatus,
-  HealthCheckStatus,
-  BloodUnitStatus,
-  BloodComponentEnum
-} from '~/constants/enum'
-import HealthCheck from '~/models/schemas/HealthCheck'
-import { ErrorWithStatus } from '~/models/Error'
-import { DONATION_MESSAGES } from '~/constants/messages'
 import BloodUnit from '~/models/schemas/BloodUnit.schemas'
+import { default as DonationProcess, default as DonationRequestProcess } from '~/models/schemas/DonationProcess.schemas'
+import DonationRegistration from '~/models/schemas/DonationRegistration.schemas'
+import HealthCheck from '~/models/schemas/HealthCheck'
+import databaseService from './database.services'
 
 class DonationService {
-  async registerDonation({ user_id, payload }: { user_id: string; payload: RegisterDonationReqBody }) {
-    const donationRequestProcessId = new ObjectId()
+  async createDonationRegistration({ user_id, payload }: { user_id: string; payload: DonationRegistrationReqBody }) {
+    const donationProcessId = new ObjectId()
     const healthCheckId = new ObjectId()
 
     const resultUser = await databaseService.users.findOne({ _id: new ObjectId(user_id) })
 
-    const newDonationRegister = new DonationRegister({
+    const newDonationRegistration = new DonationRegistration({
       ...payload,
       user_id: new ObjectId(user_id),
-      status: DonationRegisterStatus.Approved,
-      donation_request_process_id: donationRequestProcessId,
+      status: DonationRegistrationStatus.Approved,
+      donation_process_id: donationProcessId,
       health_check_id: healthCheckId,
       blood_group_id: new ObjectId(payload.blood_group_id ? payload.blood_group_id : resultUser?.blood_group_id),
       blood_component_id: payload.blood_component_id
@@ -40,14 +40,17 @@ class DonationService {
       created_at: new Date(),
       updated_at: new Date()
     })
-    const resultRegistration = await databaseService.donationRegistrations.insertOne(newDonationRegister)
+    const resultRegistration = await databaseService.donationRegistrations.insertOne(newDonationRegistration)
 
     const newHealthCheck = new HealthCheck({
       _id: healthCheckId,
       user_id: new ObjectId(user_id),
       blood_group_id: new ObjectId(payload.blood_group_id ? payload.blood_group_id : resultUser?.blood_group_id),
-      donation_register_id: resultRegistration.insertedId,
-      donation_process_id: donationRequestProcessId,
+      donation_registration_id: resultRegistration.insertedId,
+      donation_process_id: donationProcessId,
+      request_process_id: null,
+      request_registration_id: null,
+
       weight: 0,
       temperature: 0,
       heart_rate: 0,
@@ -62,8 +65,8 @@ class DonationService {
     })
     const resultHealthCheck = await databaseService.healthChecks.insertOne(newHealthCheck)
 
-    const newDonationRequestProcess = new DonationRequestProcess({
-      _id: donationRequestProcessId,
+    const newDonationProcess = new DonationProcess({
+      _id: donationProcessId,
       user_id: new ObjectId(user_id),
       donation_registration_id: resultRegistration.insertedId,
       blood_group_id: new ObjectId(payload.blood_group_id ? payload.blood_group_id : resultUser?.blood_group_id),
@@ -75,7 +78,7 @@ class DonationService {
       created_at: new Date(),
       updated_at: new Date()
     })
-    const resultProcess = await databaseService.donationProcesses.insertOne(newDonationRequestProcess)
+    const resultProcess = await databaseService.donationProcesses.insertOne(newDonationProcess)
 
     return {
       donationRegistration: resultRegistration,
@@ -84,8 +87,8 @@ class DonationService {
     }
   }
 
-  async getAllDonationRegisters() {
-    const donationRegisters = await databaseService.donationRegistrations
+  async getAllDonationRegistration() {
+    const donationRegistration = await databaseService.donationRegistrations
       .aggregate([
         {
           $lookup: {
@@ -128,11 +131,11 @@ class DonationService {
       ])
       .toArray()
 
-    return donationRegisters
+    return donationRegistration
   }
 
-  async getDonationRegisterByUserId(user_id: string) {
-    const donationRegister = await databaseService.donationRegistrations
+  async getDonationRegistrationByUserId(user_id: string) {
+    const donationRegistration = await databaseService.donationRegistrations
       .aggregate([
         {
           $match: { user_id: new ObjectId(user_id) }
@@ -177,10 +180,10 @@ class DonationService {
         }
       ])
       .toArray()
-    if (!donationRegister) {
+    if (!donationRegistration) {
       return null
     }
-    return donationRegister
+    return donationRegistration
   }
 
   async updateDonationRegistration({ id, payload }: { id: string; payload: UpdateDonationRegistrationReqBody }) {
@@ -394,12 +397,12 @@ class DonationService {
     if (!deletedRegistration) {
       return null
     }
-    return new DonationRegister(deletedRegistration)
+    return new DonationRegistration(deletedRegistration)
   }
 
   async getDonationProcesses() {
     const donationProcesses = await databaseService.donationProcesses.find({}).toArray()
-    return donationProcesses.map((process: DonationRequestProcess) => new DonationRequestProcess(process))
+    return donationProcesses.map((process: DonationProcess) => new DonationProcess(process))
   }
 
   async getDonationProcess(donationProcessId: string) {
@@ -409,7 +412,7 @@ class DonationService {
     if (!donationRequestProcess) {
       return null
     }
-    return new DonationRequestProcess(donationRequestProcess)
+    return new DonationProcess(donationRequestProcess)
   }
 
   //not use

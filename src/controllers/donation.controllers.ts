@@ -3,24 +3,23 @@ import { NextFunction, ParamsDictionary } from 'express-serve-static-core'
 import { ObjectId } from 'mongodb'
 import { DONATION_MESSAGES } from '~/constants/messages'
 import {
-  RegisterDonationReqBody,
+  DonationRegistrationReqBody,
   UpdateDonationProcessReqBody,
   UpdateDonationProcessReqParams,
   UpdateDonationRegistrationReqBody,
-  UpdateDonationRegistrationReqParams,
-  UpdateStatusDonationRegistrationReqBody
+  UpdateDonationRegistrationReqParams
 } from '~/models/requests/Donation.requests'
 import { TokenPayload } from '~/models/requests/User.requests'
 import donationService from '~/services/donation.services'
 
 //Donation Registration
 export const createDonationRegistrationController = async (
-  req: Request<ParamsDictionary, any, RegisterDonationReqBody>,
+  req: Request<ParamsDictionary, any, DonationRegistrationReqBody>,
   res: Response
 ) => {
   const { user_id } = req.decode_authorization as TokenPayload
   const { blood_group_id, blood_component_id, start_date_donation } = req.body
-  const results = await donationService.registerDonation({
+  const results = await donationService.createDonationRegistration({
     user_id,
     payload: { blood_group_id, blood_component_id, start_date_donation }
   })
@@ -31,21 +30,21 @@ export const createDonationRegistrationController = async (
 }
 
 export const getAllDonationRegistrationsController = async (req: Request, res: Response) => {
-  const donationRegister = await donationService.getAllDonationRegisters()
+  const donationRegistration = await donationService.getAllDonationRegistration()
   res.json({
     message: DONATION_MESSAGES.GET_ALL_DONATION_REGISTRATIONS_SUCCESS,
-    result: donationRegister
+    result: donationRegistration
   })
 }
 
 export const getDonationRegistrationByUserIdController = async (req: Request, res: Response, next: NextFunction) => {
   const { user_id } = req.decode_authorization as TokenPayload
 
-  const donationRegisterByUserId = await donationService.getDonationRegisterByUserId(user_id)
+  const donationRegistrationByUserId = await donationService.getDonationRegistrationByUserId(user_id)
 
   res.json({
     message: DONATION_MESSAGES.GET_DONATION_REGISTRATIONS_SUCCESS,
-    result: donationRegisterByUserId
+    result: donationRegistrationByUserId
   })
 }
 

@@ -1,8 +1,8 @@
-import { ParamsDictionary } from 'express-serve-static-core'
 import { Request, Response } from 'express'
-import bloodService from '~/services/blood.services'
-import { CreateBloodComponentReqBody, CreateBloodGroupReqBody } from '~/models/requests/Blood.requests'
+import { ParamsDictionary } from 'express-serve-static-core'
 import { BLOOD_MESSAGES } from '~/constants/messages'
+import { CreateBloodComponentReqBody, CreateBloodGroupReqBody } from '~/models/requests/Blood.requests'
+import bloodService from '~/services/blood.services'
 
 export const getBloodGroupsController = async (req: Request, res: Response) => {
   const bloodGroups = await bloodService.getBloodGroups()

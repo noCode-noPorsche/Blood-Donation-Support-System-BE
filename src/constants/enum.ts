@@ -35,7 +35,15 @@ export enum BloodComponentEnum {
   Plasma = 'Plasma'
 }
 
-export enum DonationRegisterStatus {
+export enum BloodUnitStatus {
+  Available = 'Available',
+  Reserved = 'Reserved',
+  Used = 'Used',
+  Expired = 'Expired',
+  Damaged = 'Damaged'
+}
+
+export enum DonationRegistrationStatus {
   CheckedIn = 'Checked In',
   Pending = 'Pending',
   Approved = 'Approved',
@@ -70,10 +78,14 @@ export enum UnderlyingHealthCondition {
   None = 'None'
 }
 
-export enum BloodUnitStatus {
-  Available = 'Available',
-  Reserved = 'Reserved',
-  Used = 'Used',
-  Expired = 'Expired',
-  Damaged = 'Damaged'
+export enum RequestRegistrationStatus {
+  Pending = 'Pending',
+  Approved = 'Approved',
+  Rejected = 'Rejected'
+}
+
+export enum RequestProcessStatus {
+  Pending = 'Pending',
+  Approved = 'Approved',
+  Rejected = 'Rejected'
 }

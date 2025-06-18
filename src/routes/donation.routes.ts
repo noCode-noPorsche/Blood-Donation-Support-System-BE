@@ -26,7 +26,7 @@ const donationRouter = express.Router()
  * Description. Create a new donation
  * Path: /donation-registrations
  * METHOD: POST
- * Body : { user_id: string, blood_group_id: string, blood_component_id: string, start_date_donation: Date, status: DonationRegisterStatus }
+ * Body : { user_id: string, blood_group_id: string, blood_component_id: string, start_date_donation: Date, status: DonationRegistrationStatus }
  * Header: { Authorization: Bearer <access_token>}
  */
 donationRouter.post(

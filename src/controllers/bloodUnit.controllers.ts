@@ -6,7 +6,6 @@ import {
   UpdateBloodUnitsReqBody
 } from '~/models/requests/BloodUnit.requests'
 import { TokenPayload } from '~/models/requests/User.requests'
-import bloodService from '~/services/blood.services'
 import bloodUnitService from '~/services/bloodUnit.services'
 
 export const createBloodUnitsController = async (req: Request, res: Response) => {}

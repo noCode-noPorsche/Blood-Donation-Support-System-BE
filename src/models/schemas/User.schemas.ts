@@ -39,7 +39,6 @@ export default class User {
   created_at: Date
   updated_at: Date
   forgot_password_token: string
-
   constructor(user: UserType) {
     const date = new Date()
     this._id = user._id

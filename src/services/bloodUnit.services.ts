@@ -1,11 +1,10 @@
 import { ObjectId } from 'mongodb'
-import databaseService from './database.services'
-import { BloodComponentEnum, BloodUnitStatus } from '~/constants/enum'
-import { ErrorWithStatus } from '~/models/Error'
+import { BloodComponentEnum } from '~/constants/enum'
 import { BLOOD_MESSAGES, DONATION_MESSAGES } from '~/constants/messages'
+import { ErrorWithStatus } from '~/models/Error'
 import { UpdateBloodUnitsReqBody } from '~/models/requests/BloodUnit.requests'
-import { result } from 'lodash'
 import { getExpirationDateByComponent } from '~/utils/utils'
+import databaseService from './database.services'
 
 class BloodUnitService {
   async updateBloodUnitsFromDonation({
