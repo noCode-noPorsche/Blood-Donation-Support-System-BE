@@ -28,6 +28,7 @@ export enum BloodGroupEnum {
 }
 
 export enum BloodComponentEnum {
+  WholeBlood = 'Whole Blood',
   RedBloodCells = 'Red Blood Cells',
   WhiteBloodCells = 'White Blood Cells',
   Platelets = 'Platelets',
@@ -67,4 +68,12 @@ export enum UnderlyingHealthCondition {
   HIV = 'HIV/AIDS',
   HepatitisBorC = 'Hepatitis B or C',
   None = 'None'
+}
+
+export enum BloodUnitStatus {
+  Available = 'Available',
+  Reserved = 'Reserved',
+  Used = 'Used',
+  Expired = 'Expired',
+  Damaged = 'Damaged'
 }

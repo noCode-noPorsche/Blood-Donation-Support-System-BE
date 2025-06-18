@@ -299,7 +299,7 @@ class DonationService {
         $set: {
           ...payload,
           status: payload.status || DonationProcessStatus.Pending,
-          blood_group_id: new ObjectId(payload.blood_group_id)
+          blood_group_id: payload.blood_group_id
             ? new ObjectId(payload.blood_group_id)
             : healthCheckResult?.blood_group_id,
           donation_date: payload.donation_date || new Date(),

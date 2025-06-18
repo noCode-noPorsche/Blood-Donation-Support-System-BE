@@ -2,8 +2,10 @@ import { ObjectId } from 'mongodb'
 import databaseService from './database.services'
 import { UpdateHealthCheckReqBody } from '~/models/requests/HealthCheck.requests'
 import { ErrorWithStatus } from '~/models/Error'
-import { HEALTH_CHECK_MESSAGES } from '~/constants/messages'
+import { HEALTH_CHECK_MESSAGES, USER_MESSAGES } from '~/constants/messages'
 import { DonationProcessStatus, HealthCheckStatus } from '~/constants/enum'
+import { calculateDonationVolume } from '~/utils/utils'
+import DonationProcess from '~/models/schemas/DonationProcess.schemas'
 
 class HealthCheckService {
   async getAllHealthChecks() {
@@ -83,12 +85,24 @@ class HealthCheckService {
   }) {
     const resultUser = await databaseService.users.findOne({ _id: new ObjectId(user_id) })
 
+    if (!resultUser) {
+      throw new ErrorWithStatus({ message: USER_MESSAGES.USER_NOT_FOUND, status: 404 })
+    }
+
+    const finalWeight = payload.weight ?? resultUser.weight
+
+    let isRejectedDueToWeight = false
+    if (finalWeight < 42) {
+      payload.status = HealthCheckStatus.Rejected
+      isRejectedDueToWeight = true
+    }
+
     const result = await databaseService.healthChecks.findOneAndUpdate(
       { _id: new ObjectId(id) },
       {
         $set: {
           blood_group_id: payload.blood_group_id ? new ObjectId(payload.blood_group_id) : resultUser?.blood_group_id,
-          weight: payload.weight ? payload.weight : resultUser?.weight,
+          weight: finalWeight,
           temperature: payload.temperature,
           heart_rate: payload.heart_rate,
           diastolic_blood_pressure: payload.diastolic_blood_pressure,
@@ -107,6 +121,10 @@ class HealthCheckService {
       }
     )
 
+    if (!result) {
+      throw new ErrorWithStatus({ message: HEALTH_CHECK_MESSAGES.HEALTH_CHECK_NOT_FOUND, status: 400 })
+    }
+
     if (result) {
       const userResult = await databaseService.users.findOne({
         _id: new ObjectId(user_id)
@@ -117,7 +135,7 @@ class HealthCheckService {
           {
             $set: {
               blood_group_id: payload.blood_group_id ? new ObjectId(payload.blood_group_id) : userResult.blood_group_id,
-              weight: payload.weight ? payload.weight : userResult.weight
+              weight: finalWeight
             },
             $currentDate: { updated_at: true }
           }
@@ -125,19 +143,30 @@ class HealthCheckService {
       }
     }
 
-    if (payload.status === HealthCheckStatus.Rejected) {
-      await databaseService.donationProcesses.updateOne(
-        { health_check_id: new ObjectId(id) },
-        {
-          $set: { status: DonationProcessStatus.Rejected },
-          $currentDate: { updated_at: true }
-        }
-      )
+    const donationUpdate: {
+      $set: Partial<{
+        status: DonationProcessStatus
+        volume_collected: number
+        blood_group_id: ObjectId
+      }>
+      $currentDate: {
+        updated_at: true
+      }
+    } = {
+      $currentDate: { updated_at: true },
+      $set: {}
     }
 
-    if (!result) {
-      throw new ErrorWithStatus({ message: HEALTH_CHECK_MESSAGES.HEALTH_CHECK_NOT_FOUND, status: 400 })
+    if (payload.status === HealthCheckStatus.Rejected) {
+      donationUpdate.$set.status = DonationProcessStatus.Rejected
+    } else {
+      const volume = calculateDonationVolume(finalWeight)
+      donationUpdate.$set.volume_collected = volume
+      donationUpdate.$set.blood_group_id = new ObjectId(payload.blood_group_id || resultUser?.blood_group_id)
     }
+
+    await databaseService.donationProcesses.updateOne({ health_check_id: new ObjectId(id) }, donationUpdate)
+
     return result
   }
 }

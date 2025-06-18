@@ -143,7 +143,8 @@ export const HEALTH_CHECK_MESSAGES = {
   DESCRIPTION_MUST_BE_A_STRING: 'Description must be a string',
   DESCRIPTION_LENGTH_MUST_BE_LESS_THAN_500: 'Description length must be less than 500',
   UNDERLYING_CONDITIONS_MUST_BE_AN_ARRAY: 'Underlying health conditions must be an array',
-  UNDERLYING_CONDITIONS_INVALID_VALUES: 'Underlying health conditions must contain valid values'
+  UNDERLYING_CONDITIONS_INVALID_VALUES: 'Underlying health conditions must contain valid values',
+  THE_MINIUM_WEIGHT_REQUIRED_TO_DONATION_BLOOD_IS_42KG: 'The minimum weight required to donate blood is 42kg'
 } as const
 
 export const BLOG_MESSAGES = {

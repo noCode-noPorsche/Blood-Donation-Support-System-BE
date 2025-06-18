@@ -8,6 +8,7 @@ import DonationRegister from '~/models/schemas/DonationRegister.schemas'
 import DonationRequestProcess from '~/models/schemas/DonationProcess.schemas'
 import Blog from '~/models/schemas/Blog.schemas'
 import HealthCheck from '~/models/schemas/HealthCheck'
+import BloodUnit from '~/models/schemas/BloodUnit.schemas'
 
 config()
 const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@blooddonation.mfyc9dy.mongodb.net/?retryWrites=true&w=majority&appName=BloodDonation`
@@ -41,6 +42,9 @@ class DatabaseService {
   get bloodComponents(): Collection<BloodComponent> {
     return this.db.collection(process.env.DB_BLOOD_COMPONENTS_COLLECTION as string)
   }
+  get bloodUnits(): Collection<BloodUnit> {
+    return this.db.collection(process.env.DB_BLOOD_UNITS_COLLECTION as string)
+  }
   get donationRegistrations(): Collection<DonationRegister> {
     return this.db.collection(process.env.DB_DONATION_REGISTRATIONS_COLLECTION as string)
   }
@@ -50,6 +54,9 @@ class DatabaseService {
   get healthChecks(): Collection<HealthCheck> {
     return this.db.collection(process.env.DB_HEALTH_CHECKS_COLLECTION as string)
   }
+  // get requestRegistrations(): Collection<DonationRegister> {
+  //   return this.db.collection(process.env.DB_REQUEST_REGISTRATIONS_COLLECTION as string)
+  // }
   get blogs(): Collection<Blog> {
     return this.db.collection(process.env.DB_BLOGS_COLLECTION as string)
   }
