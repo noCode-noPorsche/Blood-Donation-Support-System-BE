@@ -20,7 +20,7 @@ export const updateBloodUnitsController = async (
   const { body } = req
   const updateBloodUnits = await bloodUnitService.updateBloodUnitsFromDonation({ id, payload: body, user_id })
   res.json({
-    message: '',
+    message: BLOOD_MESSAGES.UPDATE_BLOOD_UNITS_SUCCESS,
     result: updateBloodUnits
   })
 }

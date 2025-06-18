@@ -11,10 +11,14 @@ tags:
     description: Operations about user
   - name: Bloods
     description: Operations about blood
+  - name: Blood Units
+    description: Operations about blood units
   - name: Donation Registrations
     description: Operations about donation registrations
   - name: Donation Processes
     description: Operations about donation processes
+  - name: Health Checks
+    description: Operations about health checks
   - name: Blogs
     description: Operations about blogs
 paths:
@@ -282,6 +286,88 @@ paths:
           description: UnAuthorization
       security:
         - BearerAuth: []
+  /api/blood-units:
+    get:
+      tags:
+        - Blood Units
+      summary: Get All Blood Units for Staff or Admin
+      description: Get All Blood Units for Staff or Admin
+      operationId: getAllBloodUnitsForStaffOrAdmin
+      responses:
+        default:
+          description: Get all blood units success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BloodUnits'
+        '401':
+          description: UnAuthorization
+      security:
+        - BearerAuth: []
+  /api/blood-units/{id}:
+    get:
+      tags:
+        - Blood Units
+      summary: Get Blood Units by Donation Process Id
+      description: Get Blood Units by Donation Process Id
+      operationId: getBloodUnitsByDonationProcessId
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: MongoId
+      responses:
+        default:
+          description: Get blood units by donation process id success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BloodUnits'
+        '401':
+          description: UnAuthorization
+      security:
+        - BearerAuth: []
+    patch:
+      tags:
+        - Blood Units
+      summary: Update Health Check by Id for Staff or Admin
+      description: Update Health Check by Id for Staff or Admin
+      operationId: updateHealthCheckById
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: MongoId
+      requestBody:
+        description: Information update health check
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/UpdateBloodUnitReqBody'
+        required: true
+      responses:
+        default:
+          description: Update health check success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BloodUnits'
+        '401':
+          description: UnAuthorization
+      security:
+        - BearerAuth: []
   /api/donations/donation-registrations:
     post:
       tags:
@@ -455,7 +541,7 @@ paths:
         - Health Checks
       summary: Get All Health Checks for Admin or Staff
       description: Get All Health Checks for Admin or Staff
-      operationId: healthCheck
+      operationId: getAllHealthCheckForAdminOrStaff
       responses:
         default:
           description: Get all health check success
@@ -465,6 +551,60 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/HealthCheck'
+        '401':
+          description: UnAuthorization
+      security:
+        - BearerAuth: []
+  /api/health-checks/user:
+    get:
+      tags:
+        - Health Checks
+      summary: Get All Health Checks for User now
+      description: Get All Health Checks for User now
+      operationId: getAllHealthCheck
+      responses:
+        default:
+          description: Get all health check success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/HealthCheck'
+        '401':
+          description: UnAuthorization
+      security:
+        - BearerAuth: []
+  /api/health-checks/{id}:
+    patch:
+      tags:
+        - Health Checks
+      summary: Update Health Check By Id for Staff or Admin
+      description: Update Health Check By Id for Staff or Admin
+      operationId: updateHealthCheck
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: MongoId
+      requestBody:
+        description: Information update Health Check
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateHealthCheckReqBody'
+        required: true
+      responses:
+        default:
+          description: Update Health Check success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthCheck'
+        '422':
+          description: Invalid Input
         '401':
           description: UnAuthorization
       security:
@@ -806,6 +946,70 @@ components:
           type: string
           format: date-time
           example: 2025-05-21T17:48:12.171Z
+    BloodUnitsStatus:
+      type: string
+      enum: [Available, Reserved, Used, Expired, Damaged]
+      example:
+    BloodUnits:
+      type: object
+      properties:
+        _id:
+          type: string
+          format: MongoId
+          example: 682f6a3fdb3fb589d23e7654
+        donation_process_id:
+          type: string
+          format: MongoId
+          example: 682f6a3fdb3fb589d23e7654
+        request_process_id:
+          type: string
+          format: MongoId
+          example: 682f6a3fdb3fb589d23e7654
+        blood_group_id:
+          type: string
+          format: MongoId
+          example: 682f6a3fdb3fb589d23e7654
+        blood_component_id:
+          type: string
+          format: MongoId
+          example: 682f6a3fdb3fb589d23e7654
+        volume:
+          type: number
+          example: 0
+        status:
+          $ref: '#/components/schemas/BloodUnitsStatus'
+        update_by:
+          type: string
+          format: MongoId
+          example: 682f6a3fdb3fb589d23e7654
+        expired_at:
+          type: string
+          format: date-time
+          example: 2025-05-21T17:48:12.171Z
+        created_at:
+          type: string
+          format: date-time
+          example: 2025-05-21T17:48:12.171Z
+        updated_at:
+          type: string
+          format: date-time
+          example: 2025-05-21T17:48:12.171Z
+    UpdateBloodUnitReqBody:
+      type: object
+      properties:
+        blood_group_id:
+          type: string
+          format: MongoId
+          example: 682f6a3fdb3fb589d23e7654
+        blood_component_id:
+          type: string
+          format: MongoId
+          example: 682f6a3fdb3fb589d23e7654
+        volume:
+          type: number
+          example: 0
+        status:
+          $ref: '#/components/schemas/BloodUnitsStatus'
     CreateBloodGroupBody:
       type: object
       properties:
@@ -938,6 +1142,40 @@ components:
       type: string
       enum: [Pending, Approved, Rejected]
       example: Pending
+    UpdateHealthCheckReqBody:
+      type: object
+      properties:
+        blood_group_id:
+          type: string
+          format: MongoId
+          example: 682f6a3fdb3fb589d23e7654
+        weight:
+          type: number
+          example: 0
+        temperature:
+          type: number
+          example: 0
+        heart_rate:
+          type: number
+          example: 0
+        diastolic_blood_pressure:
+          type: number
+          example: 0
+        systolic_blood_pressure:
+          type: number
+          example: 0
+        hemoglobin:
+          type: number
+          example: 0
+        underlying_health_conditions:
+          type: array
+          items:
+            $ref: '#/components/schemas/UnderlyingHealthConditionsEnum'
+        description:
+          type: string
+          example: ''
+        status:
+          $ref: '#/components/schemas/HealthCheckStatus'
     UnderlyingHealthConditionsEnum:
       type: string
       enum: [Diabetes, Hypertension, HeartDisease, Other]
