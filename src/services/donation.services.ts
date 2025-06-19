@@ -18,6 +18,8 @@ import { default as DonationProcess, default as DonationRequestProcess } from '~
 import DonationRegistration from '~/models/schemas/DonationRegistration.schemas'
 import HealthCheck from '~/models/schemas/HealthCheck'
 import databaseService from './database.services'
+import { config } from 'dotenv'
+config()
 
 class DonationService {
   async createDonationRegistration({ user_id, payload }: { user_id: string; payload: DonationRegistrationReqBody }) {
@@ -32,7 +34,9 @@ class DonationService {
       status: DonationRegistrationStatus.Approved,
       donation_process_id: donationProcessId,
       health_check_id: healthCheckId,
-      blood_group_id: new ObjectId(payload.blood_group_id ? payload.blood_group_id : resultUser?.blood_group_id),
+      blood_group_id: new ObjectId(
+        payload.blood_group_id ? payload.blood_group_id : (resultUser?.blood_group_id as ObjectId)
+      ),
       blood_component_id: payload.blood_component_id
         ? new ObjectId(payload.blood_component_id)
         : ('' as unknown as ObjectId),
@@ -45,12 +49,13 @@ class DonationService {
     const newHealthCheck = new HealthCheck({
       _id: healthCheckId,
       user_id: new ObjectId(user_id),
-      blood_group_id: new ObjectId(payload.blood_group_id ? payload.blood_group_id : resultUser?.blood_group_id),
+      blood_group_id: new ObjectId(
+        payload.blood_group_id ? payload.blood_group_id : (resultUser?.blood_group_id as ObjectId)
+      ),
       donation_registration_id: resultRegistration.insertedId,
       donation_process_id: donationProcessId,
       request_process_id: null,
       request_registration_id: null,
-
       weight: 0,
       temperature: 0,
       heart_rate: 0,
@@ -69,7 +74,9 @@ class DonationService {
       _id: donationProcessId,
       user_id: new ObjectId(user_id),
       donation_registration_id: resultRegistration.insertedId,
-      blood_group_id: new ObjectId(payload.blood_group_id ? payload.blood_group_id : resultUser?.blood_group_id),
+      blood_group_id: new ObjectId(
+        payload.blood_group_id ? payload.blood_group_id : (resultUser?.blood_group_id as ObjectId)
+      ),
       health_check_id: healthCheckId,
       volume_collected: 0,
       description: '',
@@ -82,7 +89,7 @@ class DonationService {
 
     return {
       donationRegistration: resultRegistration,
-      donationRequestProcess: resultProcess,
+      donationProcess: resultProcess,
       healthCheck: resultHealthCheck
     }
   }
@@ -328,57 +335,68 @@ class DonationService {
       { returnDocument: 'after' }
     )
 
-    if (result?.status === DonationProcessStatus.Approved) {
-      const now = new Date()
-      const bloodComponentDocs = await databaseService.bloodComponents
+    const wasNotApprovedBefore = donationProcessResult?.status !== DonationProcessStatus.Approved
+    const isNowApproved = result?.status === DonationProcessStatus.Approved
+
+    if (isNowApproved && wasNotApprovedBefore) {
+      const existingUnits = await databaseService.bloodUnits
         .find({
-          name: { $in: [BloodComponentEnum.RedBloodCells, BloodComponentEnum.Platelets, BloodComponentEnum.Plasma] }
+          donation_process_id: new ObjectId(result._id)
         })
         .toArray()
 
-      const componentMap = bloodComponentDocs.reduce(
-        (acc, comp) => {
-          acc[comp.name] = comp._id
-          return acc
-        },
-        {} as Record<string, ObjectId>
-      )
-
-      const bloodUnits = [
-        BloodComponentEnum.RedBloodCells,
-        BloodComponentEnum.Platelets,
-        BloodComponentEnum.Plasma
-      ].map((name) => {
-        return new BloodUnit({
-          donation_process_id: new ObjectId(result._id),
-          request_process_id: null,
-          blood_group_id: result.blood_group_id,
-          blood_component_id: componentMap[name],
-          update_by: new ObjectId(user_id),
-          status: BloodUnitStatus.Available,
-          volume: 0
-          // expired_at: new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)
-        })
-      })
-
-      await databaseService.bloodUnits.insertMany(bloodUnits)
-    }
-
-    if (result) {
-      const userResult = await databaseService.users.findOne({
-        _id: new ObjectId(donationProcessResult?.user_id)
-      })
-      if (userResult) {
-        await databaseService.users.findOneAndUpdate(
-          { _id: new ObjectId(userResult._id) },
-          {
-            $set: {
-              blood_group_id: payload.blood_group_id ? new ObjectId(payload.blood_group_id) : userResult.blood_group_id,
-              number_of_donations: userResult?.number_of_donations ? userResult.number_of_donations + 1 : 1
-            },
-            $currentDate: { updated_at: true }
-          }
+      if (existingUnits.length === 0) {
+        const now = new Date()
+        const bloodComponentDocs = await databaseService.bloodComponents
+          .find({
+            name: {
+              $in: [BloodComponentEnum.RedBloodCells, BloodComponentEnum.Platelets, BloodComponentEnum.Plasma]
+            }
+          })
+          .toArray()
+        const componentMap = bloodComponentDocs.reduce(
+          (acc, comp) => {
+            acc[comp.name] = comp._id
+            return acc
+          },
+          {} as Record<string, ObjectId>
         )
+        const bloodUnits = [
+          BloodComponentEnum.RedBloodCells,
+          BloodComponentEnum.Platelets,
+          BloodComponentEnum.Plasma
+        ].map((name) => {
+          return new BloodUnit({
+            donation_process_id: new ObjectId(result._id),
+            request_process_id: null,
+            blood_group_id: result.blood_group_id,
+            blood_component_id: componentMap[name],
+            update_by: new ObjectId(user_id),
+            status: BloodUnitStatus.Available,
+            volume: 0
+            // expired_at: new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)
+          })
+        })
+        await databaseService.bloodUnits.insertMany(bloodUnits)
+      }
+      if (result) {
+        const userResult = await databaseService.users.findOne({
+          _id: new ObjectId(donationProcessResult?.user_id)
+        })
+        if (userResult) {
+          await databaseService.users.findOneAndUpdate(
+            { _id: new ObjectId(userResult._id) },
+            {
+              $set: {
+                blood_group_id: payload.blood_group_id
+                  ? new ObjectId(payload.blood_group_id)
+                  : userResult.blood_group_id,
+                number_of_donations: userResult?.number_of_donations ? userResult.number_of_donations + 1 : 1
+              },
+              $currentDate: { updated_at: true }
+            }
+          )
+        }
       }
     }
 
@@ -386,19 +404,19 @@ class DonationService {
   }
 
   //not use
-  async deleteDonationRegistration(id: string) {
-    let parsedId: ObjectId
-    try {
-      parsedId = new ObjectId(id)
-    } catch (err) {
-      return false
-    }
-    const deletedRegistration = await databaseService.donationRegistrations.findOneAndDelete({ _id: parsedId })
-    if (!deletedRegistration) {
-      return null
-    }
-    return new DonationRegistration(deletedRegistration)
-  }
+  // async deleteDonationRegistration(id: string) {
+  //   let parsedId: ObjectId
+  //   try {
+  //     parsedId = new ObjectId(id)
+  //   } catch (err) {
+  //     return false
+  //   }
+  //   const deletedRegistration = await databaseService.donationRegistrations.findOneAndDelete({ _id: parsedId })
+  //   if (!deletedRegistration) {
+  //     return null
+  //   }
+  //   return new DonationRegistration(deletedRegistration)
+  // }
 
   async getDonationProcesses() {
     const donationProcesses = await databaseService.donationProcesses.find({}).toArray()

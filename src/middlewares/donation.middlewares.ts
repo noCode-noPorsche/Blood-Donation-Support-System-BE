@@ -138,11 +138,11 @@ export const updateDonationProcessValidator = validate(
         notEmpty: {
           errorMessage: DONATION_MESSAGES.VOLUME_COLLECTED_IS_REQUIRED
         },
-        isFloat: {
-          options: { min: 0, max: 350 },
+        isInt: {
+          options: { min: 250, max: 450 },
           errorMessage: DONATION_MESSAGES.VOLUME_COLLECTED_MUST_BE_POSITIVE
         },
-        toFloat: true
+        toInt: true
       },
       donation_date: {
         notEmpty: undefined,

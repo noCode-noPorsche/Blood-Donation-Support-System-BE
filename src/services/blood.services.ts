@@ -4,6 +4,8 @@ import { BLOOD_MESSAGES } from '~/constants/messages'
 import BloodComponent from '~/models/schemas/BloodComponent.schemas'
 import BloodGroup from '~/models/schemas/BloodGroup.schemas'
 import databaseService from './database.services'
+import { config } from 'dotenv'
+config()
 
 class BloodService {
   async getBloodGroups() {

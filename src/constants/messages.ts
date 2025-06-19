@@ -45,7 +45,11 @@ export const USER_MESSAGES = {
   WEIGHT_MUST_BE_AN_INTEGER_BETWEEN_1_AND_500: 'Weight must be an integer between 1 and 500',
   OLD_PASSWORD_NOT_MATCH: 'Old password not match',
   CHANGE_PASSWORD_SUCCESS: 'Change password success',
-  USER_NOT_AUTHORIZED: 'User not authorized'
+  USER_NOT_AUTHORIZED: 'User not authorized',
+  CITIZEN_ID_NUMBER_IS_REQUIRED: 'Citizen ID number is required',
+  CITIZEN_ID_NUMBER_ALREADY_EXIST: 'Email already exists',
+  CITIZEN_ID_MUST_BE_EXACTLY_12_DIGITS: 'Citizen ID must be exactly 12 digits',
+  CITIZEN_ID_MUST_CONTAIN_ONLY_DIGITS_0_9: 'Citizen ID must contain only digits (0–9)'
 } as const
 
 export const BLOOD_MESSAGES = {
@@ -157,7 +161,9 @@ export const HEALTH_CHECK_MESSAGES = {
   THE_MINIUM_WEIGHT_REQUIRED_TO_DONATION_BLOOD_IS_42KG: 'The minimum weight required to donate blood is 42kg'
 } as const
 
-export const REQUEST_MESSAGES = {} as const
+export const REQUEST_MESSAGES = {
+  CREATE_REQUEST_REGISTRATION_SUCCESS: 'Create request registration success'
+} as const
 
 export const BLOG_MESSAGES = {
   CREATE_BLOG_SUCCESS: 'Create blog success',

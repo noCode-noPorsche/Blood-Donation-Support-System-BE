@@ -70,26 +70,26 @@ export const updateDonationRegistrationController = async (
   })
 }
 
-export const deleteDonationRegistrationController = async (req: Request, res: Response): Promise<void> => {
-  const { id } = req.params
+// export const deleteDonationRegistrationController = async (req: Request, res: Response): Promise<void> => {
+//   const { id } = req.params
 
-  if (!ObjectId.isValid(id)) {
-    res.status(400).json({ message: DONATION_MESSAGES.DONATION_REGISTRATION_ID_INVALID })
-    return
-  }
+//   if (!ObjectId.isValid(id)) {
+//     res.status(400).json({ message: DONATION_MESSAGES.DONATION_REGISTRATION_ID_INVALID })
+//     return
+//   }
 
-  const deletedRegistration = await donationService.deleteDonationRegistration(id)
+//   const deletedRegistration = await donationService.deleteDonationRegistration(id)
 
-  if (!deletedRegistration) {
-    res.status(404).json({ message: DONATION_MESSAGES.DONATION_REGISTRATION_NOT_FOUND })
-    return
-  }
+//   if (!deletedRegistration) {
+//     res.status(404).json({ message: DONATION_MESSAGES.DONATION_REGISTRATION_NOT_FOUND })
+//     return
+//   }
 
-  res.status(200).json({
-    message: DONATION_MESSAGES.DELETE_DONATION_REGISTRATION_SUCCESS,
-    result: deletedRegistration
-  })
-}
+//   res.status(200).json({
+//     message: DONATION_MESSAGES.DELETE_DONATION_REGISTRATION_SUCCESS,
+//     result: deletedRegistration
+//   })
+// }
 
 //Donation Registration Process
 export const getAllDonationProcessesController = async (req: Request, res: Response) => {

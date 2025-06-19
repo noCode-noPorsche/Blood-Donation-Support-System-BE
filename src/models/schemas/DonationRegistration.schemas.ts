@@ -7,7 +7,7 @@ interface DonationRegistrationType {
   donation_process_id?: ObjectId
   health_check_id?: ObjectId
   status: DonationRegistrationStatus
-  blood_group_id: ObjectId
+  blood_group_id: ObjectId | null
   blood_component_id: ObjectId
   created_at: Date
   updated_at: Date
@@ -20,8 +20,8 @@ export default class DonationRegistration {
   donation_process_id?: ObjectId
   health_check_id?: ObjectId
   status: DonationRegistrationStatus
-  blood_group_id: ObjectId
-  blood_component_id: ObjectId
+  blood_group_id: ObjectId | null
+  blood_component_id: ObjectId | null
   created_at: Date
   updated_at: Date
   start_date_donation: Date
@@ -32,8 +32,8 @@ export default class DonationRegistration {
     this.donation_process_id = donationRegistration.donation_process_id || new ObjectId()
     this.health_check_id = donationRegistration.health_check_id || new ObjectId()
     this.status = donationRegistration.status || DonationRegistrationStatus.Pending
-    this.blood_group_id = donationRegistration.blood_group_id || ''
-    this.blood_component_id = donationRegistration.blood_component_id || ''
+    this.blood_group_id = donationRegistration.blood_group_id || null
+    this.blood_component_id = donationRegistration.blood_component_id || null
     this.created_at = donationRegistration.created_at || date
     this.updated_at = donationRegistration.updated_at || date
     this.start_date_donation = donationRegistration.start_date_donation || date

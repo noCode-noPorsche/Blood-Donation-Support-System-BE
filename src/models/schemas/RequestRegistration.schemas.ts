@@ -7,10 +7,11 @@ interface RequestRegistrationType {
   request_process_id?: ObjectId
   health_check_id?: ObjectId
   status: RequestRegistrationStatus
-  blood_group_id: ObjectId
-  blood_component_id: ObjectId
+  blood_group_id: ObjectId | null
+  blood_component_id: ObjectId | null
   image?: string
   receive_date_request: Date
+  update_by: ObjectId
   created_at: Date
   updated_at: Date
   is_emergency: boolean
@@ -22,10 +23,11 @@ export default class RequestRegistration {
   request_process_id?: ObjectId
   health_check_id?: ObjectId
   status: RequestRegistrationStatus
-  blood_group_id: ObjectId
-  blood_component_id: ObjectId
+  blood_group_id: ObjectId | null
+  blood_component_id: ObjectId | null
   image?: string
   receive_date_request: Date
+  update_by: ObjectId
   created_at: Date
   updated_at: Date
   is_emergency: boolean
@@ -35,9 +37,10 @@ export default class RequestRegistration {
     this.user_id = requestRegistration.user_id
     this.health_check_id = requestRegistration.health_check_id || new ObjectId()
     this.status = requestRegistration.status || RequestRegistrationStatus.Pending
-    this.blood_group_id = requestRegistration.blood_group_id || ''
-    this.blood_component_id = requestRegistration.blood_component_id || ''
+    this.blood_group_id = requestRegistration.blood_group_id || null
+    this.blood_component_id = requestRegistration.blood_component_id || null
     this.receive_date_request = requestRegistration.receive_date_request || date
+    this.update_by = requestRegistration.update_by
     this.created_at = requestRegistration.created_at || date
     this.updated_at = requestRegistration.updated_at || date
     this.is_emergency = requestRegistration.is_emergency || false

@@ -9,7 +9,8 @@ interface UserType {
   password: string
   role: UserRole
   gender: UserGender
-  blood_group_id?: ObjectId
+  citizen_id_number: string | null
+  blood_group_id?: ObjectId | null
   number_of_donations?: number
   number_of_requests?: number
   weight: number
@@ -29,7 +30,8 @@ export default class User {
   password: string
   role: UserRole
   gender: UserGender
-  blood_group_id?: ObjectId
+  citizen_id_number: string | null
+  blood_group_id?: ObjectId | null
   number_of_donations?: number
   number_of_requests?: number
   weight: number
@@ -48,7 +50,8 @@ export default class User {
     this.password = user.password
     this.role = user.role || UserRole.Customer
     this.gender = user.gender || UserGender.Other
-    this.blood_group_id = user.blood_group_id
+    this.citizen_id_number = user.citizen_id_number || null
+    this.blood_group_id = user.blood_group_id || null
     this.number_of_donations = user.number_of_donations || 0
     this.number_of_requests = user.number_of_requests || 0
     this.weight = user.weight || 0

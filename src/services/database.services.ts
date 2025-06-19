@@ -8,6 +8,8 @@ import DonationRequestProcess from '~/models/schemas/DonationProcess.schemas'
 import DonationRegistration from '~/models/schemas/DonationRegistration.schemas'
 import HealthCheck from '~/models/schemas/HealthCheck'
 import RefreshToken from '~/models/schemas/RefreshToken.schemas'
+import RequestProcess from '~/models/schemas/RequestProcess.schemas'
+import RequestRegistration from '~/models/schemas/RequestRegistration.schemas'
 import User from '~/models/schemas/User.schemas'
 
 config()
@@ -54,8 +56,11 @@ class DatabaseService {
   get healthChecks(): Collection<HealthCheck> {
     return this.db.collection(process.env.DB_HEALTH_CHECKS_COLLECTION as string)
   }
-  get requestRegistrations(): Collection<DonationRegistration> {
+  get requestRegistrations(): Collection<RequestRegistration> {
     return this.db.collection(process.env.DB_REQUEST_REGISTRATIONS_COLLECTION as string)
+  }
+  get requestProcesses(): Collection<RequestProcess> {
+    return this.db.collection(process.env.DB_REQUEST_PROCESSES_COLLECTION as string)
   }
   get blogs(): Collection<Blog> {
     return this.db.collection(process.env.DB_BLOGS_COLLECTION as string)

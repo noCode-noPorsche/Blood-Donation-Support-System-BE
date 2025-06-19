@@ -188,6 +188,29 @@ export const registerValidator = validate(
           }
         }
       },
+      citizen_id_number: {
+        notEmpty: {
+          errorMessage: USER_MESSAGES.CITIZEN_ID_NUMBER_IS_REQUIRED
+        },
+        isLength: {
+          options: { min: 12, max: 12 },
+          errorMessage: USER_MESSAGES.CITIZEN_ID_MUST_BE_EXACTLY_12_DIGITS
+        },
+        matches: {
+          options: [/^\d{12}$/],
+          errorMessage: USER_MESSAGES.CITIZEN_ID_MUST_CONTAIN_ONLY_DIGITS_0_9
+        },
+        trim: true,
+        custom: {
+          options: async (value) => {
+            const isExistCitizen = await usersService.checkCitizenIDNumber(value)
+            if (isExistCitizen) {
+              throw new Error(USER_MESSAGES.CITIZEN_ID_NUMBER_ALREADY_EXIST)
+            }
+            return true
+          }
+        }
+      },
       gender: genderSchema,
       password: passwordSchema,
       confirm_password: confirmPasswordSchema,

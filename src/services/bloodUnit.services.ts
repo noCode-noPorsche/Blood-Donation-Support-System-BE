@@ -5,6 +5,8 @@ import { ErrorWithStatus } from '~/models/Error'
 import { UpdateBloodUnitsReqBody } from '~/models/requests/BloodUnit.requests'
 import { getExpirationDateByComponent } from '~/utils/utils'
 import databaseService from './database.services'
+import { config } from 'dotenv'
+config()
 
 class BloodUnitService {
   async updateBloodUnitsFromDonation({

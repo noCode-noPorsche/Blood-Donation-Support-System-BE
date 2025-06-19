@@ -5,6 +5,8 @@ import { ErrorWithStatus } from '~/models/Error'
 import { UpdateHealthCheckReqBody } from '~/models/requests/HealthCheck.requests'
 import { calculateDonationVolume } from '~/utils/utils'
 import databaseService from './database.services'
+import { config } from 'dotenv'
+config()
 
 class HealthCheckService {
   async getAllHealthChecks() {
@@ -96,15 +98,13 @@ class HealthCheckService {
       isRejectedDueToWeight = true
     }
 
-    console.log('first, ', resultUser?.blood_group_id)
-
     const result = await databaseService.healthChecks.findOneAndUpdate(
       { _id: new ObjectId(id) },
       {
         $set: {
           blood_group_id: payload.blood_group_id
             ? new ObjectId(payload.blood_group_id)
-            : new ObjectId(resultUser?.blood_group_id),
+            : new ObjectId(resultUser?.blood_group_id as ObjectId),
           weight: finalWeight,
           temperature: payload.temperature,
           heart_rate: payload.heart_rate,
@@ -165,7 +165,9 @@ class HealthCheckService {
     } else {
       const volume = calculateDonationVolume(finalWeight)
       donationUpdate.$set.volume_collected = volume
-      donationUpdate.$set.blood_group_id = new ObjectId(payload.blood_group_id || resultUser?.blood_group_id)
+      donationUpdate.$set.blood_group_id = new ObjectId(
+        payload.blood_group_id || (resultUser?.blood_group_id as ObjectId)
+      )
     }
 
     await databaseService.donationProcesses.updateOne({ health_check_id: new ObjectId(id) }, donationUpdate)

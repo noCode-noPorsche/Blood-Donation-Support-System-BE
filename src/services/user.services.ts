@@ -46,6 +46,7 @@ class UsersService {
   async register(payload: RegisterReqBody) {
     const newUser = new User({
       ...payload,
+      citizen_id_number: payload.citizen_id_number,
       date_of_birth: new Date(payload.date_of_birth),
       password: hashPassword(payload.password),
       role: UserRole.Customer,
@@ -110,6 +111,11 @@ class UsersService {
 
   async checkEmailExist(email: string) {
     const user = await databaseService.users.findOne({ email })
+    return Boolean(user)
+  }
+
+  async checkCitizenIDNumber(citizen_id_number: string) {
+    const user = await databaseService.users.findOne({ citizen_id_number })
     return Boolean(user)
   }
 

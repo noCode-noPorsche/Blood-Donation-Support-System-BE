@@ -1,7 +1,7 @@
 import express from 'express'
 import {
   createDonationRegistrationController,
-  deleteDonationRegistrationController,
+  // deleteDonationRegistrationController,
   getAllDonationProcessesController,
   getAllDonationRegistrationsController,
   getDonationProcessesController,
@@ -78,12 +78,12 @@ donationRouter.patch(
  * Path: /donation-registration/:id
  * METHOD: DELETE
  */
-donationRouter.delete(
-  '/donation-registration/:id',
-  accessTokenValidator,
-  isAdminValidator,
-  wrapAsync(deleteDonationRegistrationController)
-)
+// donationRouter.delete(
+//   '/donation-registration/:id',
+//   accessTokenValidator,
+//   isAdminValidator,
+//   wrapAsync(deleteDonationRegistrationController)
+// )
 
 /**
  * Description. Get all donation request processes for staff or admin
@@ -117,19 +117,6 @@ donationRouter.patch(
     'blood_group_id'
   ]),
   wrapAsync(updateDonationProcessController)
-)
-
-//not use
-/**
- * Description. Delete a donation request process
- * Path: /donation-request-processes/:id
- * METHOD: DELETE
- */
-donationRouter.delete(
-  '/donation-request-processes/:id',
-  accessTokenValidator,
-  isAdminValidator,
-  wrapAsync(deleteDonationRegistrationController)
 )
 
 export default donationRouter

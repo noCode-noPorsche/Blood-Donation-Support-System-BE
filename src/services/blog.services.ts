@@ -3,6 +3,8 @@ import databaseService from './database.services'
 import { ObjectId } from 'mongodb'
 import { ErrorWithStatus } from '~/models/Error'
 import { BLOG_MESSAGES } from '~/constants/messages'
+import { config } from 'dotenv'
+config()
 
 class BlogService {
   async createBlog({ user_id, payload }: { user_id: string; payload: CreateBlogReqBody }) {

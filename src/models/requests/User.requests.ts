@@ -7,6 +7,7 @@ export interface RegisterReqBody {
   password: string
   confirm_password: string
   date_of_birth: string
+  citizen_id_number: string
   weight: number
   full_name: string
   gender: UserGender
