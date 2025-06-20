@@ -162,7 +162,15 @@ export const HEALTH_CHECK_MESSAGES = {
 } as const
 
 export const REQUEST_MESSAGES = {
-  CREATE_REQUEST_REGISTRATION_SUCCESS: 'Create request registration success'
+  CREATE_REQUEST_REGISTRATION_SUCCESS: 'Create request registration success',
+  UPDATE_REQUEST_REGISTRATION_SUCCESS: 'Update request registration success',
+  RECEIVE_DATE_REQUEST_IS_REQUIRED: 'Receive date request is required',
+  RECEIVE_DATE_REQUEST_IS_INVALID: 'Receive date request is invalid',
+  IS_EMERGENCY_IS_REQUIRED: 'Is emergency is required',
+  IS_EMERGENCY_IS_INVALID: 'Is emergency is invalid',
+  STATUS_MUST_BE_A_STRING: 'Status must be a string',
+  STATUS_IS_INVALID: 'Status is invalid',
+  STATUS_IS_REQUIRED: 'Status is required'
 } as const
 
 export const BLOG_MESSAGES = {

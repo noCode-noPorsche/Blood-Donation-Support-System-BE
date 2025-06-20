@@ -36,6 +36,7 @@ export default class RequestRegistration {
     this._id = requestRegistration._id || new ObjectId()
     this.user_id = requestRegistration.user_id
     this.health_check_id = requestRegistration.health_check_id || new ObjectId()
+    this.request_process_id = requestRegistration.request_process_id
     this.status = requestRegistration.status || RequestRegistrationStatus.Pending
     this.blood_group_id = requestRegistration.blood_group_id || null
     this.blood_component_id = requestRegistration.blood_component_id || null

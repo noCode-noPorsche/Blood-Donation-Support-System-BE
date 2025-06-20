@@ -1,5 +1,5 @@
 import { config } from 'dotenv'
-import { CreateRequestRegistrationReqBody } from '~/models/requests/Request.requests'
+import { CreateRequestRegistrationReqBody, UpdateRequestRegistrationReqBody } from '~/models/requests/Request.requests'
 import databaseService from './database.services'
 import { ObjectId } from 'mongodb'
 import User from '~/models/schemas/User.schemas'
@@ -56,9 +56,10 @@ class RequestService {
     } else {
       userObjectId = resultUser._id
     }
+    console.log('request', requestProcessId)
 
     const newRequestRegistration = new RequestRegistration({
-      blood_component_id: payload.blood_group_id ? new ObjectId(payload.blood_group_id) : null,
+      blood_component_id: payload.blood_component_id ? new ObjectId(payload.blood_component_id) : null,
       blood_group_id: new ObjectId(
         payload.blood_group_id ? payload.blood_group_id : (resultUser?.blood_group_id as ObjectId)
       ),
@@ -66,9 +67,9 @@ class RequestService {
       update_by: new ObjectId(user_id),
       image: payload.image,
       health_check_id: healthCheckId,
-      request_process_id: requestProcessId,
       receive_date_request: payload.receive_date_request || new Date(),
-      status: RequestRegistrationStatus.Pending,
+      status: RequestRegistrationStatus.Approved,
+      request_process_id: requestProcessId,
       user_id: new ObjectId(userObjectId),
       created_at: new Date(),
       updated_at: new Date()
@@ -107,7 +108,7 @@ class RequestService {
         payload.blood_group_id ? payload.blood_group_id : (resultUser?.blood_group_id as ObjectId)
       ),
       blood_component_id: payload.blood_group_id ? new ObjectId(payload.blood_group_id) : null,
-      health_check_id: resultHealthCheck.insertedId,
+      health_check_id: healthCheckId,
       volume_received: 0,
       description: '',
       status: RequestProcessStatus.Pending,
@@ -122,6 +123,42 @@ class RequestService {
       HealthCheck: resultHealthCheck,
       RequestProcess: resultRequestProcess
     }
+  }
+  async updateRequestRegistration({
+    id,
+    user_id,
+    payload
+  }: {
+    id: string
+    user_id: string
+    payload: UpdateRequestRegistrationReqBody
+  }) {
+    const isValidBloodGroupId = ObjectId.isValid(payload.blood_group_id as string)
+    const isValidBloodComponentId = ObjectId.isValid(payload.blood_component_id as string)
+
+    const bloodGroupId = isValidBloodGroupId ? new ObjectId(payload.blood_group_id) : null
+    const bloodComponentId = isValidBloodComponentId ? new ObjectId(payload.blood_component_id) : null
+
+    const result = await databaseService.requestRegistrations.findOneAndUpdate(
+      { _id: new ObjectId(id) },
+      {
+        $set: {
+          ...payload,
+          status: payload.status,
+          is_emergency: payload.is_emergency,
+          image: payload.image,
+          update_by: new ObjectId(user_id),
+          receive_date_request: payload.receive_date_request,
+          blood_component_id: bloodComponentId,
+          blood_group_id: bloodGroupId
+        },
+        $currentDate: { updated_at: true }
+      },
+      {
+        returnDocument: 'after'
+      }
+    )
+    return result
   }
 }
 

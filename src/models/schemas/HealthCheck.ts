@@ -48,7 +48,7 @@ export default class HealthCheck {
     this.blood_group_id = healthCheck.blood_group_id
     this.donation_registration_id = healthCheck.donation_registration_id || null
     this.donation_process_id = healthCheck.donation_process_id || null
-    this.request_registration_id = healthCheck.request_process_id || null
+    this.request_registration_id = healthCheck.request_registration_id || null
     this.request_process_id = healthCheck.request_process_id || null
     this.weight = healthCheck.weight || 0
     this.temperature = healthCheck.temperature || 0
