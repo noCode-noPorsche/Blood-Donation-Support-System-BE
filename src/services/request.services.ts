@@ -1,8 +1,5 @@
 import { config } from 'dotenv'
-import { CreateRequestRegistrationReqBody, UpdateRequestRegistrationReqBody } from '~/models/requests/Request.requests'
-import databaseService from './database.services'
 import { ObjectId } from 'mongodb'
-import User from '~/models/schemas/User.schemas'
 import {
   HealthCheckStatus,
   RequestProcessStatus,
@@ -10,10 +7,12 @@ import {
   UserGender,
   UserRole
 } from '~/constants/enum'
-import RequestRegistration from '~/models/schemas/RequestRegistration.schemas'
+import { CreateRequestRegistrationReqBody, UpdateRequestRegistrationReqBody } from '~/models/requests/Request.requests'
 import HealthCheck from '~/models/schemas/HealthCheck'
 import RequestProcess from '~/models/schemas/RequestProcess.schemas'
-import { ErrorWithStatus } from '~/models/Error'
+import RequestRegistration from '~/models/schemas/RequestRegistration.schemas'
+import User from '~/models/schemas/User.schemas'
+import databaseService from './database.services'
 config()
 
 class RequestService {
@@ -30,6 +29,12 @@ class RequestService {
 
     const resultUser = await databaseService.users.findOne({ citizen_id_number: payload.citizen_id_number })
 
+    const isValidBloodGroupId = ObjectId.isValid(payload.blood_group_id as string)
+    const isValidBloodComponentId = ObjectId.isValid(payload.blood_component_id as string)
+
+    const bloodGroupId = isValidBloodGroupId ? new ObjectId(payload.blood_group_id) : resultUser?.blood_group_id || null
+    const bloodComponentId = isValidBloodComponentId ? new ObjectId(payload.blood_component_id) : null
+
     if (!resultUser) {
       const date = new Date()
       const newUser = new User({
@@ -42,7 +47,7 @@ class RequestService {
         role: UserRole.Customer,
         weight: 0,
         avatar_url: '',
-        blood_group_id: null,
+        blood_group_id: bloodGroupId,
         created_at: date,
         updated_at: date,
         location: '',
@@ -56,13 +61,10 @@ class RequestService {
     } else {
       userObjectId = resultUser._id
     }
-    console.log('request', requestProcessId)
 
     const newRequestRegistration = new RequestRegistration({
-      blood_component_id: payload.blood_component_id ? new ObjectId(payload.blood_component_id) : null,
-      blood_group_id: new ObjectId(
-        payload.blood_group_id ? payload.blood_group_id : (resultUser?.blood_group_id as ObjectId)
-      ),
+      blood_component_id: bloodGroupId,
+      blood_group_id: bloodComponentId,
       is_emergency: payload.is_emergency,
       update_by: new ObjectId(user_id),
       image: payload.image,
@@ -79,9 +81,7 @@ class RequestService {
     const newHealthCheck = new HealthCheck({
       _id: healthCheckId,
       user_id: new ObjectId(user_id),
-      blood_group_id: new ObjectId(
-        payload.blood_group_id ? payload.blood_group_id : (resultUser?.blood_group_id as ObjectId)
-      ),
+      blood_group_id: bloodGroupId as ObjectId,
       donation_process_id: null,
       donation_registration_id: null,
       request_registration_id: resultRequestRegistration.insertedId,
@@ -104,10 +104,8 @@ class RequestService {
       _id: requestProcessId,
       user_id: new ObjectId(user_id),
       request_registration_id: resultRequestRegistration.insertedId,
-      blood_group_id: new ObjectId(
-        payload.blood_group_id ? payload.blood_group_id : (resultUser?.blood_group_id as ObjectId)
-      ),
-      blood_component_id: payload.blood_group_id ? new ObjectId(payload.blood_group_id) : null,
+      blood_group_id: bloodGroupId as ObjectId,
+      blood_component_id: bloodComponentId,
       health_check_id: healthCheckId,
       volume_received: 0,
       description: '',
@@ -124,6 +122,7 @@ class RequestService {
       RequestProcess: resultRequestProcess
     }
   }
+
   async updateRequestRegistration({
     id,
     user_id,
@@ -159,6 +158,18 @@ class RequestService {
       }
     )
     return result
+  }
+
+  async getRequestRegistrationByUserId(user_id: string) {
+    const requestRegistration = await databaseService.requestRegistrations
+      .find({ user_id: new ObjectId(user_id) })
+      .toArray()
+    return requestRegistration
+  }
+
+  async getAllRequestRegistration() {
+    const requestRegistration = await databaseService.requestRegistrations.find({}).toArray()
+    return requestRegistration
   }
 }
 

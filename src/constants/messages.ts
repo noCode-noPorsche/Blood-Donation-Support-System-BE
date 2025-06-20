@@ -170,7 +170,9 @@ export const REQUEST_MESSAGES = {
   IS_EMERGENCY_IS_INVALID: 'Is emergency is invalid',
   STATUS_MUST_BE_A_STRING: 'Status must be a string',
   STATUS_IS_INVALID: 'Status is invalid',
-  STATUS_IS_REQUIRED: 'Status is required'
+  STATUS_IS_REQUIRED: 'Status is required',
+  GET_REQUEST_REGISTRATION_BY_USER_SUCCESS: 'Get request registration by user success',
+  GET_REQUEST_REGISTRATION_SUCCESS: 'Get request registration success'
 } as const
 
 export const BLOG_MESSAGES = {

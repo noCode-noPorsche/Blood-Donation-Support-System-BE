@@ -132,6 +132,16 @@ class HealthCheckService {
       const userResult = await databaseService.users.findOne({
         _id: new ObjectId(user_id)
       })
+      await databaseService.donationRegistrations.findOneAndUpdate(
+        {
+          _id: new ObjectId(result?.donation_registration_id as ObjectId)
+        },
+        {
+          $set: {
+            blood_group_id: payload.blood_group_id ? new ObjectId(payload.blood_group_id) : result.blood_group_id
+          }
+        }
+      )
       if (userResult) {
         await databaseService.users.findOneAndUpdate(
           { _id: new ObjectId(userResult._id) },

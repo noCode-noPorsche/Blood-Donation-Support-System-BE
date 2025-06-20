@@ -35,3 +35,20 @@ export const updateRequestRegistrationController = async (
     result: result
   })
 }
+
+export const getRequestRegistrationByUserIdController = async (req: Request, res: Response) => {
+  const { user_id } = req.decode_authorization as TokenPayload
+  const result = await requestsService.getRequestRegistrationByUserId(user_id)
+  res.json({
+    message: REQUEST_MESSAGES.GET_REQUEST_REGISTRATION_BY_USER_SUCCESS,
+    result: result
+  })
+}
+
+export const getAllRequestRegistrationController = async (req: Request, res: Response) => {
+  const result = await requestsService.getAllRequestRegistration()
+  res.json({
+    message: REQUEST_MESSAGES.GET_REQUEST_REGISTRATION_SUCCESS,
+    result: result
+  })
+}

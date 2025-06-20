@@ -1,6 +1,8 @@
 import express from 'express'
 import {
   createRequestRegistrationController,
+  getAllRequestRegistrationController,
+  getRequestRegistrationByUserIdController,
   updateRequestRegistrationController
 } from '~/controllers/request.controllers'
 import { filterMiddleware } from '~/middlewares/common.middlewares'
@@ -8,7 +10,7 @@ import {
   createRequestRegistrationValidator,
   updateRequestRegistrationValidator
 } from '~/middlewares/request.middlewares'
-import { isStaffOrAdminValidator } from '~/middlewares/user.middlewares'
+import { accessTokenValidator, isStaffOrAdminValidator } from '~/middlewares/user.middlewares'
 import { CreateRequestRegistrationReqBody, UpdateRequestRegistrationReqBody } from '~/models/requests/Request.requests'
 import { wrapAsync } from '~/utils/handler'
 
@@ -62,5 +64,25 @@ requestsRouter.patch(
   ]),
   wrapAsync(updateRequestRegistrationController)
 )
+
+/**
+ * Description. Get request registration by user id
+ * Path: /user
+ * Method: GET
+ * Header: { Authorization: Bearer <access_token>}
+ */
+requestsRouter.get(
+  '/request-registrations/user',
+  accessTokenValidator,
+  wrapAsync(getRequestRegistrationByUserIdController)
+)
+
+/**
+ * Description. Get All request registration for Admin or Staff
+ * Path: /
+ * Method: GET
+ * Header: { Authorization: Bearer <access_token>}
+ */
+requestsRouter.get('/request-registrations', isStaffOrAdminValidator, wrapAsync(getAllRequestRegistrationController))
 
 export default requestsRouter

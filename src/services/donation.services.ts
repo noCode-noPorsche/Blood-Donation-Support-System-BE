@@ -28,18 +28,20 @@ class DonationService {
 
     const resultUser = await databaseService.users.findOne({ _id: new ObjectId(user_id) })
 
+    const isValidBloodGroupId = ObjectId.isValid(payload.blood_group_id as string)
+    const isValidBloodComponentId = ObjectId.isValid(payload.blood_component_id as string)
+
+    const bloodGroupId = isValidBloodGroupId ? new ObjectId(payload.blood_group_id) : resultUser?.blood_group_id || null
+    const bloodComponentId = isValidBloodComponentId ? new ObjectId(payload.blood_component_id) : null
+
     const newDonationRegistration = new DonationRegistration({
       ...payload,
       user_id: new ObjectId(user_id),
       status: DonationRegistrationStatus.Approved,
       donation_process_id: donationProcessId,
       health_check_id: healthCheckId,
-      blood_group_id: new ObjectId(
-        payload.blood_group_id ? payload.blood_group_id : (resultUser?.blood_group_id as ObjectId)
-      ),
-      blood_component_id: payload.blood_component_id
-        ? new ObjectId(payload.blood_component_id)
-        : ('' as unknown as ObjectId),
+      blood_group_id: bloodGroupId,
+      blood_component_id: bloodComponentId as ObjectId,
       start_date_donation: new Date(payload.start_date_donation),
       created_at: new Date(),
       updated_at: new Date()
@@ -49,9 +51,7 @@ class DonationService {
     const newHealthCheck = new HealthCheck({
       _id: healthCheckId,
       user_id: new ObjectId(user_id),
-      blood_group_id: new ObjectId(
-        payload.blood_group_id ? payload.blood_group_id : (resultUser?.blood_group_id as ObjectId)
-      ),
+      blood_group_id: bloodGroupId as ObjectId,
       donation_registration_id: resultRegistration.insertedId,
       donation_process_id: donationProcessId,
       request_process_id: null,
@@ -74,9 +74,7 @@ class DonationService {
       _id: donationProcessId,
       user_id: new ObjectId(user_id),
       donation_registration_id: resultRegistration.insertedId,
-      blood_group_id: new ObjectId(
-        payload.blood_group_id ? payload.blood_group_id : (resultUser?.blood_group_id as ObjectId)
-      ),
+      blood_group_id: bloodGroupId as ObjectId,
       health_check_id: healthCheckId,
       volume_collected: 0,
       description: '',
@@ -369,7 +367,7 @@ class DonationService {
           return new BloodUnit({
             donation_process_id: new ObjectId(result._id),
             request_process_id: null,
-            blood_group_id: result.blood_group_id,
+            blood_group_id: result.blood_group_id as ObjectId,
             blood_component_id: componentMap[name],
             update_by: new ObjectId(user_id),
             status: BloodUnitStatus.Available,
