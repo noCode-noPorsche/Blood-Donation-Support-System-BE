@@ -53,25 +53,25 @@ export const createDonationValidator = validate(
   )
 )
 
-export const updateStatusDonationRegistrationValidator = validate(
-  checkSchema(
-    {
-      status: {
-        notEmpty: {
-          errorMessage: DONATION_MESSAGES.STATUS_IS_REQUIRED
-        },
-        isString: {
-          errorMessage: DONATION_MESSAGES.STATUS_MUST_BE_A_STRING
-        },
-        isIn: {
-          options: [Object.values(DonationRegistrationStatus)],
-          errorMessage: DONATION_MESSAGES.STATUS_IS_INVALID
-        }
-      }
-    },
-    ['body']
-  )
-)
+// export const updateStatusDonationRegistrationValidator = validate(
+//   checkSchema(
+//     {
+//       status: {
+//         notEmpty: {
+//           errorMessage: DONATION_MESSAGES.STATUS_IS_REQUIRED
+//         },
+//         isString: {
+//           errorMessage: DONATION_MESSAGES.STATUS_MUST_BE_A_STRING
+//         },
+//         isIn: {
+//           options: [Object.values(DonationRegistrationStatus)],
+//           errorMessage: DONATION_MESSAGES.STATUS_IS_INVALID
+//         }
+//       }
+//     },
+//     ['body']
+//   )
+// )
 
 export const updateDonationRegistrationValidator = validate(
   checkSchema(
@@ -113,6 +113,18 @@ export const updateDonationRegistrationValidator = validate(
           errorMessage: DONATION_MESSAGES.START_DATE_DONATION_IS_INVALID
         },
         optional: true
+      },
+      status: {
+        notEmpty: {
+          errorMessage: DONATION_MESSAGES.STATUS_IS_REQUIRED
+        },
+        isString: {
+          errorMessage: DONATION_MESSAGES.STATUS_MUST_BE_A_STRING
+        },
+        isIn: {
+          options: [Object.values(DonationRegistrationStatus)],
+          errorMessage: DONATION_MESSAGES.STATUS_IS_INVALID
+        }
       }
     },
     ['body']

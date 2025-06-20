@@ -14,14 +14,15 @@ export interface UpdateDonationRegistrationReqParams extends ParamsDictionary {
   id: string
 }
 
-export interface UpdateStatusDonationRegistrationReqBody {
-  status: DonationRegistrationStatus
-}
-
 export interface UpdateDonationRegistrationReqBody {
   blood_group_id: string
   blood_component_id: string
   start_date_donation: Date
+  status: DonationRegistrationStatus
+}
+
+export interface GetDonationRegistrationReqParams extends ParamsDictionary {
+  id: string
 }
 
 export interface UpdateDonationProcessReqBody {

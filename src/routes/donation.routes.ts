@@ -4,6 +4,7 @@ import {
   // deleteDonationRegistrationController,
   getAllDonationProcessesController,
   getAllDonationRegistrationsController,
+  getDonationProcessesByIdController,
   getDonationProcessesController,
   getDonationRegistrationByUserIdController,
   updateDonationProcessController,
@@ -16,7 +17,11 @@ import {
   updateDonationRegistrationValidator
 } from '~/middlewares/donation.middlewares'
 import { accessTokenValidator, isAdminValidator, isStaffOrAdminValidator } from '~/middlewares/user.middlewares'
-import { UpdateDonationProcessReqBody, UpdateDonationRegistrationReqParams } from '~/models/requests/Donation.requests'
+import {
+  UpdateDonationProcessReqBody,
+  UpdateDonationRegistrationReqBody,
+  UpdateDonationRegistrationReqParams
+} from '~/models/requests/Donation.requests'
 
 import { wrapAsync } from '~/utils/handler'
 
@@ -64,10 +69,11 @@ donationRouter.patch(
   '/donation-registrations/:id',
   accessTokenValidator,
   updateDonationRegistrationValidator,
-  filterMiddleware<UpdateDonationRegistrationReqParams>([
+  filterMiddleware<UpdateDonationRegistrationReqBody>([
     'blood_group_id',
     'blood_component_id',
-    'start_date_donation'
+    'start_date_donation',
+    'status'
   ]),
   wrapAsync(updateDonationRegistrationController)
 )
@@ -91,6 +97,13 @@ donationRouter.patch(
  * METHOD: GET
  */
 donationRouter.get('/donation-processes', isStaffOrAdminValidator, wrapAsync(getAllDonationProcessesController))
+
+/**
+ * Description. Get donation request processes by id for staff or admin
+ * Path: /donation-request-processes/:id
+ * METHOD: GET
+ */
+donationRouter.get('/donation-processes/:id', isStaffOrAdminValidator, wrapAsync(getDonationProcessesByIdController))
 
 /**
  * Description. Get donation process by user id

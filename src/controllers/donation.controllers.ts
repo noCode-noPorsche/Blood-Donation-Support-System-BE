@@ -4,6 +4,7 @@ import { ObjectId } from 'mongodb'
 import { DONATION_MESSAGES } from '~/constants/messages'
 import {
   DonationRegistrationReqBody,
+  GetDonationRegistrationReqParams,
   UpdateDonationProcessReqBody,
   UpdateDonationProcessReqParams,
   UpdateDonationRegistrationReqBody,
@@ -162,6 +163,18 @@ export const getDonationProcessController = async (req: Request, res: Response) 
   })
 }
 
+export const getDonationProcessesByIdController = async (
+  req: Request<GetDonationRegistrationReqParams, any, any>,
+  res: Response
+) => {
+  const { id } = req.params
+  const result = await donationService.getDonationProcessById(id)
+
+  res.json({
+    message: DONATION_MESSAGES.GET_DONATION_REQUEST_PROCESS_SUCCESS,
+    result: result
+  })
+}
 // export const updateDonationRequestProcessController = async (req: Request, res: Response): Promise<void> => {
 //   const { id } = req.params
 //   const { status, volumeCollected, donationDate, description } = req.body

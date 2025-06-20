@@ -19,6 +19,7 @@ import DonationRegistration from '~/models/schemas/DonationRegistration.schemas'
 import HealthCheck from '~/models/schemas/HealthCheck'
 import databaseService from './database.services'
 import { config } from 'dotenv'
+import { HTTP_STATUS } from '~/constants/httpStatus'
 config()
 
 class DonationService {
@@ -199,7 +200,8 @@ class DonationService {
           ...payload,
           blood_group_id: new ObjectId(payload.blood_group_id),
           blood_component_id: new ObjectId(payload.blood_component_id),
-          start_date_donation: new Date(payload.start_date_donation)
+          start_date_donation: new Date(payload.start_date_donation),
+          status: payload.status
         },
         $currentDate: { updated_at: true }
       },
@@ -252,6 +254,17 @@ class DonationService {
       ])
       .toArray()
     return donationProcesses
+  }
+
+  async getDonationProcessById(id: string) {
+    const result = await databaseService.donationProcesses.findOne({ _id: new ObjectId(id) })
+    if (!result) {
+      throw new ErrorWithStatus({
+        message: DONATION_MESSAGES.DONATION_PROCESS_NOT_FOUND,
+        status: HTTP_STATUS.BAD_REQUEST
+      })
+    }
+    return result
   }
 
   async getDonationProcessByUserId(user_id: string) {

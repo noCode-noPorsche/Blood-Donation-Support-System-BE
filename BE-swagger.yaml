@@ -508,6 +508,30 @@ paths:
       security:
         - BearerAuth: []
   /api/donations/donation-processes/{id}:
+    get:
+      tags:
+        - Donation Processes
+      summary: Get Donation Processes By Id
+      description: Get Donation Processes By Id
+      operationId: getDonationProcessesById
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: MongoId
+          required: true
+      responses:
+        default:
+          description: Get donation processes success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DonationProcess'
+        '401':
+          description: UnAuthorization
+      security:
+        - BearerAuth: []
     patch:
       tags:
         - Donation Processes
@@ -613,7 +637,7 @@ paths:
           description: UnAuthorization
       security:
         - BearerAuth: []
-  /api/requests/request-registrations: 
+  /api/requests/request-registrations:
     post:
       tags:
         - Request Registrations
@@ -643,7 +667,7 @@ paths:
 
     get:
       tags:
-        - Donation Registrations
+        - Request Registrations
       summary: Get All Donation Registrations for Staff or Admin
       description: Get all donation registrations for staff or admin
       operationId: getAllDonationRegistrations
@@ -790,7 +814,7 @@ components:
     RegisterBody:
       type: object
       properties:
-        citizen_id_number: 
+        citizen_id_number:
           type: string
           example: 123456789123
         phone:
@@ -952,7 +976,7 @@ components:
       example: Admin
     DonationRegistrationStatus:
       type: string
-      enum: [Pending, Approved, Rejected]
+      enum: [Pending, Approved, Rejected, Checked In]
       example: Pending
     DonationProcessStatus:
       type: string
@@ -1137,6 +1161,8 @@ components:
           type: string
           format: date-time
           example: 2025-05-21T17:48:12.171Z
+        status:
+          $ref: '#/components/schemas/DonationRegistrationStatus'
     DonationProcess:
       type: object
       properties:
