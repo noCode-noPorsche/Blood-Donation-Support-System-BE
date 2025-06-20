@@ -19,6 +19,10 @@ tags:
     description: Operations about donation processes
   - name: Health Checks
     description: Operations about health checks
+  - name: Request Registrations
+    description: Operations about request registrations
+  - name: Request Processes
+    description: Operations about request processes
   - name: Blogs
     description: Operations about blogs
 paths:
@@ -609,6 +613,53 @@ paths:
           description: UnAuthorization
       security:
         - BearerAuth: []
+  /api/requests/request-registrations: 
+    post:
+      tags:
+        - Request Registrations
+      summary: Create Request Registration
+      description: Create a new request registration
+      operationId: createRequestRegistration
+      requestBody:
+        description: Information create request registration
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDonationRegistrationBody'
+        required: true
+      responses:
+        '200':
+          description: Create donation registration success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DonationRegistration'
+        '422':
+          description: Invalid Input
+        '401':
+          description: UnAuthorization
+      security:
+        - BearerAuth: []
+
+    get:
+      tags:
+        - Donation Registrations
+      summary: Get All Donation Registrations for Staff or Admin
+      description: Get all donation registrations for staff or admin
+      operationId: getAllDonationRegistrations
+      responses:
+        default:
+          description: Get all donation registrations success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DonationRegistration'
+        '401':
+          description: UnAuthorization
+      security:
+        - BearerAuth: []
   /api/blogs:
     get:
       tags:
@@ -739,6 +790,9 @@ components:
     RegisterBody:
       type: object
       properties:
+        citizen_id_number: 
+          type: string
+          example: 123456789123
         phone:
           type: string
           example: 0987654321

@@ -22,7 +22,7 @@ const requestsRouter = express.Router()
  * Header: { Authorization: Bearer <access_token>}
  */
 requestsRouter.post(
-  '/',
+  '/request-registrations',
   isStaffOrAdminValidator,
   createRequestRegistrationValidator,
   filterMiddleware<CreateRequestRegistrationReqBody>([
@@ -46,7 +46,7 @@ requestsRouter.post(
  * Header: { Authorization: Bearer <access_token>}
  */
 requestsRouter.patch(
-  '/:id',
+  '/request-registrations/:id',
   isStaffOrAdminValidator,
   updateRequestRegistrationValidator,
   filterMiddleware<UpdateRequestRegistrationReqBody>([
