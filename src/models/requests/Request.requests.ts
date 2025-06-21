@@ -26,3 +26,7 @@ export interface UpdateRequestRegistrationReqBody {
 export interface UpdateRequestRegistrationIdReqParams extends ParamsDictionary {
   id: string
 }
+
+export interface GetRequestRegistrationIdReqParams extends ParamsDictionary {
+  id: string
+}

@@ -2,6 +2,7 @@ import express from 'express'
 import {
   createRequestRegistrationController,
   getAllRequestRegistrationController,
+  getRequestRegistrationByIdController,
   getRequestRegistrationByUserIdController,
   updateRequestRegistrationController
 } from '~/controllers/request.controllers'
@@ -84,5 +85,17 @@ requestsRouter.get(
  * Header: { Authorization: Bearer <access_token>}
  */
 requestsRouter.get('/request-registrations', isStaffOrAdminValidator, wrapAsync(getAllRequestRegistrationController))
+
+/**
+ * Description. Get request registration by id
+ * Path: /:id
+ * Method: GET
+ * Header: { Authorization: Bearer <access_token>}
+ */
+requestsRouter.get(
+  '/request-registrations/:id',
+  isStaffOrAdminValidator,
+  wrapAsync(getRequestRegistrationByIdController)
+)
 
 export default requestsRouter

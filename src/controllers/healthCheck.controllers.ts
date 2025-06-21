@@ -1,6 +1,10 @@
 import { Request, Response } from 'express'
 import { HEALTH_CHECK_MESSAGES } from '~/constants/messages'
-import { UpdateHealthCheckReqBody, UpdateHealthCheckReqParams } from '~/models/requests/HealthCheck.requests'
+import {
+  GetHealthCheckReqParams,
+  UpdateHealthCheckReqBody,
+  UpdateHealthCheckReqParams
+} from '~/models/requests/HealthCheck.requests'
 import { TokenPayload } from '~/models/requests/User.requests'
 import healthCheckService from '~/services/healthCheck.services'
 
@@ -17,6 +21,15 @@ export const getHealthCheckByUserIdController = async (req: Request, res: Respon
   const healthCheck = await healthCheckService.getHealthCheckByUserId(user_id)
   res.json({
     message: HEALTH_CHECK_MESSAGES.GET_HEALTH_CHECK_BY_USER_ID_SUCCESS,
+    result: healthCheck
+  })
+}
+
+export const getHealthCheckByIdController = async (req: Request<GetHealthCheckReqParams, any, any>, res: Response) => {
+  const { id } = req.params
+  const healthCheck = await healthCheckService.getHealthCheckById(id)
+  res.json({
+    message: HEALTH_CHECK_MESSAGES.GET_HEALTH_CHECK_SUCCESS,
     result: healthCheck
   })
 }

@@ -3,6 +3,7 @@ import { HealthCheckStatus, UnderlyingHealthCondition } from '~/constants/enum'
 
 export interface UpdateHealthCheckReqBody {
   blood_group_id?: string
+  blood_component_ids?: string[]
   weight?: number
   temperature?: number
   heart_rate?: number
@@ -15,5 +16,9 @@ export interface UpdateHealthCheckReqBody {
 }
 
 export interface UpdateHealthCheckReqParams extends ParamsDictionary {
+  id: string
+}
+
+export interface GetHealthCheckReqParams extends ParamsDictionary {
   id: string
 }

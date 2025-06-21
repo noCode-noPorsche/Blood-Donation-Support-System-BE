@@ -66,6 +66,7 @@ class DonationService {
       hemoglobin: 0,
       description: '',
       status: HealthCheckStatus.Pending,
+      updated_by: new ObjectId(user_id),
       created_at: new Date(),
       updated_at: new Date()
     })

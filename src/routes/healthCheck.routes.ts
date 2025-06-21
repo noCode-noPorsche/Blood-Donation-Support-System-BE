@@ -1,6 +1,7 @@
 import express from 'express'
 import {
   getAllHealthChecksController,
+  getHealthCheckByIdController,
   getHealthCheckByUserIdController,
   updateHealthCheckByIdController
 } from '~/controllers/healthCheck.controllers'
@@ -30,6 +31,14 @@ healthCheckRouter.get('/', isStaffOrAdminValidator, wrapAsync(getAllHealthChecks
 healthCheckRouter.get('/user', accessTokenValidator, wrapAsync(getHealthCheckByUserIdController))
 
 /**
+ * Description. Get health checks by id
+ * Path: /:id
+ * Method: GET
+ * Header: { Authorization: Bearer <access_token>}
+ */
+healthCheckRouter.get('/:id', isStaffOrAdminValidator, wrapAsync(getHealthCheckByIdController))
+
+/**
  * Description. Update health checks by id
  * Path: /:id
  * Method: PATCH
@@ -40,6 +49,7 @@ healthCheckRouter.patch(
   isStaffOrAdminValidator,
   updateHealthCheckValidator,
   filterMiddleware<UpdateHealthCheckReqBody>([
+    'blood_component_ids',
     'blood_group_id',
     'weight',
     'heart_rate',

@@ -5,6 +5,7 @@ interface HealthCheckType {
   _id?: ObjectId
   user_id: ObjectId
   blood_group_id: ObjectId
+  blood_component_ids?: ObjectId[]
   donation_registration_id: ObjectId | null
   donation_process_id: ObjectId | null
   request_registration_id: ObjectId | null
@@ -18,6 +19,7 @@ interface HealthCheckType {
   hemoglobin?: number
   status?: HealthCheckStatus
   description?: string
+  updated_by: ObjectId
   created_at: Date
   updated_at: Date
 }
@@ -26,6 +28,7 @@ export default class HealthCheck {
   _id?: ObjectId
   user_id: ObjectId
   blood_group_id: ObjectId
+  blood_component_ids?: ObjectId[]
   donation_registration_id: ObjectId | null
   donation_process_id: ObjectId | null
   request_registration_id: ObjectId | null
@@ -39,6 +42,7 @@ export default class HealthCheck {
   hemoglobin?: number
   status?: HealthCheckStatus
   description?: string
+  updated_by: ObjectId
   created_at: Date
   updated_at: Date
   constructor(healthCheck: HealthCheckType) {
@@ -46,6 +50,7 @@ export default class HealthCheck {
     this._id = healthCheck._id || new ObjectId()
     this.user_id = healthCheck.user_id
     this.blood_group_id = healthCheck.blood_group_id
+    this.blood_component_ids = healthCheck.blood_component_ids || []
     this.donation_registration_id = healthCheck.donation_registration_id || null
     this.donation_process_id = healthCheck.donation_process_id || null
     this.request_registration_id = healthCheck.request_registration_id || null
@@ -59,6 +64,7 @@ export default class HealthCheck {
     this.hemoglobin = healthCheck.hemoglobin || 0
     this.status = healthCheck.status || HealthCheckStatus.Pending
     this.description = healthCheck.description || ''
+    this.updated_by = healthCheck.updated_by
     this.created_at = healthCheck.created_at || date
     this.updated_at = healthCheck.updated_at || date
   }

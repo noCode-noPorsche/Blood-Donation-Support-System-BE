@@ -89,3 +89,9 @@ export enum RequestProcessStatus {
   Approved = 'Approved',
   Rejected = 'Rejected'
 }
+
+export enum RequestProcessDetailStatus {
+  Pending = 'Pending',
+  Used = 'Used',
+  Cancel = 'Canceled'
+}

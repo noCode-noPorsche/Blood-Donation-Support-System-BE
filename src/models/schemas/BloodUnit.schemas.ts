@@ -11,6 +11,8 @@ interface BloodUnitType {
   status: BloodUnitStatus
   expired_at?: Date
   volume?: number
+  note?: string
+  used_at?: Date
   created_at?: Date
   updated_at?: Date
 }
@@ -24,7 +26,9 @@ export default class BloodUnit {
   status: BloodUnitStatus
   expired_at?: Date | null
   volume?: number
+  note?: string
   update_by?: ObjectId
+  used_at?: Date
   created_at?: Date
   updated_at?: Date
   constructor(bloodUnit: BloodUnitType) {
@@ -38,6 +42,8 @@ export default class BloodUnit {
     this.status = bloodUnit.status || BloodUnitStatus.Available
     this.expired_at = bloodUnit.expired_at || null
     this.volume = bloodUnit.volume || 0
+    this.note = bloodUnit.note || ''
+    this.used_at = bloodUnit.used_at || date
     this.created_at = bloodUnit.created_at || date
     this.updated_at = bloodUnit.updated_at || date
   }

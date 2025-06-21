@@ -9,6 +9,7 @@ import DonationRegistration from '~/models/schemas/DonationRegistration.schemas'
 import HealthCheck from '~/models/schemas/HealthCheck'
 import RefreshToken from '~/models/schemas/RefreshToken.schemas'
 import RequestProcess from '~/models/schemas/RequestProcess.schemas'
+import RequestProcessDetail from '~/models/schemas/RequestProcessDetail.schemas'
 import RequestRegistration from '~/models/schemas/RequestRegistration.schemas'
 import User from '~/models/schemas/User.schemas'
 
@@ -61,6 +62,9 @@ class DatabaseService {
   }
   get requestProcesses(): Collection<RequestProcess> {
     return this.db.collection(process.env.DB_REQUEST_PROCESSES_COLLECTION as string)
+  }
+  get requestProcessDetails(): Collection<RequestProcessDetail> {
+    return this.db.collection(process.env.DB_REQUEST_PROCESS_DETAILS_COLLECTION as string)
   }
   get blogs(): Collection<Blog> {
     return this.db.collection(process.env.DB_BLOGS_COLLECTION as string)

@@ -3,6 +3,7 @@ import { ParamsDictionary } from 'express-serve-static-core'
 import { REQUEST_MESSAGES } from '~/constants/messages'
 import {
   CreateRequestRegistrationReqBody,
+  GetRequestRegistrationIdReqParams,
   UpdateRequestRegistrationIdReqParams,
   UpdateRequestRegistrationReqBody
 } from '~/models/requests/Request.requests'
@@ -47,6 +48,18 @@ export const getRequestRegistrationByUserIdController = async (req: Request, res
 
 export const getAllRequestRegistrationController = async (req: Request, res: Response) => {
   const result = await requestsService.getAllRequestRegistration()
+  res.json({
+    message: REQUEST_MESSAGES.GET_REQUEST_REGISTRATION_SUCCESS,
+    result: result
+  })
+}
+
+export const getRequestRegistrationByIdController = async (
+  req: Request<GetRequestRegistrationIdReqParams, any, any>,
+  res: Response
+) => {
+  const { id } = req.params
+  const result = await requestsService.getRequestRegistrationById(id)
   res.json({
     message: REQUEST_MESSAGES.GET_REQUEST_REGISTRATION_SUCCESS,
     result: result

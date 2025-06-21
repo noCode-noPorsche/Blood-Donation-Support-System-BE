@@ -13,6 +13,9 @@ import RequestProcess from '~/models/schemas/RequestProcess.schemas'
 import RequestRegistration from '~/models/schemas/RequestRegistration.schemas'
 import User from '~/models/schemas/User.schemas'
 import databaseService from './database.services'
+import { ErrorWithStatus } from '~/models/Error'
+import { REQUEST_MESSAGES } from '~/constants/messages'
+import { HTTP_STATUS } from '~/constants/httpStatus'
 config()
 
 class RequestService {
@@ -63,8 +66,8 @@ class RequestService {
     }
 
     const newRequestRegistration = new RequestRegistration({
-      blood_component_id: bloodGroupId,
-      blood_group_id: bloodComponentId,
+      blood_component_id: bloodComponentId,
+      blood_group_id: bloodGroupId,
       is_emergency: payload.is_emergency,
       update_by: new ObjectId(user_id),
       image: payload.image,
@@ -82,6 +85,7 @@ class RequestService {
       _id: healthCheckId,
       user_id: new ObjectId(user_id),
       blood_group_id: bloodGroupId as ObjectId,
+      blood_component_ids: [],
       donation_process_id: null,
       donation_registration_id: null,
       request_registration_id: resultRequestRegistration.insertedId,
@@ -95,6 +99,7 @@ class RequestService {
       hemoglobin: 0,
       description: '',
       status: HealthCheckStatus.Pending,
+      updated_by: new ObjectId(user_id),
       created_at: new Date(),
       updated_at: new Date()
     })
@@ -105,12 +110,14 @@ class RequestService {
       user_id: new ObjectId(user_id),
       request_registration_id: resultRequestRegistration.insertedId,
       blood_group_id: bloodGroupId as ObjectId,
-      blood_component_id: bloodComponentId,
+      blood_component_ids: [],
       health_check_id: healthCheckId,
       volume_received: 0,
       description: '',
       status: RequestProcessStatus.Pending,
+      is_emergency: payload.is_emergency,
       request_date: new Date(),
+      update_by: new ObjectId(user_id),
       created_at: new Date(),
       updated_at: new Date()
     })
@@ -169,6 +176,17 @@ class RequestService {
 
   async getAllRequestRegistration() {
     const requestRegistration = await databaseService.requestRegistrations.find({}).toArray()
+    return requestRegistration
+  }
+
+  async getRequestRegistrationById(id: string) {
+    const requestRegistration = await databaseService.requestRegistrations.findOne({ _id: new ObjectId(id) })
+    if (!requestRegistration) {
+      throw new ErrorWithStatus({
+        message: REQUEST_MESSAGES.REQUEST_REGISTRATION_NOT_FOUND,
+        status: HTTP_STATUS.NOT_FOUND
+      })
+    }
     return requestRegistration
   }
 }

@@ -116,6 +116,7 @@ export const DONATION_MESSAGES = {
 
 export const HEALTH_CHECK_MESSAGES = {
   GET_ALL_HEALTH_CHECKS_SUCCESS: 'Get all health checks success',
+  GET_HEALTH_CHECK_SUCCESS: 'Get health check success',
   HEALTH_CHECK_NOT_FOUND: 'Health check not found',
   HEALTH_CHECK_ALREADY_EXIST: 'Health check already exists',
   HEALTH_CHECK_MUST_BE_A_STRING: 'Health check must be a string',
@@ -172,7 +173,8 @@ export const REQUEST_MESSAGES = {
   STATUS_IS_INVALID: 'Status is invalid',
   STATUS_IS_REQUIRED: 'Status is required',
   GET_REQUEST_REGISTRATION_BY_USER_SUCCESS: 'Get request registration by user success',
-  GET_REQUEST_REGISTRATION_SUCCESS: 'Get request registration success'
+  GET_REQUEST_REGISTRATION_SUCCESS: 'Get request registration success',
+  REQUEST_REGISTRATION_NOT_FOUND: 'Request registration not found'
 } as const
 
 export const BLOG_MESSAGES = {
