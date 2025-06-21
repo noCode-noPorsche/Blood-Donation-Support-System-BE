@@ -604,6 +604,32 @@ paths:
       security:
         - BearerAuth: []
   /api/health-checks/{id}:
+    get:
+      tags:
+        - Health Checks
+      summary: Get Health Check By Id for Staff or Admin
+      description: Get Health Check By Id for Staff or Admin
+      operationId: getHealthCheckById
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: MongoId
+      responses:
+        default:
+          description: Update Health Check success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthCheck'
+        '422':
+          description: Invalid Input
+        '401':
+          description: UnAuthorization
+      security:
+        - BearerAuth: []
     patch:
       tags:
         - Health Checks
