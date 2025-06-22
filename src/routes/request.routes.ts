@@ -1,18 +1,32 @@
 import express from 'express'
 import {
   createRequestRegistrationController,
+  getAllRequestProcessController,
   getAllRequestRegistrationController,
+  getRequestProcessBloodByProcessIdController,
+  getRequestProcessByIdController,
+  getRequestProcessByUserIdController,
+  getRequestProcessDetailByProcessIdController,
   getRequestRegistrationByIdController,
   getRequestRegistrationByUserIdController,
+  updateRequestProcessBloodByProcessIdController,
+  updateRequestProcessByIdController,
+  updateRequestProcessDetailByProcessIdController,
   updateRequestRegistrationController
 } from '~/controllers/request.controllers'
 import { filterMiddleware } from '~/middlewares/common.middlewares'
 import {
   createRequestRegistrationValidator,
+  updateRequestProcessValidator,
   updateRequestRegistrationValidator
 } from '~/middlewares/request.middlewares'
 import { accessTokenValidator, isStaffOrAdminValidator } from '~/middlewares/user.middlewares'
-import { CreateRequestRegistrationReqBody, UpdateRequestRegistrationReqBody } from '~/models/requests/Request.requests'
+import {
+  CreateRequestRegistrationReqBody,
+  UpdateRequestProcessDetailIdReqBody,
+  UpdateRequestProcessIdReqBody,
+  UpdateRequestRegistrationReqBody
+} from '~/models/requests/Request.requests'
 import { wrapAsync } from '~/utils/handler'
 
 const requestsRouter = express.Router()
@@ -96,6 +110,108 @@ requestsRouter.get(
   '/request-registrations/:id',
   isStaffOrAdminValidator,
   wrapAsync(getRequestRegistrationByIdController)
+)
+
+//Request Process
+/**
+ * Description. Get request Process by user id
+ * Path: /user
+ * Method: GET
+ * Header: { Authorization: Bearer <access_token>}
+ */
+requestsRouter.get('/request-processes/user', accessTokenValidator, wrapAsync(getRequestProcessByUserIdController))
+
+/**
+ * Description. Get All request Process for Admin or Staff
+ * Path: /
+ * Method: GET
+ * Header: { Authorization: Bearer <access_token>}
+ */
+requestsRouter.get('/request-processes', isStaffOrAdminValidator, wrapAsync(getAllRequestProcessController))
+
+/**
+ * Description. Get request Process by id
+ * Path: /:id
+ * Method: GET
+ * Header: { Authorization: Bearer <access_token>}
+ */
+requestsRouter.get('/request-processes/:id', isStaffOrAdminValidator, wrapAsync(getRequestProcessByIdController))
+
+/**
+ * Description. Update request Process by id
+ * Path: /:id
+ * Method: PATCH
+ * Body: { UpdateRequestRegistrationReqBody }
+ * Header: { Authorization: Bearer <access_token>}
+ */
+requestsRouter.patch(
+  '/request-processes/:id',
+  isStaffOrAdminValidator,
+  updateRequestProcessValidator,
+  filterMiddleware<UpdateRequestProcessIdReqBody>([
+    'blood_component_ids',
+    'blood_group_id',
+    'description',
+    'is_emergency',
+    'request_date',
+    'status',
+    'volume_received'
+  ]),
+  wrapAsync(updateRequestProcessByIdController)
+)
+
+//Request Process Detail
+/**
+ * Description. Get Request Process Detail by request process id
+ * Path: /:id
+ * Method: GET
+ * Header: { Authorization: Bearer <access_token>}
+ */
+requestsRouter.get(
+  '/request-process-details/:id',
+  isStaffOrAdminValidator,
+  wrapAsync(getRequestProcessDetailByProcessIdController)
+)
+
+/**
+ * Description. Update Request Process Detail by request process id
+ * Path: /:id
+ * Method: PATCH
+ * Body:
+ * Header: { Authorization: Bearer <access_token>}
+ */
+requestsRouter.patch(
+  '/request-process-details/:id',
+  isStaffOrAdminValidator,
+  // filterMiddleware<UpdateRequestProcessDetailIdReqBody>(['status', 'volume_required']),
+  wrapAsync(updateRequestProcessDetailByProcessIdController)
+)
+
+//Request Process Blood
+/**
+ * Description. Get Request Process Blood by request process id
+ * Path: /:id
+ * Method: GET
+ * Header: { Authorization: Bearer <access_token>}
+ */
+requestsRouter.get(
+  '/request-process-bloods/:id',
+  isStaffOrAdminValidator,
+  wrapAsync(getRequestProcessBloodByProcessIdController)
+)
+
+/**
+ * Description. Update Request Process Blood by request process id
+ * Path: /:id
+ * Method: PATCH
+ * Body:
+ * Header: { Authorization: Bearer <access_token>}
+ */
+requestsRouter.patch(
+  '/request-process-bloods/:id',
+  isStaffOrAdminValidator,
+  // filterMiddleware<UpdateRequestProcessDetailIdReqBody>(['status', 'volume_required']),
+  wrapAsync(updateRequestProcessBloodByProcessIdController)
 )
 
 export default requestsRouter

@@ -47,7 +47,7 @@ export const USER_MESSAGES = {
   CHANGE_PASSWORD_SUCCESS: 'Change password success',
   USER_NOT_AUTHORIZED: 'User not authorized',
   CITIZEN_ID_NUMBER_IS_REQUIRED: 'Citizen ID number is required',
-  CITIZEN_ID_NUMBER_ALREADY_EXIST: 'Email already exists',
+  CITIZEN_ID_NUMBER_ALREADY_EXIST: 'Citizen already exists',
   CITIZEN_ID_MUST_BE_EXACTLY_12_DIGITS: 'Citizen ID must be exactly 12 digits',
   CITIZEN_ID_MUST_CONTAIN_ONLY_DIGITS_0_9: 'Citizen ID must contain only digits (0–9)'
 } as const
@@ -174,7 +174,19 @@ export const REQUEST_MESSAGES = {
   STATUS_IS_REQUIRED: 'Status is required',
   GET_REQUEST_REGISTRATION_BY_USER_SUCCESS: 'Get request registration by user success',
   GET_REQUEST_REGISTRATION_SUCCESS: 'Get request registration success',
-  REQUEST_REGISTRATION_NOT_FOUND: 'Request registration not found'
+  REQUEST_REGISTRATION_NOT_FOUND: 'Request registration not found',
+  GET_REQUEST_PROCESS_SUCCESS: 'Get request process success',
+  REQUEST_PROCESS_NOT_FOUND: 'Request process not found',
+  UPDATE_REQUEST_PROCESS_SUCCESS: 'Update request process success',
+  REQUEST_DATE_IS_REQUIRED: 'Request date is required',
+  REQUEST_DATE_IS_INVALID: 'Request date is invalid',
+  VOLUME_RECEIVED_MUST_BE_POSITIVE: 'Volume received must be positive',
+  VOLUME_RECEIVED_MUST_BE_A_NUMBER: 'Volume received must be a number',
+  GET_REQUEST_PROCESS_DETAIL_SUCCESS: 'Get request process detail success',
+  REQUEST_PROCESS_DETAIL_NOT_FOUND: 'Request process detail not found',
+  UPDATE_REQUEST_PROCESS_DETAIL_SUCCESS: 'Update request process detail success',
+  GET_REQUEST_PROCESS_BLOOD_SUCCESS: 'Get request process blood success',
+  REQUEST_PROCESS_BLOOD_NOT_FOUND: 'Request process blood not found'
 } as const
 
 export const BLOG_MESSAGES = {

@@ -90,8 +90,13 @@ export enum RequestProcessStatus {
   Rejected = 'Rejected'
 }
 
+export enum RequestProcessBloodStatus {
+  Pending = 'Pending',
+  Selected = 'Selected',
+  Cancel = 'Canceled'
+}
+
 export enum RequestProcessDetailStatus {
   Pending = 'Pending',
-  Used = 'Used',
-  Cancel = 'Canceled'
+  Matched = 'Matched'
 }

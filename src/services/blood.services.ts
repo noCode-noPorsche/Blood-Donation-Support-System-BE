@@ -5,6 +5,8 @@ import BloodComponent from '~/models/schemas/BloodComponent.schemas'
 import BloodGroup from '~/models/schemas/BloodGroup.schemas'
 import databaseService from './database.services'
 import { config } from 'dotenv'
+import { ErrorWithStatus } from '~/models/Error'
+import { HTTP_STATUS } from '~/constants/httpStatus'
 config()
 
 class BloodService {
@@ -12,6 +14,18 @@ class BloodService {
     const bloodGroups = await databaseService.bloodGroups.find({}).toArray()
     return bloodGroups
   }
+
+  async getBloodGroupNameById(id: string) {
+    const bloodGroupResult = await databaseService.bloodGroups.findOne({ _id: new ObjectId(id) })
+    if (!bloodGroupResult) {
+      throw new ErrorWithStatus({
+        message: BLOOD_MESSAGES.BLOOD_GROUP_NOT_FOUND,
+        status: HTTP_STATUS.NOT_FOUND
+      })
+    }
+    return bloodGroupResult.name
+  }
+
   async createBloodGroup(name: BloodGroupEnum) {
     await databaseService.bloodGroups.insertOne(new BloodGroup({ name }))
     return {
@@ -22,6 +36,17 @@ class BloodService {
   async getBloodComponents() {
     const bloodComponents = await databaseService.bloodComponents.find({}).toArray()
     return bloodComponents
+  }
+
+  async getBloodComponentNameById(id: string) {
+    const bloodComponentResult = await databaseService.bloodComponents.findOne({ _id: new ObjectId(id) })
+    if (!bloodComponentResult) {
+      throw new ErrorWithStatus({
+        message: BLOOD_MESSAGES.BLOOD_COMPONENT_NOT_FOUND,
+        status: HTTP_STATUS.NOT_FOUND
+      })
+    }
+    return bloodComponentResult.name
   }
 
   async createBloodComponent(name: BloodComponentEnum) {

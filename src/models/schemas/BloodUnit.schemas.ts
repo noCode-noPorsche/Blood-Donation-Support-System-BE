@@ -16,7 +16,6 @@ interface BloodUnitType {
   created_at?: Date
   updated_at?: Date
 }
-
 export default class BloodUnit {
   _id?: ObjectId
   donation_process_id?: ObjectId

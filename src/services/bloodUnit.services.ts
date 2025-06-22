@@ -1,11 +1,12 @@
+import { config } from 'dotenv'
 import { ObjectId } from 'mongodb'
 import { BloodComponentEnum } from '~/constants/enum'
+import { HTTP_STATUS } from '~/constants/httpStatus'
 import { BLOOD_MESSAGES, DONATION_MESSAGES } from '~/constants/messages'
 import { ErrorWithStatus } from '~/models/Error'
 import { UpdateBloodUnitsReqBody } from '~/models/requests/BloodUnit.requests'
 import { getExpirationDateByComponent } from '~/utils/utils'
 import databaseService from './database.services'
-import { config } from 'dotenv'
 config()
 
 class BloodUnitService {
@@ -19,7 +20,6 @@ class BloodUnitService {
     user_id: string
   }) {
     const bloodUnitsList = await databaseService.bloodUnits.find({ donation_process_id: new ObjectId(id) }).toArray()
-    console.log('first', payload)
 
     const totalVolume = payload.reduce((sum, p) => sum + p.volume, 0)
 
@@ -28,11 +28,14 @@ class BloodUnitService {
     })
 
     if (!donationProcess) {
-      throw new ErrorWithStatus({ message: 'Không tìm thấy quy trình hiến máu', status: 404 })
+      throw new ErrorWithStatus({ message: 'Không tìm thấy quy trình hiến máu', status: HTTP_STATUS.NOT_FOUND })
     }
 
     if (totalVolume !== donationProcess.volume_collected) {
-      throw new ErrorWithStatus({ message: 'Tổng thể tích không khớp với lượng máu đã lấy', status: 400 })
+      throw new ErrorWithStatus({
+        message: 'Tổng thể tích không khớp với lượng máu đã lấy',
+        status: HTTP_STATUS.BAD_REQUEST
+      })
     }
 
     const allComponents = await databaseService.bloodComponents.find().toArray()
@@ -49,7 +52,7 @@ class BloodUnitService {
       if (!targetUnit) {
         throw new ErrorWithStatus({
           message: `Không tìm thấy thành phần máu có ID: ${updateItem.blood_component_id}`,
-          status: 404
+          status: HTTP_STATUS.NOT_FOUND
         })
       }
 
@@ -60,7 +63,7 @@ class BloodUnitService {
       if (!componentName) {
         throw new ErrorWithStatus({
           message: `Không tìm thấy tên thành phần máu tương ứng với ID: ${updateItem.blood_component_id}`,
-          status: 404
+          status: HTTP_STATUS.NOT_FOUND
         })
       }
 

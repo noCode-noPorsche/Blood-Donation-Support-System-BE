@@ -1,7 +1,9 @@
-import { BloodComponentEnum } from '~/constants/enum'
+import { ObjectId } from 'mongodb'
+import { BloodComponentEnum, BloodGroupEnum } from '~/constants/enum'
 import { HTTP_STATUS } from '~/constants/httpStatus'
 import { HEALTH_CHECK_MESSAGES } from '~/constants/messages'
 import { ErrorWithStatus } from '~/models/Error'
+import bloodService from '~/services/blood.services'
 
 export const calculateDonationVolume = (weight: number) => {
   if (weight < 42) {
@@ -28,4 +30,22 @@ export const getExpirationDateByComponent = (componentName: BloodComponentEnum):
 
   const days = componentExpiryDays[componentName] ?? 30
   return new Date(now.getTime() + days * 24 * 60 * 60 * 1000)
+}
+
+export const isCompatibleDonor = async (receiverGroupId: string, donorGroupId: string): Promise<boolean> => {
+  const bloodGroupMap: Record<string, string[]> = {
+    'A+': ['A+', 'A-', 'O+', 'O-'],
+    'A-': ['A-', 'O-'],
+    'B+': ['B+', 'B-', 'O+', 'O-'],
+    'B-': ['B-', 'O-'],
+    'AB+': ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'],
+    'AB-': ['A-', 'B-', 'AB-', 'O-'],
+    'O+': ['O+', 'O-'],
+    'O-': ['O-']
+  }
+
+  const receiverName = await bloodService.getBloodGroupNameById(receiverGroupId)
+  const donorName = await bloodService.getBloodGroupNameById(donorGroupId)
+
+  return bloodGroupMap[receiverName]?.includes(donorName)
 }

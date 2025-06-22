@@ -1,12 +1,12 @@
+import { config } from 'dotenv'
 import { ObjectId } from 'mongodb'
 import { DonationProcessStatus, HealthCheckStatus, RequestProcessStatus } from '~/constants/enum'
+import { HTTP_STATUS } from '~/constants/httpStatus'
 import { HEALTH_CHECK_MESSAGES, USER_MESSAGES } from '~/constants/messages'
 import { ErrorWithStatus } from '~/models/Error'
 import { UpdateHealthCheckReqBody } from '~/models/requests/HealthCheck.requests'
 import { calculateDonationVolume } from '~/utils/utils'
 import databaseService from './database.services'
-import { config } from 'dotenv'
-import { HTTP_STATUS } from '~/constants/httpStatus'
 config()
 
 class HealthCheckService {
@@ -152,7 +152,7 @@ class HealthCheckService {
       })
 
       if (result.donation_registration_id) {
-        // 👉 HealthCheck này thuộc quy trình hiến máu
+        // HealthCheck này thuộc quy trình hiến máu
         await databaseService.donationRegistrations.findOneAndUpdate(
           {
             _id: new ObjectId(result.donation_registration_id)
@@ -164,7 +164,7 @@ class HealthCheckService {
           }
         )
       } else if (result.request_registration_id) {
-        // 👉 HealthCheck này thuộc quy trình nhận máu
+        // HealthCheck này thuộc quy trình nhận máu
         await databaseService.requestRegistrations.findOneAndUpdate(
           {
             _id: new ObjectId(result.request_registration_id)
@@ -275,6 +275,70 @@ class HealthCheckService {
 
       await databaseService.requestProcesses.updateOne({ health_check_id: new ObjectId(id) }, requestUpdate)
     }
+
+    //Create Request Process Blood
+    // if (payload.status === HealthCheckStatus.Approved && result?.request_registration_id) {
+    //   const requestProcess = await databaseService.requestProcesses.findOne({
+    //     health_check_id: result._id
+    //   })
+
+    //   if (!requestProcess) {
+    //     throw new ErrorWithStatus({
+    //       message: REQUEST_MESSAGES.REQUEST_PROCESS_NOT_FOUND,
+    //       status: HTTP_STATUS.NOT_FOUND
+    //     })
+    //   }
+
+    //   await databaseService.requestProcessBloods.deleteMany({
+    //     request_process_id: requestProcess._id
+    //   })
+
+    //   // 1. Lấy tất cả túi máu còn dùng được
+    //   const allAvailableUnits = await databaseService.bloodUnits
+    //     .find({
+    //       status: BloodUnitStatus.Available,
+    //       volume: { $gt: 0 },
+    //       expired_at: { $gt: new Date() }
+    //     })
+    //     .toArray()
+
+    //   // 2. Lọc nhóm máu tương thích
+    //   const compatibleUnits = []
+
+    //   for (const unit of allAvailableUnits) {
+    //     const isCompatible = await isCompatibleDonor(
+    //       requestProcess.blood_group_id.toString(),
+    //       unit.blood_group_id.toString()
+    //     )
+
+    //     if (isCompatible) {
+    //       compatibleUnits.push(unit)
+    //     }
+    //   }
+
+    //   // 3. Với từng thành phần cần thiết, lọc túi máu tương ứng
+    //   for (const componentId of requestProcess.blood_component_ids || []) {
+    //     const matchingUnits = compatibleUnits.filter(
+    //       (unit) => unit.blood_component_id.toString() === componentId.toString()
+    //     )
+
+    //     for (const unit of matchingUnits) {
+    //       const newMapping: RequestProcessBlood = {
+    //         request_process_id: requestProcess._id,
+    //         blood_unit_id: unit._id,
+    //         blood_component_id: unit.blood_component_id,
+    //         blood_group_id: unit.blood_group_id,
+    //         volume: unit.volume ?? 0,
+    //         status: RequestProcessBloodStatus.Pending,
+    //         created_at: new Date(),
+    //         updated_at: new Date(),
+    //         updated_by: new ObjectId(user_id)
+    //       }
+
+    //       await databaseService.requestProcessBloods.insertOne(newMapping)
+    //     }
+    //   }
+    // }
     return result
   }
 }
