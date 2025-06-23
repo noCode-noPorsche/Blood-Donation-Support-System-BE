@@ -128,7 +128,7 @@ class RequestService {
       status: RequestProcessStatus.Pending,
       is_emergency: payload.is_emergency,
       request_date: new Date(),
-      update_by: new ObjectId(user_id),
+      updated_by: new ObjectId(user_id),
       created_at: new Date(),
       updated_at: new Date()
     })
@@ -258,7 +258,7 @@ class RequestService {
           blood_component_ids: Array.isArray(payload.blood_component_ids)
             ? payload.blood_component_ids.map((id) => new ObjectId(id))
             : [],
-          update_by: new ObjectId(user_id),
+          updated_by: new ObjectId(user_id),
           request_date: payload.request_date
         },
         $currentDate: { updated_at: true }

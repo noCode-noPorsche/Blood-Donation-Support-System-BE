@@ -23,6 +23,7 @@ import databaseService from './database.services'
 config()
 
 class DonationService {
+  //Donation Registration
   async createDonationRegistration({ user_id, payload }: { user_id: string; payload: DonationRegistrationReqBody }) {
     const donationProcessId = new ObjectId()
     const healthCheckId = new ObjectId()
@@ -141,6 +142,17 @@ class DonationService {
     return donationRegistration
   }
 
+  async getDonationRegistrationId(id: string) {
+    const donationRegistration = await databaseService.donationRegistrations.findOne({ _id: new ObjectId(id) })
+    if (!donationRegistration) {
+      throw new ErrorWithStatus({
+        message: DONATION_MESSAGES.DONATION_REGISTRATION_NOT_FOUND,
+        status: HTTP_STATUS.NOT_FOUND
+      })
+    }
+    return donationRegistration
+  }
+
   async getDonationRegistrationByUserId(user_id: string) {
     const donationRegistration = await databaseService.donationRegistrations
       .aggregate([
@@ -211,6 +223,7 @@ class DonationService {
     return result
   }
 
+  //Donation Process
   async getAllDonationProcesses() {
     const donationProcesses = await databaseService.donationProcesses
       .aggregate([
@@ -429,21 +442,6 @@ class DonationService {
   //   }
   //   return new DonationRegistration(deletedRegistration)
   // }
-
-  async getDonationProcesses() {
-    const donationProcesses = await databaseService.donationProcesses.find({}).toArray()
-    return donationProcesses.map((process: DonationProcess) => new DonationProcess(process))
-  }
-
-  async getDonationProcess(donationProcessId: string) {
-    const donationRequestProcess = await databaseService.donationProcesses.findOne({
-      _id: new ObjectId(donationProcessId)
-    })
-    if (!donationRequestProcess) {
-      return null
-    }
-    return new DonationProcess(donationRequestProcess)
-  }
 
   //not use
   async deleteDonationProcess(id: string) {

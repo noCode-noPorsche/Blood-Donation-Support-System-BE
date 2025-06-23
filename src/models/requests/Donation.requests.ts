@@ -6,11 +6,7 @@ export interface DonationRegistrationReqBody {
   start_date_donation: string
 }
 
-export interface GetDonationRegistrationReqParams extends ParamsDictionary {
-  user_id: string
-}
-
-export interface UpdateDonationRegistrationReqParams extends ParamsDictionary {
+export interface UpdateDonationRegistrationIdReqParams extends ParamsDictionary {
   id: string
 }
 
@@ -21,7 +17,11 @@ export interface UpdateDonationRegistrationReqBody {
   status: DonationRegistrationStatus
 }
 
-export interface GetDonationRegistrationReqParams extends ParamsDictionary {
+export interface GetDonationRegistrationIdReqParams extends ParamsDictionary {
+  id: string
+}
+
+export interface GetDonationProcessIdReqParams extends ParamsDictionary {
   id: string
 }
 

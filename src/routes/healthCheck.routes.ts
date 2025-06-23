@@ -42,6 +42,7 @@ healthCheckRouter.get('/:id', isStaffOrAdminValidator, wrapAsync(getHealthCheckB
  * Description. Update health checks by id
  * Path: /:id
  * Method: PATCH
+ * Body: { UpdateHealthCheckReqBody }
  * Header: { Authorization: Bearer <access_token>}
  */
 healthCheckRouter.patch(

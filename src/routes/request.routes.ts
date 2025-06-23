@@ -23,7 +23,6 @@ import {
 import { accessTokenValidator, isStaffOrAdminValidator } from '~/middlewares/user.middlewares'
 import {
   CreateRequestRegistrationReqBody,
-  UpdateRequestProcessDetailIdReqBody,
   UpdateRequestProcessIdReqBody,
   UpdateRequestRegistrationReqBody
 } from '~/models/requests/Request.requests'

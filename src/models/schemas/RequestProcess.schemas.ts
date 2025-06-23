@@ -13,7 +13,7 @@ interface RequestProcessType {
   is_emergency: boolean
   request_date?: Date
   description?: string
-  update_by: ObjectId
+  updated_by: ObjectId
   created_at: Date
   updated_at: Date
 }
@@ -28,7 +28,7 @@ export default class RequestProcess {
   status: RequestProcessStatus
   is_emergency: boolean
   request_date?: Date
-  update_by: ObjectId
+  updated_by: ObjectId
   created_at: Date
   updated_at: Date
   description?: string
@@ -44,7 +44,7 @@ export default class RequestProcess {
     this.status = requestProcess.status || RequestProcessStatus.Pending
     this.is_emergency = requestProcess.is_emergency
     this.request_date = requestProcess.request_date || date
-    this.update_by = requestProcess.update_by
+    this.updated_by = requestProcess.updated_by
     this.created_at = requestProcess.created_at || date
     this.updated_at = requestProcess.updated_at || date
     this.description = requestProcess.description || ''

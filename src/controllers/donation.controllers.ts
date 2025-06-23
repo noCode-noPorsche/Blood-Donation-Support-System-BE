@@ -1,14 +1,14 @@
 import { Request, Response } from 'express'
 import { NextFunction, ParamsDictionary } from 'express-serve-static-core'
-import { ObjectId } from 'mongodb'
 import { DONATION_MESSAGES } from '~/constants/messages'
 import {
   DonationRegistrationReqBody,
-  GetDonationRegistrationReqParams,
+  GetDonationProcessIdReqParams,
+  GetDonationRegistrationIdReqParams,
   UpdateDonationProcessReqBody,
   UpdateDonationProcessReqParams,
-  UpdateDonationRegistrationReqBody,
-  UpdateDonationRegistrationReqParams
+  UpdateDonationRegistrationIdReqParams,
+  UpdateDonationRegistrationReqBody
 } from '~/models/requests/Donation.requests'
 import { TokenPayload } from '~/models/requests/User.requests'
 import donationService from '~/services/donation.services'
@@ -38,6 +38,21 @@ export const getAllDonationRegistrationsController = async (req: Request, res: R
   })
 }
 
+export const getDonationRegistrationByIdController = async (
+  req: Request<GetDonationRegistrationIdReqParams, any, any>,
+  res: Response,
+  next: NextFunction
+) => {
+  const { id } = req.params
+
+  const donationRegistrationById = await donationService.getDonationRegistrationId(id)
+
+  res.json({
+    message: DONATION_MESSAGES.GET_DONATION_REGISTRATIONS_SUCCESS,
+    result: donationRegistrationById
+  })
+}
+
 export const getDonationRegistrationByUserIdController = async (req: Request, res: Response, next: NextFunction) => {
   const { user_id } = req.decode_authorization as TokenPayload
 
@@ -50,7 +65,7 @@ export const getDonationRegistrationByUserIdController = async (req: Request, re
 }
 
 export const updateDonationRegistrationController = async (
-  req: Request<UpdateDonationRegistrationReqParams, any, UpdateDonationRegistrationReqBody>,
+  req: Request<UpdateDonationRegistrationIdReqParams, any, UpdateDonationRegistrationReqBody>,
   res: Response
 ) => {
   const { id } = req.params
@@ -92,11 +107,11 @@ export const updateDonationRegistrationController = async (
 //   })
 // }
 
-//Donation Registration Process
+//Donation Process
 export const getAllDonationProcessesController = async (req: Request, res: Response) => {
   const donationRequestsProcess = await donationService.getAllDonationProcesses()
 
-  res.status(200).json({
+  res.json({
     message: DONATION_MESSAGES.GET_ALL_DONATION_REQUEST_PROCESS_SUCCESS,
     result: donationRequestsProcess
   })
@@ -126,7 +141,7 @@ export const updateDonationProcessController = async (
   })
 }
 
-export const getDonationProcessesController = async (req: Request, res: Response) => {
+export const getDonationProcessByUserIdController = async (req: Request, res: Response) => {
   const { user_id } = req.decode_authorization as TokenPayload
 
   const donationProcess = await donationService.getDonationProcessByUserId(user_id)
@@ -142,29 +157,8 @@ export const getDonationProcessesController = async (req: Request, res: Response
   })
 }
 
-export const getDonationProcessController = async (req: Request, res: Response) => {
-  const { id } = req.params
-
-  if (!ObjectId.isValid(id)) {
-    res.status(400).json({ message: DONATION_MESSAGES.DONATION_REQUEST_PROCESS_ID_INVALID })
-    return
-  }
-
-  const donationProcess = await donationService.getDonationProcess(id)
-
-  if (!donationProcess) {
-    res.status(404).json({ message: DONATION_MESSAGES.DONATION_PROCESS_NOT_FOUND })
-    return
-  }
-
-  res.status(200).json({
-    message: DONATION_MESSAGES.GET_DONATION_REQUEST_PROCESS_SUCCESS,
-    result: donationProcess
-  })
-}
-
 export const getDonationProcessesByIdController = async (
-  req: Request<GetDonationRegistrationReqParams, any, any>,
+  req: Request<GetDonationProcessIdReqParams, any, any>,
   res: Response
 ) => {
   const { id } = req.params

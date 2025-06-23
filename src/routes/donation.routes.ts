@@ -4,8 +4,9 @@ import {
   // deleteDonationRegistrationController,
   getAllDonationProcessesController,
   getAllDonationRegistrationsController,
+  getDonationProcessByUserIdController,
   getDonationProcessesByIdController,
-  getDonationProcessesController,
+  getDonationRegistrationByIdController,
   getDonationRegistrationByUserIdController,
   updateDonationProcessController,
   updateDonationRegistrationController
@@ -16,12 +17,8 @@ import {
   updateDonationProcessValidator,
   updateDonationRegistrationValidator
 } from '~/middlewares/donation.middlewares'
-import { accessTokenValidator, isAdminValidator, isStaffOrAdminValidator } from '~/middlewares/user.middlewares'
-import {
-  UpdateDonationProcessReqBody,
-  UpdateDonationRegistrationReqBody,
-  UpdateDonationRegistrationReqParams
-} from '~/models/requests/Donation.requests'
+import { accessTokenValidator, isStaffOrAdminValidator } from '~/middlewares/user.middlewares'
+import { UpdateDonationProcessReqBody, UpdateDonationRegistrationReqBody } from '~/models/requests/Donation.requests'
 
 import { wrapAsync } from '~/utils/handler'
 
@@ -31,7 +28,7 @@ const donationRouter = express.Router()
  * Description. Create a new donation
  * Path: /donation-registrations
  * METHOD: POST
- * Body : { user_id: string, blood_group_id: string, blood_component_id: string, start_date_donation: Date, status: DonationRegistrationStatus }
+ * Body : { DonationRegistrationReqBody }
  * Header: { Authorization: Bearer <access_token>}
  */
 donationRouter.post(
@@ -45,6 +42,7 @@ donationRouter.post(
  * Description. Get all donation registrations for staff or admin
  * Path: /donation-registrations
  * METHOD: GET
+ * Header: { Authorization: Bearer <access_token>}
  */
 donationRouter.get('/donation-registrations', isStaffOrAdminValidator, wrapAsync(getAllDonationRegistrationsController))
 
@@ -52,6 +50,7 @@ donationRouter.get('/donation-registrations', isStaffOrAdminValidator, wrapAsync
  * Description. Get donation registration by user id
  * Path: /donation-registrations/user
  * METHOD: GET
+ * Header: { Authorization: Bearer <access_token>}
  */
 donationRouter.get(
   '/donation-registrations/user',
@@ -60,10 +59,23 @@ donationRouter.get(
 )
 
 /**
+ * Description. Get donation registration by id
+ * Path: /donation-registrations/:id
+ * METHOD: GET
+ * Header: { Authorization: Bearer <access_token>}
+ */
+donationRouter.get(
+  '/donation-registrations/:id',
+  isStaffOrAdminValidator,
+  wrapAsync(getDonationRegistrationByIdController)
+)
+
+/**
  * Description. Update information a donation registration for customer
  * Path: /donation-registrations/:id
  * METHOD: PATCH
- * Body : { blood_group_id: string, blood_component_id: string, start_date_donation: Date }
+ * Body : { UpdateDonationRegistrationReqBody }
+ * Header: { Authorization: Bearer <access_token>}
  */
 donationRouter.patch(
   '/donation-registrations/:id',
@@ -102,6 +114,7 @@ donationRouter.get('/donation-processes', isStaffOrAdminValidator, wrapAsync(get
  * Description. Get donation request processes by id for staff or admin
  * Path: /donation-request-processes/:id
  * METHOD: GET
+ * Header: { Authorization: Bearer <access_token>}
  */
 donationRouter.get('/donation-processes/:id', isStaffOrAdminValidator, wrapAsync(getDonationProcessesByIdController))
 
@@ -109,14 +122,17 @@ donationRouter.get('/donation-processes/:id', isStaffOrAdminValidator, wrapAsync
  * Description. Get donation process by user id
  * Path: /donation-processes/user
  * METHOD: GET
+ * Header: { Authorization: Bearer <access_token>}
+ *
  */
-donationRouter.get('/donation-processes/user', accessTokenValidator, wrapAsync(getDonationProcessesController))
+donationRouter.get('/donation-processes/user', accessTokenValidator, wrapAsync(getDonationProcessByUserIdController))
 
 /**
  * Description. Update a donation request process for staff or admin
  * Path: /donation-request-processes/:id
  * METHOD: PATCH
- * Body : { status: string, description: string, donation_date: Date, volume_collected: number }
+ * Body : { UpdateDonationProcessReqBody }
+ * Header: { Authorization: Bearer <access_token>}
  */
 donationRouter.patch(
   '/donation-processes/:id',
