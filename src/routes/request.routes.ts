@@ -57,7 +57,7 @@ requestsRouter.get(
   wrapAsync(getRequestHealthProcessByRequestIdController)
 )
 
-//Request Registration
+// Request Registration
 /**
  * Description. Create a new request registration
  * Path: /
@@ -70,14 +70,15 @@ requestsRouter.post(
   isStaffOrAdminValidator,
   createRequestRegistrationValidator,
   filterMiddleware<CreateRequestRegistrationReqBody>([
-    'blood_component_id',
+    'blood_component_ids',
     'blood_group_id',
     'citizen_id_number',
     'full_name',
     'image',
     'is_emergency',
     'phone',
-    'receive_date_request'
+    'receive_date_request',
+    'note'
   ]),
   wrapAsync(createRequestRegistrationController)
 )

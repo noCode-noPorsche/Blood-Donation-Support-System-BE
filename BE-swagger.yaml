@@ -206,6 +206,44 @@ paths:
           description: UnAuthorization
       security:
         - BearerAuth: []
+  /api/users/{citizen_id_number}:
+    get:
+      tags:
+        - Users
+      summary: Get user information by citizen id number for Staff or Admin
+      description: Get user information by citizen id number for Staff or Admin
+      operationId: information by citizen id
+      responses:
+        default:
+          description: Get user information by citizen id number success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+        '401':
+          description: UnAuthorization
+      security:
+        - BearerAuth: []
+  /api/users:
+    get:
+      tags:
+        - Users
+      summary: Get all user information for Staff or Admin
+      description: Get all user information for Staff or Admin
+      operationId: getAllInformation
+      responses:
+        default:
+          description: Get all user information success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+        '401':
+          description: UnAuthorization
+      security:
+        - BearerAuth: []
   /api/bloods/blood-groups:
     get:
       tags:
@@ -1772,6 +1810,8 @@ components:
           type: string
         image:
           type: string
+        note:
+          type: string
     RequestRegistration:
       type: object
       properties:
@@ -1812,6 +1852,8 @@ components:
           type: string
           format: MongoId
           example: 682f6a3fdb3fb589d23e7654
+        note:
+          type: string
         image:
           type: string
         created_at:

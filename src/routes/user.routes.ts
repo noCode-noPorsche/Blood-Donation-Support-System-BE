@@ -2,7 +2,9 @@ import express from 'express'
 import { filterMiddleware } from '~/middlewares/common.middlewares'
 import {
   changePasswordController,
+  getAllUserController,
   getMeController,
+  getProfileByCitizenIdNumberController,
   loginController,
   logoutController,
   refreshTokenController,
@@ -12,6 +14,7 @@ import {
 import {
   accessTokenValidator,
   changePasswordValidator,
+  isStaffOrAdminValidator,
   loginValidator,
   refreshTokenValidator,
   registerValidator,
@@ -66,6 +69,22 @@ usersRouter.post('/refresh-token', refreshTokenValidator, wrapAsync(refreshToken
  * Header: { Authorization: Bearer <access_token>}
  */
 usersRouter.get('/me', accessTokenValidator, wrapAsync(getMeController))
+
+/**
+ * Description. Get All User for Admin or Staff
+ * Path: /
+ * METHOD: GET
+ * Header: { Authorization: Bearer <access_token>}
+ */
+usersRouter.get('/', isStaffOrAdminValidator, wrapAsync(getAllUserController))
+
+/**
+ * Description. Get Profile by citizen id number
+ * Path: /:citizen_id_number
+ * METHOD: GET
+ * Header: { Authorization: Bearer <access_token>}
+ */
+usersRouter.get('/:citizen_id_number', accessTokenValidator, wrapAsync(getProfileByCitizenIdNumberController))
 
 /**
  * Description. Update My Profile

@@ -164,10 +164,14 @@ class RequestService {
     const resultUser = await databaseService.users.findOne({ citizen_id_number: payload.citizen_id_number })
 
     const isValidBloodGroupId = ObjectId.isValid(payload.blood_group_id as string)
-    const isValidBloodComponentId = ObjectId.isValid(payload.blood_component_id as string)
-
     const bloodGroupId = isValidBloodGroupId ? new ObjectId(payload.blood_group_id) : resultUser?.blood_group_id || null
-    const bloodComponentId = isValidBloodComponentId ? new ObjectId(payload.blood_component_id) : null
+
+    let bloodComponentIds: ObjectId[] | null = null
+
+    if (Array.isArray(payload.blood_component_ids)) {
+      const validIds = payload.blood_component_ids.filter((id) => ObjectId.isValid(id))
+      bloodComponentIds = validIds.map((id) => new ObjectId(id))
+    }
 
     if (!resultUser) {
       const date = new Date()
@@ -197,7 +201,7 @@ class RequestService {
     }
 
     const newRequestRegistration = new RequestRegistration({
-      blood_component_id: bloodComponentId,
+      blood_component_ids: bloodComponentIds,
       blood_group_id: bloodGroupId,
       is_emergency: payload.is_emergency,
       update_by: new ObjectId(user_id),
@@ -216,7 +220,7 @@ class RequestService {
       _id: healthCheckId,
       user_id: new ObjectId(userObjectId),
       blood_group_id: bloodGroupId as ObjectId,
-      blood_component_ids: [],
+      blood_component_ids: bloodComponentIds,
       donation_process_id: null,
       donation_registration_id: null,
       request_registration_id: resultRequestRegistration.insertedId,

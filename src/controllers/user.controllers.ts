@@ -4,6 +4,7 @@ import { ObjectId } from 'mongodb'
 import { USER_MESSAGES } from '~/constants/messages'
 import {
   ChangePasswordReqBody,
+  GetProfileByCitizenIdNumberReqParam,
   LogoutReqBody,
   RefreshTokenReqBody,
   RegisterReqBody,
@@ -58,6 +59,26 @@ export const refreshTokenController = async (
 export const getMeController = async (req: Request, res: Response) => {
   const { user_id } = req.decode_authorization as TokenPayload
   const result = await usersService.getMe(user_id)
+  res.json({
+    message: USER_MESSAGES.GET_PROFILE_SUCCESS,
+    result
+  })
+}
+
+export const getAllUserController = async (req: Request, res: Response) => {
+  const result = await usersService.getAllUser()
+  res.json({
+    message: USER_MESSAGES.GET_PROFILE_SUCCESS,
+    result
+  })
+}
+
+export const getProfileByCitizenIdNumberController = async (
+  req: Request<GetProfileByCitizenIdNumberReqParam, any, any>,
+  res: Response
+) => {
+  const { citizen_id_number } = req.params
+  const result = await usersService.getProfileByCitizenIdNumber(citizen_id_number)
   res.json({
     message: USER_MESSAGES.GET_PROFILE_SUCCESS,
     result

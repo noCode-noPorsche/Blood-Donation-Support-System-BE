@@ -5,7 +5,7 @@ interface HealthCheckType {
   _id?: ObjectId
   user_id: ObjectId
   blood_group_id: ObjectId
-  blood_component_ids?: ObjectId[]
+  blood_component_ids?: ObjectId[] | null
   donation_registration_id: ObjectId | null
   donation_process_id: ObjectId | null
   request_registration_id: ObjectId | null
@@ -28,7 +28,7 @@ export default class HealthCheck {
   _id?: ObjectId
   user_id: ObjectId
   blood_group_id: ObjectId
-  blood_component_ids?: ObjectId[]
+  blood_component_ids?: ObjectId[] | null
   donation_registration_id: ObjectId | null
   donation_process_id: ObjectId | null
   request_registration_id: ObjectId | null
@@ -50,7 +50,7 @@ export default class HealthCheck {
     this._id = healthCheck._id || new ObjectId()
     this.user_id = healthCheck.user_id
     this.blood_group_id = healthCheck.blood_group_id
-    this.blood_component_ids = healthCheck.blood_component_ids || []
+    this.blood_component_ids = healthCheck.blood_component_ids || null
     this.donation_registration_id = healthCheck.donation_registration_id || null
     this.donation_process_id = healthCheck.donation_process_id || null
     this.request_registration_id = healthCheck.request_registration_id || null

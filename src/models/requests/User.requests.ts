@@ -1,3 +1,4 @@
+import { ParamsDictionary } from 'express-serve-static-core'
 import { JwtPayload } from 'jsonwebtoken'
 import { ObjectId } from 'mongodb'
 import { TokenType, UserGender, UserRole } from '~/constants/enum'
@@ -42,4 +43,8 @@ export interface ChangePasswordReqBody {
   old_password: string
   password: string
   confirm_password: string
+}
+
+export interface GetProfileByCitizenIdNumberReqParam extends ParamsDictionary {
+  citizen_id_number: string
 }
