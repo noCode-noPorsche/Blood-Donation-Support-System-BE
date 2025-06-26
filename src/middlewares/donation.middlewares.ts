@@ -78,33 +78,33 @@ export const updateDonationRegistrationValidator = validate(
     {
       blood_group_id: {
         ...bloodGroupSchema,
-        notEmpty: undefined,
-        custom: {
-          options: async (value: string) => {
-            const isBloodGroupExist = await bloodService.isBloodGroupIdExist(value)
-            if (!isBloodGroupExist) {
-              throw new ErrorWithStatus({
-                message: BLOOD_MESSAGES.BLOOD_GROUP_NOT_FOUND,
-                status: HTTP_STATUS.BAD_REQUEST
-              })
-            }
-          }
-        }
+        notEmpty: undefined
+        // custom: {
+        //   options: async (value: string) => {
+        //     const isBloodGroupExist = await bloodService.isBloodGroupIdExist(value)
+        //     if (!isBloodGroupExist) {
+        //       throw new ErrorWithStatus({
+        //         message: BLOOD_MESSAGES.BLOOD_GROUP_NOT_FOUND,
+        //         status: HTTP_STATUS.BAD_REQUEST
+        //       })
+        //     }
+        //   }
+        // }
       },
       blood_component_id: {
         ...bloodComponentSchema,
-        notEmpty: undefined,
-        custom: {
-          options: async (value: string) => {
-            const isBloodComponentExist = await bloodService.isBloodComponentIdExist(value)
-            if (!isBloodComponentExist) {
-              throw new ErrorWithStatus({
-                message: BLOOD_MESSAGES.BLOOD_COMPONENT_NOT_FOUND,
-                status: HTTP_STATUS.BAD_REQUEST
-              })
-            }
-          }
-        }
+        notEmpty: undefined
+        // custom: {
+        //   options: async (value: string) => {
+        //     const isBloodComponentExist = await bloodService.isBloodComponentIdExist(value)
+        //     if (!isBloodComponentExist) {
+        //       throw new ErrorWithStatus({
+        //         message: BLOOD_MESSAGES.BLOOD_COMPONENT_NOT_FOUND,
+        //         status: HTTP_STATUS.BAD_REQUEST
+        //       })
+        //     }
+        //   }
+        // }
       },
       start_date_donation: {
         notEmpty: undefined,

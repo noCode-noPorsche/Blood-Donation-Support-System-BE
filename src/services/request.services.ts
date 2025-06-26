@@ -30,6 +30,126 @@ import databaseService from './database.services'
 config()
 
 class RequestService {
+  //Request - Health - Process
+  async getRequestHealthProcessByUserId(user_id: string) {
+    const userObjectId = new ObjectId(user_id)
+
+    const requestRegistrations = await databaseService.requestRegistrations.find({ user_id: userObjectId }).toArray()
+
+    const result = []
+
+    for (const regis of requestRegistrations) {
+      const [healthCheck, requestProcess] = await Promise.all([
+        regis.health_check_id ? databaseService.healthChecks.findOne({ _id: regis.health_check_id }) : null,
+        regis.request_process_id ? databaseService.requestProcesses.findOne({ _id: regis.request_process_id }) : null
+      ])
+
+      // Get blood group name
+      const bloodGroup = regis.blood_group_id
+        ? await databaseService.bloodGroups.findOne({ _id: regis.blood_group_id })
+        : null
+
+      // Get blood component names from requestProcess.blood_component_ids (mảng)
+      let bloodComponentNames: string[] = []
+      if (requestProcess?.blood_component_ids && requestProcess.blood_component_ids.length > 0) {
+        const componentObjects = await databaseService.bloodComponents
+          .find({ _id: { $in: requestProcess.blood_component_ids } })
+          .toArray()
+        bloodComponentNames = componentObjects.map((comp) => comp.name)
+      }
+
+      const combined = {
+        _id: regis._id,
+        user_id: regis.user_id,
+        request_process_id: regis.request_process_id,
+        health_check_id: regis.health_check_id,
+        status: regis.status,
+        receive_date_request: regis.receive_date_request,
+        is_emergency: regis.is_emergency,
+        image: regis.image || null,
+
+        // Health check
+        weight: healthCheck?.weight,
+        temperature: healthCheck?.temperature,
+        heart_rate: healthCheck?.heart_rate,
+        diastolic_blood_pressure: healthCheck?.diastolic_blood_pressure,
+        systolic_blood_pressure: healthCheck?.systolic_blood_pressure,
+        underlying_health_condition: healthCheck?.underlying_health_condition,
+        hemoglobin: healthCheck?.hemoglobin,
+
+        // Process
+        volume_received: requestProcess?.volume_received,
+        request_date: requestProcess?.request_date,
+        description: requestProcess?.description || healthCheck?.description,
+
+        // Names
+        blood_group: bloodGroup?.name ?? null,
+        blood_components: bloodComponentNames // <-- đây là mảng tên
+      }
+
+      result.push(combined)
+    }
+
+    return result
+  }
+
+  async getRequestHealthProcessByRequestId(request_id: string) {
+    const requestObjectId = new ObjectId(request_id)
+
+    const regis = await databaseService.requestRegistrations.findOne({ _id: requestObjectId })
+
+    if (!regis) return null
+
+    const [healthCheck, requestProcess] = await Promise.all([
+      regis.health_check_id ? databaseService.healthChecks.findOne({ _id: regis.health_check_id }) : null,
+      regis.request_process_id ? databaseService.requestProcesses.findOne({ _id: regis.request_process_id }) : null
+    ])
+
+    const bloodGroup = regis.blood_group_id
+      ? await databaseService.bloodGroups.findOne({ _id: regis.blood_group_id })
+      : null
+
+    let bloodComponentNames: string[] = []
+    if (requestProcess?.blood_component_ids && requestProcess.blood_component_ids.length > 0) {
+      const componentObjects = await databaseService.bloodComponents
+        .find({ _id: { $in: requestProcess.blood_component_ids } })
+        .toArray()
+      bloodComponentNames = componentObjects.map((comp) => comp.name)
+    }
+
+    const combined = {
+      _id: regis._id,
+      user_id: regis.user_id,
+      request_process_id: regis.request_process_id,
+      health_check_id: regis.health_check_id,
+      status: regis.status,
+      receive_date_request: regis.receive_date_request,
+      is_emergency: regis.is_emergency,
+      image: regis.image || null,
+
+      // Health Check
+      weight: healthCheck?.weight,
+      temperature: healthCheck?.temperature,
+      heart_rate: healthCheck?.heart_rate,
+      diastolic_blood_pressure: healthCheck?.diastolic_blood_pressure,
+      systolic_blood_pressure: healthCheck?.systolic_blood_pressure,
+      underlying_health_condition: healthCheck?.underlying_health_condition,
+      hemoglobin: healthCheck?.hemoglobin,
+
+      // Request Process
+      volume_received: requestProcess?.volume_received,
+      request_date: requestProcess?.request_date,
+      description: requestProcess?.description || healthCheck?.description,
+
+      // Names
+      blood_group: bloodGroup?.name ?? null,
+      blood_components: bloodComponentNames
+    }
+
+    return combined
+  }
+
+  //Request Donation
   async createRequestRegistration({
     user_id,
     payload

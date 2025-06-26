@@ -17,12 +17,16 @@ tags:
     description: Operations about donation registrations
   - name: Donation Processes
     description: Operations about donation processes
+  - name: Donation - Health - Process
+    description: Operations about Donation - Health - Process
   - name: Health Checks
     description: Operations about health checks
   - name: Request Registrations
     description: Operations about request registrations
   - name: Request Processes
     description: Operations about request processes
+  - name: Request - Health - Process
+    description: Operations about Request - Health - Process
   - name: Request Process Details
     description: Operations about request process details
   - name: Request Process Bloods
@@ -592,6 +596,41 @@ paths:
           description: UnAuthorization
       security:
         - BearerAuth: []
+  /api/donations/donation-health-process/user:
+    get:
+      tags:
+        - Donation - Health - Process
+      summary: Get Donation - Health - Process By User Id
+      description: Get Donation - Health - Process By User Id
+      operationId: getDonationHealthProcessByUserId
+      responses:
+        default:
+          description: Get donation processes success
+        '401':
+          description: UnAuthorization
+      security:
+        - BearerAuth: []
+  /api/donations/donation-health-process/{id}:
+    get:
+      tags:
+        - Donation - Health - Process
+      summary: Get Donation - Health - Process By Donation Id
+      description: Get Donation - Health - Process By Donation Id
+      operationId: getDonationHealthProcessByDonationId
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: MongoId
+          required: true
+      responses:
+        default:
+          description: Get donation processes success
+        '401':
+          description: UnAuthorization
+      security:
+        - BearerAuth: []
   /api/health-checks/:
     get:
       tags:
@@ -907,6 +946,41 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RequestProcess'
+        '401':
+          description: UnAuthorization
+      security:
+        - BearerAuth: []
+  /api/requests/request-health-process/user:
+    get:
+      tags:
+        - Request - Health - Process
+      summary: Get Request - Health - Process By User Id
+      description: Get Request - Health - Process By User Id
+      operationId: getRequestHealthProcessByUserId
+      responses:
+        default:
+          description: Get donation processes success
+        '401':
+          description: UnAuthorization
+      security:
+        - BearerAuth: []
+  /api/requests/request-health-process/{id}:
+    get:
+      tags:
+        - Request - Health - Process
+      summary: Get Request - Health - Process By Request Id
+      description: Get Request - Health - Process By Request Id
+      operationId: getRequestHealthProcessByRequestId
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: MongoId
+          required: true
+      responses:
+        default:
+          description: Get request processes success
         '401':
           description: UnAuthorization
       security:

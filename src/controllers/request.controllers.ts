@@ -19,6 +19,26 @@ import {
 import { TokenPayload } from '~/models/requests/User.requests'
 import requestsService from '~/services/request.services'
 
+//Request - Health - Process
+export const getAllRequestHealthProcessByUserIdController = async (req: Request, res: Response) => {
+  const { user_id } = req.decode_authorization as TokenPayload
+  const result = await requestsService.getRequestHealthProcessByUserId(user_id)
+  res.json({
+    message: REQUEST_MESSAGES.GET_REQUEST_REGISTRATION_BY_USER_SUCCESS,
+    result: result
+  })
+}
+
+export const getRequestHealthProcessByRequestIdController = async (req: Request, res: Response) => {
+  const { id } = req.params
+  const result = await requestsService.getRequestHealthProcessByRequestId(id)
+  res.json({
+    message: REQUEST_MESSAGES.GET_REQUEST_REGISTRATION_BY_USER_SUCCESS,
+    result: result
+  })
+}
+
+//Request Donation
 export const createRequestRegistrationController = async (
   req: Request<ParamsDictionary, any, CreateRequestRegistrationReqBody>,
   res: Response

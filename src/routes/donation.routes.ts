@@ -1,9 +1,11 @@
 import express from 'express'
 import {
   createDonationRegistrationController,
+  getAllDonationHealthProcessByUserIdController,
   // deleteDonationRegistrationController,
   getAllDonationProcessesController,
   getAllDonationRegistrationsController,
+  getDonationHealthProcessByDonationIdController,
   getDonationProcessByUserIdController,
   getDonationProcessesByIdController,
   getDonationRegistrationByIdController,
@@ -24,6 +26,32 @@ import { wrapAsync } from '~/utils/handler'
 
 const donationRouter = express.Router()
 
+//Donation - Health - Process
+/**
+ * Description. Get all donation registrations - health check - donation process for user now
+ * Path: /donation-health-processes/user
+ * METHOD: GET
+ * Header: { Authorization: Bearer <access_token>}
+ */
+donationRouter.get(
+  '/donation-health-process/user',
+  accessTokenValidator,
+  wrapAsync(getAllDonationHealthProcessByUserIdController)
+)
+
+/**
+ * Description. Get all donation registrations - health check - donation process for user now
+ * Path: /donation-health-processes/user
+ * METHOD: GET
+ * Header: { Authorization: Bearer <access_token>}
+ */
+donationRouter.get(
+  '/donation-health-process/:id',
+  accessTokenValidator,
+  wrapAsync(getDonationHealthProcessByDonationIdController)
+)
+
+//Donation Registration
 /**
  * Description. Create a new donation
  * Path: /donation-registrations

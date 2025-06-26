@@ -11,9 +11,9 @@ export interface UpdateDonationRegistrationIdReqParams extends ParamsDictionary 
 }
 
 export interface UpdateDonationRegistrationReqBody {
-  blood_group_id: string
-  blood_component_id: string
-  start_date_donation: Date
+  blood_group_id?: string
+  blood_component_id?: string
+  start_date_donation?: string
   status: DonationRegistrationStatus
 }
 
@@ -29,7 +29,7 @@ export interface UpdateDonationProcessReqBody {
   blood_group_id: string
   volume_collected: number
   description: string
-  donation_date: Date
+  donation_date: string
   status: DonationProcessStatus
 }
 

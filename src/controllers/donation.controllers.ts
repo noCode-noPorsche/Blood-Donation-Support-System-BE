@@ -13,6 +13,25 @@ import {
 import { TokenPayload } from '~/models/requests/User.requests'
 import donationService from '~/services/donation.services'
 
+//Donation - Health - Process
+export const getAllDonationHealthProcessByUserIdController = async (req: Request, res: Response) => {
+  const { user_id } = req.decode_authorization as TokenPayload
+  const donationHealthProcess = await donationService.getAllDonationHealthProcessByUserId(user_id)
+  res.json({
+    message: DONATION_MESSAGES.GET_ALL_DONATION_REGISTRATIONS_SUCCESS,
+    result: donationHealthProcess
+  })
+}
+
+export const getDonationHealthProcessByDonationIdController = async (req: Request, res: Response) => {
+  const { id } = req.params
+  const donationHealthProcess = await donationService.getDonationHealthProcessByDonationId(id)
+  res.json({
+    message: DONATION_MESSAGES.GET_ALL_DONATION_REGISTRATIONS_SUCCESS,
+    result: donationHealthProcess
+  })
+}
+
 //Donation Registration
 export const createDonationRegistrationController = async (
   req: Request<ParamsDictionary, any, DonationRegistrationReqBody>,
@@ -143,7 +162,7 @@ export const updateDonationProcessController = async (
 
 export const getDonationProcessByUserIdController = async (req: Request, res: Response) => {
   const { user_id } = req.decode_authorization as TokenPayload
-
+  console.log('user_id', user_id)
   const donationProcess = await donationService.getDonationProcessByUserId(user_id)
 
   if (donationProcess.length === 0) {

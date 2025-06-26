@@ -23,6 +23,107 @@ import databaseService from './database.services'
 config()
 
 class DonationService {
+  //Donation - Health - Process
+  async getAllDonationHealthProcessByUserId(user_id: string) {
+    const userObjectId = new ObjectId(user_id)
+
+    const donationRegistrations = await databaseService.donationRegistrations.find({ user_id: userObjectId }).toArray()
+
+    const result = []
+
+    for (const regis of donationRegistrations) {
+      const [healthCheck, donationProcess] = await Promise.all([
+        regis.health_check_id ? databaseService.healthChecks.findOne({ _id: regis.health_check_id }) : null,
+        regis.donation_process_id ? databaseService.donationProcesses.findOne({ _id: regis.donation_process_id }) : null
+      ])
+
+      // Get blood group + component names
+      const bloodGroup = regis.blood_group_id
+        ? await databaseService.bloodGroups.findOne({ _id: regis.blood_group_id })
+        : null
+      const bloodComponent = regis.blood_component_id
+        ? await databaseService.bloodComponents.findOne({ _id: regis.blood_component_id })
+        : null
+
+      // Gộp và loại field không cần
+      const combined = {
+        _id: regis._id,
+        user_id: regis.user_id,
+        donation_process_id: regis.donation_process_id,
+        health_check_id: regis.health_check_id,
+        status: regis.status,
+        start_date_donation: regis.start_date_donation,
+        donation_registration_id: healthCheck?.donation_registration_id,
+        weight: healthCheck?.weight,
+        temperature: healthCheck?.temperature,
+        heart_rate: healthCheck?.heart_rate,
+        diastolic_blood_pressure: healthCheck?.diastolic_blood_pressure,
+        systolic_blood_pressure: healthCheck?.systolic_blood_pressure,
+        underlying_health_condition: healthCheck?.underlying_health_condition,
+        hemoglobin: healthCheck?.hemoglobin,
+        description: donationProcess?.description || healthCheck?.description,
+        volume_collected: donationProcess?.volume_collected,
+        donation_date: donationProcess?.donation_date,
+
+        // Chỉ lấy name
+        blood_group: bloodGroup?.name ?? null,
+        blood_component: bloodComponent?.name ?? null
+      }
+
+      result.push(combined)
+    }
+
+    return result
+  }
+
+  async getDonationHealthProcessByDonationId(id: string) {
+    const regis = await databaseService.donationRegistrations.findOne({
+      _id: new ObjectId(id)
+    })
+
+    if (!regis) return null
+
+    const [healthCheck, donationProcess] = await Promise.all([
+      regis.health_check_id ? databaseService.healthChecks.findOne({ _id: regis.health_check_id }) : null,
+      regis.donation_process_id ? databaseService.donationProcesses.findOne({ _id: regis.donation_process_id }) : null
+    ])
+
+    // Get blood group + component names
+    const bloodGroup = regis.blood_group_id
+      ? await databaseService.bloodGroups.findOne({ _id: regis.blood_group_id })
+      : null
+    const bloodComponent = regis.blood_component_id
+      ? await databaseService.bloodComponents.findOne({ _id: regis.blood_component_id })
+      : null
+
+    // Gộp và loại field không cần
+    const combined = {
+      _id: regis._id,
+      user_id: regis.user_id,
+      donation_process_id: regis.donation_process_id,
+      health_check_id: regis.health_check_id,
+      status: regis.status,
+      start_date_donation: regis.start_date_donation,
+      donation_registration_id: healthCheck?.donation_registration_id,
+      weight: healthCheck?.weight,
+      temperature: healthCheck?.temperature,
+      heart_rate: healthCheck?.heart_rate,
+      diastolic_blood_pressure: healthCheck?.diastolic_blood_pressure,
+      systolic_blood_pressure: healthCheck?.systolic_blood_pressure,
+      underlying_health_condition: healthCheck?.underlying_health_condition,
+      hemoglobin: healthCheck?.hemoglobin,
+      description: donationProcess?.description || healthCheck?.description,
+      volume_collected: donationProcess?.volume_collected,
+      donation_date: donationProcess?.donation_date,
+
+      // Chỉ lấy name
+      blood_group: bloodGroup?.name ?? null,
+      blood_component: bloodComponent?.name ?? null
+    }
+
+    return combined
+  }
+
   //Donation Registration
   async createDonationRegistration({ user_id, payload }: { user_id: string; payload: DonationRegistrationReqBody }) {
     const donationProcessId = new ObjectId()
@@ -206,16 +307,23 @@ class DonationService {
   }
 
   async updateDonationRegistration({ id, payload }: { id: string; payload: UpdateDonationRegistrationReqBody }) {
+    const isValidBloodGroupId = ObjectId.isValid(payload.blood_group_id as string)
+    const isValidBloodComponentId = ObjectId.isValid(payload.blood_component_id as string)
+
+    const bloodGroupId = isValidBloodGroupId ? new ObjectId(payload.blood_group_id) : null
+    const bloodComponentId = isValidBloodComponentId ? new ObjectId(payload.blood_component_id) : null
+
+    const updateFields: Record<string, any> = {
+      status: payload.status
+    }
+
+    if (bloodGroupId) updateFields.blood_group_id = bloodGroupId
+    if (bloodComponentId) updateFields.blood_component_id = bloodComponentId
+    if (payload.start_date_donation) updateFields.start_date_donation = new Date(payload.start_date_donation)
     const result = await databaseService.donationRegistrations.findOneAndUpdate(
       { _id: new ObjectId(id) },
       {
-        $set: {
-          ...payload,
-          blood_group_id: new ObjectId(payload.blood_group_id),
-          blood_component_id: new ObjectId(payload.blood_component_id),
-          start_date_donation: new Date(payload.start_date_donation),
-          status: payload.status
-        },
+        $set: updateFields,
         $currentDate: { updated_at: true }
       },
       { returnDocument: 'after' }
@@ -343,18 +451,29 @@ class DonationService {
       })
     }
 
+    const updateFields: any = {
+      status: payload.status || DonationProcessStatus.Pending,
+      blood_group_id: payload.blood_group_id ? new ObjectId(payload.blood_group_id) : healthCheckResult?.blood_group_id,
+      volume_collected: Number(payload.volume_collected)
+    }
+
+    if (payload.donation_date) {
+      updateFields.donation_date = new Date(payload.donation_date)
+    }
+
     const result = await databaseService.donationProcesses.findOneAndUpdate(
       { _id: new ObjectId(id) },
       {
-        $set: {
-          ...payload,
-          status: payload.status || DonationProcessStatus.Pending,
-          blood_group_id: payload.blood_group_id
-            ? new ObjectId(payload.blood_group_id)
-            : healthCheckResult?.blood_group_id,
-          donation_date: payload.donation_date || new Date(),
-          volume_collected: Number(payload.volume_collected)
-        },
+        // $set: {
+        //   ...payload,
+        //   status: payload.status || DonationProcessStatus.Pending,
+        //   blood_group_id: payload.blood_group_id
+        //     ? new ObjectId(payload.blood_group_id)
+        //     : healthCheckResult?.blood_group_id,
+        //   donation_date: new Date(payload.donation_date) || undefined,
+        //   volume_collected: Number(payload.volume_collected)
+        // },
+        $set: updateFields,
         $currentDate: { updated_at: true }
       },
       { returnDocument: 'after' }

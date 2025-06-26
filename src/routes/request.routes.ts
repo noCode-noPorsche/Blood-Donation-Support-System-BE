@@ -1,8 +1,10 @@
 import express from 'express'
 import {
   createRequestRegistrationController,
+  getAllRequestHealthProcessByUserIdController,
   getAllRequestProcessController,
   getAllRequestRegistrationController,
+  getRequestHealthProcessByRequestIdController,
   getRequestProcessBloodByProcessIdController,
   getRequestProcessByIdController,
   getRequestProcessByUserIdController,
@@ -30,6 +32,32 @@ import { wrapAsync } from '~/utils/handler'
 
 const requestsRouter = express.Router()
 
+//Request - Health - Process
+/**
+ * Description. Get request registration - health check - request process by user id
+ * Path: request-health-process/user
+ * Method: GET
+ * Header: { Authorization: Bearer <access_token>}
+ */
+requestsRouter.get(
+  '/request-health-process/user',
+  accessTokenValidator,
+  wrapAsync(getAllRequestHealthProcessByUserIdController)
+)
+
+/**
+ * Description. Get request registration - health check - request process by user id
+ * Path: request-health-process/user
+ * Method: GET
+ * Header: { Authorization: Bearer <access_token>}
+ */
+requestsRouter.get(
+  '/request-health-process/:id',
+  accessTokenValidator,
+  wrapAsync(getRequestHealthProcessByRequestIdController)
+)
+
+//Request Registration
 /**
  * Description. Create a new request registration
  * Path: /
