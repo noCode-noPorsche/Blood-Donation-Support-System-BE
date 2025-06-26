@@ -25,16 +25,16 @@ export const createRequestRegistrationValidator = validate(
           options: [/^\d{12}$/],
           errorMessage: USER_MESSAGES.CITIZEN_ID_MUST_CONTAIN_ONLY_DIGITS_0_9
         },
-        trim: true,
-        custom: {
-          options: async (value) => {
-            const isExistCitizen = await usersService.checkCitizenIDNumber(value)
-            if (isExistCitizen) {
-              throw new Error(USER_MESSAGES.CITIZEN_ID_NUMBER_ALREADY_EXIST)
-            }
-            return true
-          }
-        }
+        trim: true
+        // custom: {
+        //   options: async (value) => {
+        //     const isExistCitizen = await usersService.checkCitizenIDNumber(value)
+        //     if (isExistCitizen) {
+        //       throw new Error(USER_MESSAGES.CITIZEN_ID_NUMBER_ALREADY_EXIST)
+        //     }
+        //     return true
+        //   }
+        // }
       },
       receive_date_request: {
         notEmpty: {
