@@ -199,6 +199,7 @@ class DonationService {
   async getAllDonationRegistration() {
     const donationRegistration = await databaseService.donationRegistrations
       .aggregate([
+        // Join blood group
         {
           $lookup: {
             from: 'blood_groups',
@@ -207,12 +208,9 @@ class DonationService {
             as: 'blood_group'
           }
         },
-        {
-          $unwind: {
-            path: '$blood_group',
-            preserveNullAndEmptyArrays: true
-          }
-        },
+        { $unwind: { path: '$blood_group', preserveNullAndEmptyArrays: true } },
+
+        // Join blood component
         {
           $lookup: {
             from: 'blood_components',
@@ -221,20 +219,34 @@ class DonationService {
             as: 'blood_component'
           }
         },
+        { $unwind: { path: '$blood_component', preserveNullAndEmptyArrays: true } },
+
+        // Join user info
         {
-          $unwind: {
-            path: '$blood_component',
-            preserveNullAndEmptyArrays: true
+          $lookup: {
+            from: 'users',
+            localField: 'user_id',
+            foreignField: '_id',
+            as: 'user'
           }
         },
+        { $unwind: { path: '$user', preserveNullAndEmptyArrays: true } },
+
+        // Final projection
         {
           $project: {
-            'blood_group._id': 0,
-            'blood_component._id': 0,
-            'blood_group.created_at': 0,
-            'blood_component.created_at': 0,
-            'blood_group.updated_at': 0,
-            'blood_component.updated_at': 0
+            user_id: 1,
+            donation_process_id: 1,
+            health_check_id: 1,
+            status: 1,
+            blood_group: '$blood_group.name',
+            blood_component: '$blood_component.name',
+            start_date_donation: 1,
+            created_at: 1,
+            updated_at: 1,
+            full_name: '$user.full_name',
+            citizen_id_number: '$user.citizen_id_number',
+            phone: '$user.phone'
           }
         }
       ])
