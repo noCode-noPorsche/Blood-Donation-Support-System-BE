@@ -36,3 +36,7 @@ export interface UpdateDonationProcessReqBody {
 export interface UpdateDonationProcessReqParams extends ParamsDictionary {
   id: string
 }
+
+export interface GetDonationHealthProcessByDonationIdReqParams extends ParamsDictionary {
+  id: string
+}

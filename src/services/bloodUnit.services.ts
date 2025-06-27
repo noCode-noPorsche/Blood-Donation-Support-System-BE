@@ -93,24 +93,147 @@ class BloodUnitService {
   }
 
   async getBloodUnitsByDonationProcessId(id: string) {
-    const bloodUnitResults = await databaseService.bloodUnits.find({ donation_process_id: new ObjectId(id) }).toArray()
-    if (!bloodUnitResults) {
+    const bloodUnitResults = await databaseService.bloodUnits
+      .aggregate([
+        // 1. Match theo donation_process_id
+        {
+          $match: {
+            donation_process_id: new ObjectId(id)
+          }
+        },
+
+        // 2. Join blood_groups
+        {
+          $lookup: {
+            from: 'blood_groups',
+            localField: 'blood_group_id',
+            foreignField: '_id',
+            as: 'blood_group_info'
+          }
+        },
+        {
+          $unwind: {
+            path: '$blood_group_info',
+            preserveNullAndEmptyArrays: true
+          }
+        },
+
+        // 3. Join blood_components
+        {
+          $lookup: {
+            from: 'blood_components',
+            localField: 'blood_component_id',
+            foreignField: '_id',
+            as: 'blood_component_info'
+          }
+        },
+        {
+          $unwind: {
+            path: '$blood_component_info',
+            preserveNullAndEmptyArrays: true
+          }
+        },
+
+        // 4. Project kết quả mong muốn
+        {
+          $project: {
+            _id: 1,
+            donation_process_id: 1,
+            request_process_id: 1,
+            blood_group_id: 1,
+            blood_component_id: 1,
+            status: 1,
+            expired_at: 1,
+            volume: 1,
+            update_by: 1,
+            updated_by: 1,
+            created_at: 1,
+            updated_at: 1,
+
+            // bổ sung tên nhóm máu và thành phần máu
+            blood_group_name: '$blood_group_info.name',
+            blood_component_name: '$blood_component_info.name'
+          }
+        }
+      ])
+      .toArray()
+
+    if (!bloodUnitResults || bloodUnitResults.length === 0) {
       throw new ErrorWithStatus({
         message: DONATION_MESSAGES.DONATION_PROCESS_NOT_FOUND,
         status: 404
       })
     }
+
     return bloodUnitResults
   }
 
   async getAllBloodUnits() {
-    const bloodUnitResults = await databaseService.bloodUnits.find({}).toArray()
+    const bloodUnitResults = await databaseService.bloodUnits
+      .aggregate([
+        // 1. Join blood_groups để lấy tên nhóm máu
+        {
+          $lookup: {
+            from: 'blood_groups',
+            localField: 'blood_group_id',
+            foreignField: '_id',
+            as: 'blood_group_info'
+          }
+        },
+        {
+          $unwind: {
+            path: '$blood_group_info',
+            preserveNullAndEmptyArrays: true
+          }
+        },
+
+        // 2. Join blood_components để lấy tên thành phần máu
+        {
+          $lookup: {
+            from: 'blood_components',
+            localField: 'blood_component_id',
+            foreignField: '_id',
+            as: 'blood_component_info'
+          }
+        },
+        {
+          $unwind: {
+            path: '$blood_component_info',
+            preserveNullAndEmptyArrays: true
+          }
+        },
+
+        // 3. Project kết quả trả về
+        {
+          $project: {
+            _id: 1,
+            donation_process_id: 1,
+            request_process_id: 1,
+            blood_group_id: 1,
+            blood_component_id: 1,
+            status: 1,
+            expired_at: 1,
+            volume: 1,
+            update_by: 1,
+            updated_by: 1,
+            created_at: 1,
+            updated_at: 1,
+
+            // Thêm tên vào kết quả
+            blood_group_name: '$blood_group_info.name',
+            blood_component_name: '$blood_component_info.name'
+          }
+        }
+      ])
+      .toArray()
+
     if (!bloodUnitResults) {
       throw new ErrorWithStatus({
         message: BLOOD_MESSAGES.GET_BLOOD_UNITS_FAIL,
         status: 404
       })
     }
+
     return bloodUnitResults
   }
 }

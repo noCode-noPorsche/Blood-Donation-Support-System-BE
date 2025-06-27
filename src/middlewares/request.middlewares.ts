@@ -10,7 +10,7 @@ export const createRequestRegistrationValidator = validate(
       blood_group_id: {
         notEmpty: undefined
       },
-      blood_component_id: {
+      blood_component_ids: {
         notEmpty: undefined
       },
       citizen_id_number: {
@@ -61,6 +61,9 @@ export const createRequestRegistrationValidator = validate(
       },
       image: {
         notEmpty: undefined
+      },
+      note: {
+        notEmpty: undefined
       }
     },
     ['body']
@@ -89,16 +92,16 @@ export const updateRequestRegistrationValidator = validate(
           options: [/^\d{12}$/],
           errorMessage: USER_MESSAGES.CITIZEN_ID_MUST_CONTAIN_ONLY_DIGITS_0_9
         },
-        trim: true,
-        custom: {
-          options: async (value) => {
-            const isExistCitizen = await usersService.checkCitizenIDNumber(value)
-            if (isExistCitizen) {
-              throw new Error(USER_MESSAGES.CITIZEN_ID_NUMBER_ALREADY_EXIST)
-            }
-            return true
-          }
-        }
+        trim: true
+        // custom: {
+        //   options: async (value) => {
+        //     const isExistCitizen = await usersService.checkCitizenIDNumber(value)
+        //     if (isExistCitizen) {
+        //       throw new Error(USER_MESSAGES.CITIZEN_ID_NUMBER_ALREADY_EXIST)
+        //     }
+        //     return true
+        //   }
+        // }
       },
       status: {
         notEmpty: {

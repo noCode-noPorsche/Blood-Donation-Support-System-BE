@@ -3,6 +3,7 @@ import { ParamsDictionary } from 'express-serve-static-core'
 import { REQUEST_MESSAGES } from '~/constants/messages'
 import {
   CreateRequestRegistrationReqBody,
+  GetRequestHealthProcessByRequestIdReqParams,
   GetRequestProcessBloodIdReqParams,
   GetRequestProcessDetailIdReqParams,
   GetRequestProcessIdReqParams,
@@ -29,7 +30,10 @@ export const getAllRequestHealthProcessByUserIdController = async (req: Request,
   })
 }
 
-export const getRequestHealthProcessByRequestIdController = async (req: Request, res: Response) => {
+export const getRequestHealthProcessByRequestIdController = async (
+  req: Request<GetRequestHealthProcessByRequestIdReqParams, any, any>,
+  res: Response
+) => {
   const { id } = req.params
   const result = await requestsService.getRequestHealthProcessByRequestId(id)
   res.json({

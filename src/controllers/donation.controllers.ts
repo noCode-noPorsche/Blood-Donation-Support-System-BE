@@ -3,6 +3,7 @@ import { NextFunction, ParamsDictionary } from 'express-serve-static-core'
 import { DONATION_MESSAGES } from '~/constants/messages'
 import {
   DonationRegistrationReqBody,
+  GetDonationHealthProcessByDonationIdReqParams,
   GetDonationProcessIdReqParams,
   GetDonationRegistrationIdReqParams,
   UpdateDonationProcessReqBody,
@@ -23,7 +24,10 @@ export const getAllDonationHealthProcessByUserIdController = async (req: Request
   })
 }
 
-export const getDonationHealthProcessByDonationIdController = async (req: Request, res: Response) => {
+export const getDonationHealthProcessByDonationIdController = async (
+  req: Request<GetDonationHealthProcessByDonationIdReqParams, any, any>,
+  res: Response
+) => {
   const { id } = req.params
   const donationHealthProcess = await donationService.getDonationHealthProcessByDonationId(id)
   res.json({

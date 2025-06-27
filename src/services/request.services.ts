@@ -245,7 +245,7 @@ class RequestService {
       user_id: new ObjectId(userObjectId),
       request_registration_id: resultRequestRegistration.insertedId,
       blood_group_id: bloodGroupId as ObjectId,
-      blood_component_ids: [],
+      blood_component_ids: bloodComponentIds,
       health_check_id: healthCheckId,
       volume_received: 0,
       description: '',
@@ -310,12 +310,179 @@ class RequestService {
   }
 
   async getAllRequestRegistration() {
-    const requestRegistration = await databaseService.requestRegistrations.find({}).toArray()
+    const requestRegistration = await databaseService.requestRegistrations
+      .aggregate([
+        // 1. Join user để lấy full_name, phone
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'user_id',
+            foreignField: '_id',
+            as: 'user_info'
+          }
+        },
+        {
+          $unwind: {
+            path: '$user_info',
+            preserveNullAndEmptyArrays: true
+          }
+        },
+
+        // 2. Join blood_group để lấy name
+        {
+          $lookup: {
+            from: 'blood_groups',
+            localField: 'blood_group_id',
+            foreignField: '_id',
+            as: 'blood_group_info'
+          }
+        },
+        {
+          $unwind: {
+            path: '$blood_group_info',
+            preserveNullAndEmptyArrays: true
+          }
+        },
+
+        // 3. Join blood_components nếu là mảng
+        {
+          $lookup: {
+            from: 'blood_components',
+            localField: 'blood_component_ids', // lưu ý phải là mảng
+            foreignField: '_id',
+            as: 'blood_component_info'
+          }
+        },
+
+        // 4. Project lại kết quả mong muốn
+        {
+          $project: {
+            _id: 1,
+            user_id: 1,
+            request_process_id: 1,
+            health_check_id: 1,
+            status: 1,
+            blood_group_id: 1,
+            blood_component_ids: 1,
+            receive_date_request: 1,
+            update_by: 1,
+            created_at: 1,
+            updated_at: 1,
+            is_emergency: 1,
+            image: 1,
+            note: 1,
+
+            // from user
+            full_name: '$user_info.full_name',
+            phone: '$user_info.phone',
+            citizen_id_number: '$user_info.citizen_id_number',
+            // from blood_group
+            blood_group_name: '$blood_group_info.name',
+
+            // from blood_components
+            blood_components_name: {
+              $map: {
+                input: '$blood_component_info',
+                as: 'component',
+                in: '$$component.name'
+              }
+            }
+          }
+        }
+      ])
+      .toArray()
+
     return requestRegistration
   }
 
   async getRequestRegistrationById(id: string) {
-    const requestRegistration = await databaseService.requestRegistrations.findOne({ _id: new ObjectId(id) })
+    const requestRegistration = await databaseService.requestRegistrations
+      .aggregate([
+        {
+          $match: {
+            _id: new ObjectId(id)
+          }
+        },
+        // 1. Join user để lấy full_name, phone
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'user_id',
+            foreignField: '_id',
+            as: 'user_info'
+          }
+        },
+        {
+          $unwind: {
+            path: '$user_info',
+            preserveNullAndEmptyArrays: true
+          }
+        },
+
+        // 2. Join blood_group để lấy name
+        {
+          $lookup: {
+            from: 'blood_groups',
+            localField: 'blood_group_id',
+            foreignField: '_id',
+            as: 'blood_group_info'
+          }
+        },
+        {
+          $unwind: {
+            path: '$blood_group_info',
+            preserveNullAndEmptyArrays: true
+          }
+        },
+
+        // 3. Join blood_components nếu là mảng
+        {
+          $lookup: {
+            from: 'blood_components',
+            localField: 'blood_component_ids', // lưu ý phải là mảng
+            foreignField: '_id',
+            as: 'blood_component_info'
+          }
+        },
+
+        // 4. Project lại kết quả mong muốn
+        {
+          $project: {
+            _id: 1,
+            user_id: 1,
+            request_process_id: 1,
+            health_check_id: 1,
+            status: 1,
+            blood_group_id: 1,
+            blood_component_ids: 1,
+            receive_date_request: 1,
+            update_by: 1,
+            created_at: 1,
+            updated_at: 1,
+            is_emergency: 1,
+            image: 1,
+            note: 1,
+
+            // from user
+            full_name: '$user_info.full_name',
+            phone: '$user_info.phone',
+            citizen_id_number: '$user_info.citizen_id_number',
+            // from blood_group
+            blood_group_name: '$blood_group_info.name',
+
+            // from blood_components
+            blood_components_name: {
+              $map: {
+                input: '$blood_component_info',
+                as: 'component',
+                in: '$$component.name'
+              }
+            }
+          }
+        }
+      ])
+      .next()
+
     if (!requestRegistration) {
       throw new ErrorWithStatus({
         message: REQUEST_MESSAGES.REQUEST_REGISTRATION_NOT_FOUND,
