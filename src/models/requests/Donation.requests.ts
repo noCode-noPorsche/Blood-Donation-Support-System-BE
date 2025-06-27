@@ -40,3 +40,7 @@ export interface UpdateDonationProcessReqParams extends ParamsDictionary {
 export interface GetDonationHealthProcessByDonationIdReqParams extends ParamsDictionary {
   id: string
 }
+
+export interface GetStatusDonationHealthProcessByDonationIdReqParams extends ParamsDictionary {
+  id: string
+}

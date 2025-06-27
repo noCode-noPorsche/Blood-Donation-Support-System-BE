@@ -124,6 +124,32 @@ class DonationService {
     return combined
   }
 
+  async getStatusDonationHealthProcessByDonationId(id: string) {
+    const result = await databaseService.donationRegistrations.findOne({
+      _id: new ObjectId(id)
+    })
+
+    if (!result) {
+      throw new ErrorWithStatus({
+        status: HTTP_STATUS.NOT_FOUND,
+        message: DONATION_MESSAGES.DONATION_REGISTRATION_NOT_FOUND
+      })
+    }
+
+    const [healthCheck, donationProcess] = await Promise.all([
+      result.health_check_id ? databaseService.healthChecks.findOne({ _id: result.health_check_id }) : null,
+      result.donation_process_id ? databaseService.donationProcesses.findOne({ _id: result.donation_process_id }) : null
+    ])
+
+    const combined = {
+      donation_registration_status: result.status,
+      health_check_status: healthCheck?.status || null,
+      donation_process_status: donationProcess?.status || null
+    }
+
+    return combined
+  }
+
   //Donation Registration
   async createDonationRegistration({ user_id, payload }: { user_id: string; payload: DonationRegistrationReqBody }) {
     const donationProcessId = new ObjectId()

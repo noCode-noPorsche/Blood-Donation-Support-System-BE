@@ -11,6 +11,7 @@ import {
   getRequestProcessDetailByProcessIdController,
   getRequestRegistrationByIdController,
   getRequestRegistrationByUserIdController,
+  getStatusRequestHealthProcessByRequestIdController,
   updateRequestProcessBloodByProcessIdController,
   updateRequestProcessByIdController,
   updateRequestProcessDetailByProcessIdController,
@@ -46,8 +47,8 @@ requestsRouter.get(
 )
 
 /**
- * Description. Get request registration - health check - request process by user id
- * Path: request-health-process/user
+ * Description. Get request registration - health check - request process by request id
+ * Path: /request-health-process/:id
  * Method: GET
  * Header: { Authorization: Bearer <access_token>}
  */
@@ -55,6 +56,18 @@ requestsRouter.get(
   '/request-health-process/:id',
   accessTokenValidator,
   wrapAsync(getRequestHealthProcessByRequestIdController)
+)
+
+/**
+ * Description. Get status request registration - health check - request process by request id
+ * Path: request-health-process/user
+ * Method: GET
+ * Header: { Authorization: Bearer <access_token>}
+ */
+requestsRouter.get(
+  '/request-health-process/:id/status',
+  accessTokenValidator,
+  wrapAsync(getStatusRequestHealthProcessByRequestIdController)
 )
 
 // Request Registration

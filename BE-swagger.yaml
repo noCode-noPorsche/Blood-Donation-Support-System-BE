@@ -707,6 +707,27 @@ paths:
           description: UnAuthorization
       security:
         - BearerAuth: []
+  /api/donations/donation-health-process/{id}/status:
+    get:
+      tags:
+        - Donation - Health - Process
+      summary: Get Status Donation - Health - Process By Donation Id
+      description: Get Status Donation - Health - Process By Donation Id
+      operationId: getStatusDonationHealthProcessByDonationId
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: MongoId
+          required: true
+      responses:
+        default:
+          description: Get status donation processes success
+        '401':
+          description: UnAuthorization
+      security:
+        - BearerAuth: []
   /api/health-checks/:
     get:
       tags:
@@ -1057,6 +1078,27 @@ paths:
       responses:
         default:
           description: Get request processes success
+        '401':
+          description: UnAuthorization
+      security:
+        - BearerAuth: []
+  /api/requests/request-health-process/{id}/status:
+    get:
+      tags:
+        - Request - Health - Process
+      summary: Get Status Request - Health - Process By Request Id
+      description: Get Status Request - Health - Process By Request Id
+      operationId: getStatusRequestHealthProcessByRequestId
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: MongoId
+          required: true
+      responses:
+        default:
+          description: Get status request processes success
         '401':
           description: UnAuthorization
       security:

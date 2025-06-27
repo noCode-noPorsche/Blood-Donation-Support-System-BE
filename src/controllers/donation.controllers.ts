@@ -6,6 +6,7 @@ import {
   GetDonationHealthProcessByDonationIdReqParams,
   GetDonationProcessIdReqParams,
   GetDonationRegistrationIdReqParams,
+  GetStatusDonationHealthProcessByDonationIdReqParams,
   UpdateDonationProcessReqBody,
   UpdateDonationProcessReqParams,
   UpdateDonationRegistrationIdReqParams,
@@ -33,6 +34,18 @@ export const getDonationHealthProcessByDonationIdController = async (
   res.json({
     message: DONATION_MESSAGES.GET_ALL_DONATION_REGISTRATIONS_SUCCESS,
     result: donationHealthProcess
+  })
+}
+
+export const getStatusDonationHealthProcessByDonationIdController = async (
+  req: Request<GetStatusDonationHealthProcessByDonationIdReqParams, any, any>,
+  res: Response
+) => {
+  const { id } = req.params
+  const donationHealthProcessStatus = await donationService.getStatusDonationHealthProcessByDonationId(id)
+  res.json({
+    message: DONATION_MESSAGES.GET_STATUS_DONATION_HEALTH_PROCESS_SUCCESS,
+    result: donationHealthProcessStatus
   })
 }
 

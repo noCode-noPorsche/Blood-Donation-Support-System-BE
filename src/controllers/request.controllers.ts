@@ -8,6 +8,7 @@ import {
   GetRequestProcessDetailIdReqParams,
   GetRequestProcessIdReqParams,
   GetRequestRegistrationIdReqParams,
+  GetStatusRequestHealthProcessByRequestIdReqParams,
   UpdateRequestProcessBloodIdReqBody,
   UpdateRequestProcessBloodIdReqParams,
   UpdateRequestProcessDetailIdReqBody,
@@ -37,7 +38,19 @@ export const getRequestHealthProcessByRequestIdController = async (
   const { id } = req.params
   const result = await requestsService.getRequestHealthProcessByRequestId(id)
   res.json({
-    message: REQUEST_MESSAGES.GET_REQUEST_REGISTRATION_BY_USER_SUCCESS,
+    message: REQUEST_MESSAGES.GET_REQUEST_REGISTRATION_SUCCESS,
+    result: result
+  })
+}
+
+export const getStatusRequestHealthProcessByRequestIdController = async (
+  req: Request<GetStatusRequestHealthProcessByRequestIdReqParams, any, any>,
+  res: Response
+) => {
+  const { id } = req.params
+  const result = await requestsService.getStatusRequestHealthProcessByRequestId(id)
+  res.json({
+    message: REQUEST_MESSAGES.GET_STATUS_REQUEST_HEALTH_PROCESS_SUCCESS,
     result: result
   })
 }

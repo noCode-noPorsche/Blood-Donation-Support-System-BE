@@ -85,3 +85,7 @@ export interface UpdateRequestProcessBloodIdReqBody {
 export interface GetRequestHealthProcessByRequestIdReqParams extends ParamsDictionary {
   id: string
 }
+
+export interface GetStatusRequestHealthProcessByRequestIdReqParams extends ParamsDictionary {
+  id: string
+}

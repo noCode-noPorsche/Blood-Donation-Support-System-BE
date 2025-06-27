@@ -10,6 +10,7 @@ import {
   getDonationProcessesByIdController,
   getDonationRegistrationByIdController,
   getDonationRegistrationByUserIdController,
+  getStatusDonationHealthProcessByDonationIdController,
   updateDonationProcessController,
   updateDonationRegistrationController
 } from '~/controllers/donation.controllers'
@@ -41,7 +42,7 @@ donationRouter.get(
 
 /**
  * Description. Get all donation registrations - health check - donation process by id
- * Path: /donation-health-processes/user
+ * Path: /donation-health-process/:id
  * METHOD: GET
  * Header: { Authorization: Bearer <access_token>}
  */
@@ -49,6 +50,18 @@ donationRouter.get(
   '/donation-health-process/:id',
   accessTokenValidator,
   wrapAsync(getDonationHealthProcessByDonationIdController)
+)
+
+/**
+ * Description. Get status donation registrations - health check - donation process by id
+ * Path:donation-health-process/:id/status
+ * METHOD: GET
+ * Header: { Authorization: Bearer <access_token>}
+ */
+donationRouter.get(
+  '/donation-health-process/:id/status',
+  accessTokenValidator,
+  wrapAsync(getStatusDonationHealthProcessByDonationIdController)
 )
 
 //Donation Registration

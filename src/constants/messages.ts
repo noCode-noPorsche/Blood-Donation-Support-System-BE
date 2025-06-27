@@ -111,7 +111,8 @@ export const DONATION_MESSAGES = {
   DESCRIPTION_MUST_BE_A_STRING: 'Description must be a string',
   DESCRIPTION_LENGTH_MUST_BE_LESS_THAN_500: 'Description length must be less than 500',
   BLOOD_DONATION_REQUEST_CANNOT_BE_APPROVED_IF_HEALTH_CHECK_RESULTS_ARE_NOT_SATISFACTORY:
-    'Blood donation request cannot be approved if health check results are not satisfactory'
+    'Blood donation request cannot be approved if health check results are not satisfactory',
+  GET_STATUS_DONATION_HEALTH_PROCESS_SUCCESS: 'Get status donation health process success'
 } as const
 
 export const HEALTH_CHECK_MESSAGES = {
@@ -186,7 +187,8 @@ export const REQUEST_MESSAGES = {
   REQUEST_PROCESS_DETAIL_NOT_FOUND: 'Request process detail not found',
   UPDATE_REQUEST_PROCESS_DETAIL_SUCCESS: 'Update request process detail success',
   GET_REQUEST_PROCESS_BLOOD_SUCCESS: 'Get request process blood success',
-  REQUEST_PROCESS_BLOOD_NOT_FOUND: 'Request process blood not found'
+  REQUEST_PROCESS_BLOOD_NOT_FOUND: 'Request process blood not found',
+  GET_STATUS_REQUEST_HEALTH_PROCESS_SUCCESS: 'Get status request health process success'
 } as const
 
 export const BLOG_MESSAGES = {

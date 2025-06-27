@@ -93,10 +93,8 @@ class RequestService {
     return result
   }
 
-  async getRequestHealthProcessByRequestId(request_id: string) {
-    const requestObjectId = new ObjectId(request_id)
-
-    const regis = await databaseService.requestRegistrations.findOne({ _id: requestObjectId })
+  async getRequestHealthProcessByRequestId(id: string) {
+    const regis = await databaseService.requestRegistrations.findOne({ _id: new ObjectId(id) })
 
     if (!regis) return null
 
@@ -144,6 +142,30 @@ class RequestService {
       // Names
       blood_group: bloodGroup?.name ?? null,
       blood_components: bloodComponentNames
+    }
+
+    return combined
+  }
+
+  async getStatusRequestHealthProcessByRequestId(id: string) {
+    const result = await databaseService.requestRegistrations.findOne({ _id: new ObjectId(id) })
+
+    if (!result) {
+      throw new ErrorWithStatus({
+        message: REQUEST_MESSAGES.REQUEST_REGISTRATION_NOT_FOUND,
+        status: HTTP_STATUS.NOT_FOUND
+      })
+    }
+
+    const [healthCheck, requestProcess] = await Promise.all([
+      result.health_check_id ? databaseService.healthChecks.findOne({ _id: result.health_check_id }) : null,
+      result.request_process_id ? databaseService.requestProcesses.findOne({ _id: result.request_process_id }) : null
+    ])
+
+    const combined = {
+      request_registration_status: result.status,
+      health_check_status: healthCheck?.status || null,
+      request_process_status: requestProcess?.status || null
     }
 
     return combined
