@@ -418,6 +418,44 @@ paths:
           description: UnAuthorization
       security:
         - BearerAuth: []
+  /api/blood-units/{blood_group_id}/{blood_component_ids}:
+    get:
+      tags:
+        - Blood Units
+      summary: Get All Blood Units Relative
+      description: Get blood units matching blood group and blood components
+      operationId: getAllBloodUnitsRelative
+      parameters:
+        - name: blood_group_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: MongoId
+
+        - name: blood_component_ids
+          in: path
+          required: true
+          style: simple # Comma-separated value
+          explode: false # Important: keep as a single string
+          schema:
+            type: array
+            items:
+              type: string
+              format: MongoId
+      responses:
+        '200':
+          description: Blood units fetched successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                $ref: '#/components/schemas/BloodUnits'
+        '401':
+          description: Unauthorized
+      security:
+        - BearerAuth: []
   /api/donations/donation-registrations:
     post:
       tags:

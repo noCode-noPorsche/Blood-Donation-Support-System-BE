@@ -1,12 +1,13 @@
 import { config } from 'dotenv'
 import { ObjectId } from 'mongodb'
-import { BloodComponentEnum } from '~/constants/enum'
+import { BloodComponentEnum, BloodUnitStatus } from '~/constants/enum'
 import { HTTP_STATUS } from '~/constants/httpStatus'
 import { BLOOD_MESSAGES, DONATION_MESSAGES } from '~/constants/messages'
 import { ErrorWithStatus } from '~/models/Error'
 import { UpdateBloodUnitsReqBody } from '~/models/requests/BloodUnit.requests'
-import { getExpirationDateByComponent } from '~/utils/utils'
+import { bloodGroupMap, getExpirationDateByComponent, isCompatibleDonor } from '~/utils/utils'
 import databaseService from './database.services'
+import bloodService from './blood.services'
 config()
 
 class BloodUnitService {
@@ -235,6 +236,85 @@ class BloodUnitService {
     }
 
     return bloodUnitResults
+  }
+
+  async getAllBloodUnitsRelative({
+    blood_group_id,
+    blood_component_ids
+  }: {
+    blood_group_id: string
+    blood_component_ids: string[]
+  }) {
+    // 1. Lấy tên nhóm máu người nhận
+    const receiverName = await bloodService.getBloodGroupNameById(blood_group_id)
+
+    // 2. Dò map tương thích
+    const compatibleDonorNames = bloodGroupMap[receiverName] || []
+
+    // 3. Lấy danh sách nhóm máu tương thích từ DB
+    const compatibleDonorGroups = await databaseService.bloodGroups
+      .find({ name: { $in: compatibleDonorNames as any } })
+      .toArray()
+
+    const compatibleGroupIds = compatibleDonorGroups.map((g) => g._id)
+
+    // 4. Aggregation để lấy túi máu phù hợp
+    const result = await databaseService.bloodUnits
+      .aggregate([
+        {
+          $match: {
+            status: BloodUnitStatus.Available,
+            blood_group_id: { $in: compatibleGroupIds },
+            blood_component_id: { $in: blood_component_ids.map((id) => new ObjectId(id)) }
+          }
+        },
+        {
+          $lookup: {
+            from: 'blood_groups',
+            localField: 'blood_group_id',
+            foreignField: '_id',
+            as: 'blood_group_info'
+          }
+        },
+        {
+          $unwind: {
+            path: '$blood_group_info',
+            preserveNullAndEmptyArrays: true
+          }
+        },
+        {
+          $lookup: {
+            from: 'blood_components',
+            localField: 'blood_component_id',
+            foreignField: '_id',
+            as: 'blood_component_info'
+          }
+        },
+        {
+          $unwind: {
+            path: '$blood_component_info',
+            preserveNullAndEmptyArrays: true
+          }
+        },
+        {
+          $project: {
+            _id: 1,
+            donation_process_id: 1,
+            blood_group_id: 1,
+            blood_group_name: '$blood_group_info.name',
+            blood_component_id: 1,
+            blood_component_name: '$blood_component_info.name',
+            status: 1,
+            volume: 1,
+            expired_at: 1,
+            created_at: 1,
+            updated_at: 1
+          }
+        }
+      ])
+      .toArray()
+
+    return result
   }
 }
 

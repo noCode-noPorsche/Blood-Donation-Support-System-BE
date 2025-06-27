@@ -2,6 +2,7 @@ import express from 'express'
 import {
   createBloodUnitsController,
   getAllBloodUnitsController,
+  getAllBloodUnitsRelativeController,
   getBloodUnitByDonationProcessIdController,
   updateBloodUnitsController
 } from '~/controllers/bloodUnit.controllers'
@@ -49,5 +50,17 @@ bloodUnitRouter.get('/:id', isStaffOrAdminValidator, wrapAsync(getBloodUnitByDon
  * Header: { Authorization: Bearer <access_token>}
  */
 bloodUnitRouter.get('/', isStaffOrAdminValidator, wrapAsync(getAllBloodUnitsController))
+
+/**
+ * Description. Get all blood unit relative
+ * Path: /blood_group_id=?
+ * Method: GET
+ * Header: { Authorization: Bearer <access_token>}
+ */
+bloodUnitRouter.get(
+  '/:blood_group_id/:blood_component_ids',
+  isStaffOrAdminValidator,
+  wrapAsync(getAllBloodUnitsRelativeController)
+)
 
 export default bloodUnitRouter

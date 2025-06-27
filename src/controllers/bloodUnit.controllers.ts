@@ -43,3 +43,17 @@ export const getAllBloodUnitsController = async (req: Request, res: Response) =>
     result: bloodUnits
   })
 }
+
+export const getAllBloodUnitsRelativeController = async (req: Request, res: Response) => {
+  const { blood_group_id, blood_component_ids } = req.params
+
+  const bloodUnits = await bloodUnitService.getAllBloodUnitsRelative({
+    blood_group_id,
+    blood_component_ids: blood_component_ids.split(',') //chuyển thành mảng
+  })
+
+  res.json({
+    message: BLOOD_MESSAGES.GET_BLOOD_UNITS_SUCCESS,
+    result: bloodUnits
+  })
+}
