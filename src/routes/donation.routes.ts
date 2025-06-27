@@ -40,7 +40,7 @@ donationRouter.get(
 )
 
 /**
- * Description. Get all donation registrations - health check - donation process for user now
+ * Description. Get all donation registrations - health check - donation process by id
  * Path: /donation-health-processes/user
  * METHOD: GET
  * Header: { Authorization: Bearer <access_token>}

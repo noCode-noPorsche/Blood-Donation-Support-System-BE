@@ -208,7 +208,7 @@ class RequestService {
       image: payload.image,
       health_check_id: healthCheckId,
       receive_date_request: payload.receive_date_request || new Date(),
-      status: RequestRegistrationStatus.Approved,
+      status: RequestRegistrationStatus.Pending,
       request_process_id: requestProcessId,
       user_id: new ObjectId(userObjectId),
       created_at: new Date(),
