@@ -43,6 +43,7 @@ export default class RequestRegistration {
     this.blood_group_id = requestRegistration.blood_group_id || null
     this.blood_component_ids = requestRegistration.blood_component_ids || null
     this.receive_date_request = requestRegistration.receive_date_request || date
+    this.image = requestRegistration.image || ''
     this.update_by = requestRegistration.update_by
     this.created_at = requestRegistration.created_at || date
     this.updated_at = requestRegistration.updated_at || date

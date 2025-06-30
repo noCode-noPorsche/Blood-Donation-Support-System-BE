@@ -386,9 +386,9 @@ paths:
     patch:
       tags:
         - Blood Units
-      summary: Update Health Check by Id for Staff or Admin
-      description: Update Health Check by Id for Staff or Admin
-      operationId: updateHealthCheckById
+      summary: Update Blood Units by Donation Process Id for Staff or Admin
+      description: Blood Units by Donation Process Id for Staff or Admin
+      operationId: updateBloodUnitsByProcessId
       parameters:
         - in: path
           name: id
