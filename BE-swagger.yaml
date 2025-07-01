@@ -1626,7 +1626,12 @@ components:
           type: string
           format: MongoId
           example: 682f6a3fdb3fb589d23e7654
+        note:
+          type: string
         volume:
+          type: number
+          example: 0
+        storage_temperature:
           type: number
           example: 0
         status:

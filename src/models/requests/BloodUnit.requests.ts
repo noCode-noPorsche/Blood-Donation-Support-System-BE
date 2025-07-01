@@ -12,6 +12,8 @@ export interface UpdateBloodUnitsReqBody {
   blood_component_id: string
   status: BloodUnitStatus
   volume: number
+  note?: string
+  storage_temperature?: number
 }
 
 export interface UpdateBloodUnitsByDonationProcessIdReqParams extends ParamsDictionary {

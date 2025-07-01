@@ -7,10 +7,11 @@ interface BloodUnitType {
   request_process_id: ObjectId | null
   blood_group_id: ObjectId
   blood_component_id: ObjectId
-  update_by: ObjectId
+  updated_by: ObjectId
   status: BloodUnitStatus
   expired_at?: Date
   volume?: number
+  storage_temperature?: number
   note?: string
   used_at?: Date
   created_at?: Date
@@ -25,8 +26,9 @@ export default class BloodUnit {
   status: BloodUnitStatus
   expired_at?: Date | null
   volume?: number
+  storage_temperature?: number
   note?: string
-  update_by?: ObjectId
+  updated_by?: ObjectId
   used_at?: Date
   created_at?: Date
   updated_at?: Date
@@ -37,10 +39,11 @@ export default class BloodUnit {
     this.request_process_id = bloodUnit.request_process_id || null
     this.blood_group_id = bloodUnit.blood_group_id || ''
     this.blood_component_id = bloodUnit.blood_component_id || ''
-    this.update_by = bloodUnit.update_by || ''
+    this.updated_by = bloodUnit.updated_by || ''
     this.status = bloodUnit.status || BloodUnitStatus.Available
     this.expired_at = bloodUnit.expired_at || null
     this.volume = bloodUnit.volume || 0
+    this.storage_temperature = bloodUnit.storage_temperature || 0
     this.note = bloodUnit.note || ''
     this.used_at = bloodUnit.used_at || date
     this.created_at = bloodUnit.created_at || date

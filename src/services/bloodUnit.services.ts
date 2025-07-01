@@ -76,7 +76,9 @@ class BloodUnitService {
             status: updateItem.status,
             blood_group_id: new ObjectId(updateItem.blood_group_id),
             expired_at: expired_at,
-            update_by: new ObjectId(user_id)
+            updated_by: new ObjectId(user_id),
+            note: updateItem.note,
+            storage_temperature: updateItem.storage_temperature
           },
           $currentDate: { updated_at: true }
         },
@@ -146,7 +148,7 @@ class BloodUnitService {
             status: 1,
             expired_at: 1,
             volume: 1,
-            update_by: 1,
+            note: 1,
             updated_by: 1,
             created_at: 1,
             updated_at: 1,

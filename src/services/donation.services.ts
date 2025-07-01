@@ -553,7 +553,7 @@ class DonationService {
             request_process_id: null,
             blood_group_id: result.blood_group_id as ObjectId,
             blood_component_id: componentMap[name],
-            update_by: new ObjectId(user_id),
+            updated_by: new ObjectId(user_id),
             status: BloodUnitStatus.Available,
             volume: 0
             // expired_at: new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)
