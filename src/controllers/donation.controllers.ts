@@ -145,8 +145,13 @@ export const updateDonationRegistrationController = async (
 
 //Donation Process
 export const getAllDonationProcessesController = async (req: Request, res: Response) => {
-  const donationRequestsProcess = await donationService.getAllDonationProcesses()
+  const filter: any = {}
 
+  const { is_separated } = req.query
+  if (is_separated !== undefined) {
+    filter.is_separated = is_separated === 'true'
+  }
+  const donationRequestsProcess = await donationService.getAllDonationProcesses(filter)
   res.json({
     message: DONATION_MESSAGES.GET_ALL_DONATION_REQUEST_PROCESS_SUCCESS,
     result: donationRequestsProcess

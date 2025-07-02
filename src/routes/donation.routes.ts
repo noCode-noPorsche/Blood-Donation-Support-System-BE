@@ -146,7 +146,9 @@ donationRouter.patch(
 
 /**
  * Description. Get all donation request processes for staff or admin
- * Path: /donation-request-processes
+ * Params: is_separated
+ * Path: /donation-processes?is_separated=true
+ * Header: { Authorization: Bearer <access_token>}
  * METHOD: GET
  */
 donationRouter.get('/donation-processes', isStaffOrAdminValidator, wrapAsync(getAllDonationProcessesController))

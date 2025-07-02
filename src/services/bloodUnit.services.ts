@@ -92,6 +92,16 @@ class BloodUnitService {
       }
     }
 
+    // Cập nhật is_separated = true
+    await databaseService.donationProcesses.updateOne(
+      { _id: new ObjectId(id) },
+      {
+        $set: {
+          is_separated: true
+        }
+      }
+    )
+
     return updatedBloodUnits
   }
 

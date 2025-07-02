@@ -585,6 +585,13 @@ paths:
       summary: Get All Donation Processes for Staff or Admin
       description: Get all donation processes for staff or admin
       operationId: getAllDonationProcesses
+      parameters:
+        - name: is_separated
+          in: query
+          description: Filter by whether the blood has been separated
+          required: false
+          schema:
+            type: boolean
       responses:
         default:
           description: Get all donation processes success
@@ -1726,41 +1733,58 @@ components:
           type: string
           format: MongoId
           example: 682f6a3fdb3fb589d23e7654
+        health_check_id:
+          type: string
+          format: MongoId
+          example: 6856be913ee8cc9717842b3f
+        blood_group_id:
+          type: string
+          format: MongoId
+          example: 6835ee86cb638a298130ff63
+        blood_group_name:
+          type: string
+          example: 'B+'
+        username:
+          type: string
+          example: 'Thao Nguyen'
         donation_date:
           type: string
           format: date-time
-          example: 2025-05-21T17:48:12.171Z
+          example: 2025-06-21T14:15:45.866Z
         volume_collected:
           type: number
           example: 0
         status:
           $ref: '#/components/schemas/DonationProcessStatus'
-        created_at:
-          type: string
-          format: date-time
-          example: 2025-05-21T17:48:12.171Z
-        updated_at:
-          type: string
-          format: date-time
-          example: 2025-05-21T17:48:12.171Z
+        is_separated:
+          type: boolean
+          example: false
         description:
           type: string
           example: ''
+        created_at:
+          type: string
+          format: date-time
+          example: 2025-06-21T14:15:45.866Z
+        updated_at:
+          type: string
+          format: date-time
+          example: 2025-06-21T14:15:45.866Z
     DonationProcessReqBody:
       type: object
       properties:
         status:
           $ref: '#/components/schemas/DonationProcessStatus'
-        description:
-          type: string
-          example: ''
-        donation_date:
-          type: string
-          format: date-time
-          example: 2025-05-21T17:48:12.171Z
-        volume_collected:
-          type: number
-          example: 0
+          description:
+            type: string
+            example: ''
+          donation_date:
+            type: string
+            format: date-time
+            example: 2025-05-21T17:48:12.171Z
+          volume_collected:
+            type: number
+            example: 0
     UpdateStatusDonationProcessReqBody:
       type: object
       properties:

@@ -11,6 +11,7 @@ interface DonationProcessType {
   status: DonationProcessStatus
   donation_date?: Date
   description?: string
+  is_separated: boolean
   created_at: Date
   updated_at: Date
 }
@@ -23,6 +24,7 @@ export default class DonationProcess {
   volume_collected?: number
   status: DonationProcessStatus
   donation_date?: Date
+  is_separated: boolean
   created_at: Date
   updated_at: Date
   description?: string
@@ -36,8 +38,9 @@ export default class DonationProcess {
     this.volume_collected = donationProcess.volume_collected
     this.status = donationProcess.status || DonationProcessStatus.Pending
     this.donation_date = donationProcess.donation_date || date
+    this.description = donationProcess.description || ''
+    this.is_separated = donationProcess.is_separated || false
     this.created_at = donationProcess.created_at || date
     this.updated_at = donationProcess.updated_at || date
-    this.description = donationProcess.description || ''
   }
 }

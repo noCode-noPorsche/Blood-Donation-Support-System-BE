@@ -208,6 +208,7 @@ class DonationService {
       health_check_id: healthCheckId,
       volume_collected: 0,
       description: '',
+      is_separated: false,
       status: DonationProcessStatus.Pending,
       donation_date: new Date(),
       created_at: new Date(),
@@ -370,61 +371,140 @@ class DonationService {
   }
 
   //Donation Process
-  async getAllDonationProcesses() {
+  async getAllDonationProcesses(filter: Record<string, any> = {}) {
+    const matchStage = Object.keys(filter).length > 0 ? [{ $match: filter }] : []
+
     const donationProcesses = await databaseService.donationProcesses
       .aggregate([
+        ...matchStage,
+
+        // Join user để lấy tên người hiến
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'user_id',
+            foreignField: '_id',
+            as: 'user_info'
+          }
+        },
+        { $unwind: { path: '$user_info', preserveNullAndEmptyArrays: true } },
+
+        // Join blood_groups
         {
           $lookup: {
             from: 'blood_groups',
-            localField: 'donation_registration.blood_group_id',
+            localField: 'blood_group_id',
             foreignField: '_id',
-            as: 'blood_group'
+            as: 'blood_group_info'
           }
         },
-        {
-          $unwind: {
-            path: '$blood_group',
-            preserveNullAndEmptyArrays: true
-          }
-        },
+        { $unwind: { path: '$blood_group_info', preserveNullAndEmptyArrays: true } },
+
+        // Join blood_components
         {
           $lookup: {
             from: 'blood_components',
-            localField: 'donation_registration.blood_component_id',
+            localField: 'blood_component_id',
             foreignField: '_id',
-            as: 'blood_component'
+            as: 'blood_component_info'
+          }
+        },
+        { $unwind: { path: '$blood_component_info', preserveNullAndEmptyArrays: true } },
+
+        // Project các trường cần thiết
+        {
+          $project: {
+            _id: 1,
+            user_id: 1,
+            username: '$user_info.full_name',
+            is_separated: 1,
+            status: 1,
+            volume_collected: 1,
+            donation_registration_id: 1,
+            health_check_id: 1,
+            donation_date: 1,
+            description: 1,
+            blood_group_id: 1,
+            blood_group_name: '$blood_group_info.name',
+            blood_component_id: 1,
+            blood_component_name: '$blood_component_info.name',
+            created_at: 1,
+            updated_at: 1
+          }
+        }
+      ])
+      .toArray()
+
+    return donationProcesses
+  }
+
+  async getDonationProcessById(id: string) {
+    const result = await databaseService.donationProcesses
+      .aggregate([
+        {
+          $match: {
+            _id: new ObjectId(id)
+          }
+        },
+        // Join user để lấy username
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'user_id',
+            foreignField: '_id',
+            as: 'user_info'
           }
         },
         {
           $unwind: {
-            path: '$blood_component',
+            path: '$user_info',
+            preserveNullAndEmptyArrays: true
+          }
+        },
+        // Join blood_group để lấy tên nhóm máu
+        {
+          $lookup: {
+            from: 'blood_groups',
+            localField: 'blood_group_id',
+            foreignField: '_id',
+            as: 'blood_group_info'
+          }
+        },
+        {
+          $unwind: {
+            path: '$blood_group_info',
             preserveNullAndEmptyArrays: true
           }
         },
         {
           $project: {
-            'blood_group._id': 0,
-            'blood_group.created_at': 0,
-            'blood_group.updated_at': 0,
-            'blood_component._id': 0,
-            'blood_component.created_at': 0,
-            'blood_component.updated_at': 0
+            _id: 1,
+            donation_registration_id: 1,
+            user_id: 1,
+            username: '$user_info.full_name',
+            blood_group_id: 1,
+            blood_group_name: '$blood_group_info.name',
+            health_check_id: 1,
+            donation_date: 1,
+            volume_collected: 1,
+            status: 1,
+            is_separated: 1,
+            description: 1,
+            created_at: 1,
+            updated_at: 1
           }
         }
       ])
       .toArray()
-    return donationProcesses
-  }
 
-  async getDonationProcessById(id: string) {
-    const result = await databaseService.donationProcesses.findOne({ _id: new ObjectId(id) })
-    if (!result) {
+    if (!result || result.length === 0) {
       throw new ErrorWithStatus({
         message: DONATION_MESSAGES.DONATION_PROCESS_NOT_FOUND,
         status: HTTP_STATUS.BAD_REQUEST
       })
     }
-    return result
+
+    return result[0]
   }
 
   async getDonationProcessByUserId(user_id: string) {
