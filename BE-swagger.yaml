@@ -586,14 +586,21 @@ paths:
       description: Get all donation processes for staff or admin
       operationId: getAllDonationProcesses
       parameters:
-        - name: is_separated
-          in: query
-          description: Filter by whether the blood has been separated
+        - in: query
+          name: is_separated
           required: false
           schema:
             type: boolean
+          description: Filter by separation status (true/false)
+        - in: query
+          name: status
+          required: false
+          schema:
+            type: string
+            enum: [Pending, Approved, Rejected]
+          description: Filter by donation process status
       responses:
-        default:
+        '200':
           description: Get all donation processes success
           content:
             application/json:
@@ -602,7 +609,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/DonationProcess'
         '401':
-          description: UnAuthorization
+          description: Unauthorized
       security:
         - BearerAuth: []
   /api/donations/donation-processes/user:

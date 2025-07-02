@@ -1,5 +1,6 @@
 import { Request, Response } from 'express'
 import { NextFunction, ParamsDictionary } from 'express-serve-static-core'
+import { DonationProcessStatus } from '~/constants/enum'
 import { DONATION_MESSAGES } from '~/constants/messages'
 import {
   DonationRegistrationReqBody,
@@ -147,11 +148,22 @@ export const updateDonationRegistrationController = async (
 export const getAllDonationProcessesController = async (req: Request, res: Response) => {
   const filter: any = {}
 
-  const { is_separated } = req.query
+  const { is_separated, status } = req.query
+
   if (is_separated !== undefined) {
     filter.is_separated = is_separated === 'true'
   }
+
+  if (
+    status !== undefined &&
+    typeof status === 'string' &&
+    Object.values(DonationProcessStatus).includes(status as DonationProcessStatus)
+  ) {
+    filter.status = status
+  }
+
   const donationRequestsProcess = await donationService.getAllDonationProcesses(filter)
+
   res.json({
     message: DONATION_MESSAGES.GET_ALL_DONATION_REQUEST_PROCESS_SUCCESS,
     result: donationRequestsProcess

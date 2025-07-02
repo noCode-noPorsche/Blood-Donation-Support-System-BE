@@ -147,7 +147,7 @@ donationRouter.patch(
 /**
  * Description. Get all donation request processes for staff or admin
  * Params: is_separated
- * Path: /donation-processes?is_separated=true
+ * Path: /donation-processes?is_separated=true&status=DonationProcessStatus
  * Header: { Authorization: Bearer <access_token>}
  * METHOD: GET
  */
