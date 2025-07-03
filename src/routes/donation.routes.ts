@@ -124,9 +124,9 @@ donationRouter.patch(
   updateDonationRegistrationValidator,
   filterMiddleware<UpdateDonationRegistrationReqBody>([
     'blood_group_id',
-    'blood_component_id',
     'start_date_donation',
-    'status'
+    'status',
+    'donation_type'
   ]),
   wrapAsync(updateDonationRegistrationController)
 )

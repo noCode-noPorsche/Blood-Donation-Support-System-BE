@@ -1,5 +1,5 @@
 import { checkSchema, ParamSchema } from 'express-validator'
-import { DonationProcessStatus, DonationRegistrationStatus } from '~/constants/enum'
+import { DonationProcessStatus, DonationRegistrationStatus, DonationType } from '~/constants/enum'
 import { HTTP_STATUS } from '~/constants/httpStatus'
 import { BLOOD_MESSAGES, DONATION_MESSAGES } from '~/constants/messages'
 import { ErrorWithStatus } from '~/models/Error'
@@ -38,7 +38,6 @@ export const createDonationValidator = validate(
   checkSchema(
     {
       blood_group_id: bloodGroupSchema,
-      blood_component_id: bloodComponentSchema,
       start_date_donation: {
         notEmpty: {
           errorMessage: DONATION_MESSAGES.START_DATE_DONATION_IS_REQUIRED
@@ -46,6 +45,15 @@ export const createDonationValidator = validate(
         isISO8601: {
           options: { strict: true },
           errorMessage: DONATION_MESSAGES.START_DATE_DONATION_IS_INVALID
+        }
+      },
+      donation_type: {
+        notEmpty: {
+          errorMessage: DONATION_MESSAGES.DONATION_TYPE_IS_REQUIRED
+        },
+        isIn: {
+          options: [Object.values(DonationType)],
+          errorMessage: DONATION_MESSAGES.DONATION_TYPE_IS_INVALID
         }
       }
     },
@@ -77,7 +85,7 @@ export const updateDonationRegistrationValidator = validate(
   checkSchema(
     {
       blood_group_id: {
-        ...bloodGroupSchema,
+        // ...bloodGroupSchema,
         notEmpty: undefined
         // custom: {
         //   options: async (value: string) => {
@@ -85,21 +93,6 @@ export const updateDonationRegistrationValidator = validate(
         //     if (!isBloodGroupExist) {
         //       throw new ErrorWithStatus({
         //         message: BLOOD_MESSAGES.BLOOD_GROUP_NOT_FOUND,
-        //         status: HTTP_STATUS.BAD_REQUEST
-        //       })
-        //     }
-        //   }
-        // }
-      },
-      blood_component_id: {
-        ...bloodComponentSchema,
-        notEmpty: undefined
-        // custom: {
-        //   options: async (value: string) => {
-        //     const isBloodComponentExist = await bloodService.isBloodComponentIdExist(value)
-        //     if (!isBloodComponentExist) {
-        //       throw new ErrorWithStatus({
-        //         message: BLOOD_MESSAGES.BLOOD_COMPONENT_NOT_FOUND,
         //         status: HTTP_STATUS.BAD_REQUEST
         //       })
         //     }
@@ -124,6 +117,15 @@ export const updateDonationRegistrationValidator = validate(
         isIn: {
           options: [Object.values(DonationRegistrationStatus)],
           errorMessage: DONATION_MESSAGES.STATUS_IS_INVALID
+        }
+      },
+      donation_type: {
+        notEmpty: {
+          errorMessage: DONATION_MESSAGES.DONATION_TYPE_IS_REQUIRED
+        },
+        isIn: {
+          options: [Object.values(DonationType)],
+          errorMessage: DONATION_MESSAGES.DONATION_TYPE_IS_INVALID
         }
       }
     },

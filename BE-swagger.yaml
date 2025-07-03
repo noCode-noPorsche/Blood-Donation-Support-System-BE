@@ -550,8 +550,8 @@ paths:
     patch:
       tags:
         - Donation Registrations
-      summary: Update Donation Registration
-      description: Update donation registration
+      summary: Update Donation Registration By Id
+      description: Update donation registration By Id
       operationId: updateDonationRegistration
       parameters:
         - in: path
@@ -1539,6 +1539,28 @@ components:
       type: string
       enum: [Pending, Approved, Rejected]
       example: Pending
+    DonationType:
+      type: string
+      enum:
+        - Whole Blood # Hiến máu toàn phần
+        - Platelets # Hiến tiểu cầu
+        - Plasma # Hiến huyết tương
+        - Red Blood Cells # Hiến hồng cầu kép
+        - Platelets - Plasma # Hiến tiểu cầu + huyết tương
+        - Plasma - Red Blood Cells # Hiến huyết tương + hồng cầu
+        - Platelets - Red Blood Cells # Hiến tiểu cầu + hồng cầu
+      example: Whole Blood
+    RequestType:
+      type: string
+      enum:
+        - Whole Blood # Hiến máu toàn phần
+        - Platelets # Hiến tiểu cầu
+        - Plasma # Hiến huyết tương
+        - Red Blood Cells # Hiến hồng cầu kép
+        - Platelets - Plasma # Hiến tiểu cầu + huyết tương
+        - Plasma - Red Blood Cells # Hiến huyết tương + hồng cầu
+        - Platelets - Red Blood Cells # Hiến tiểu cầu + hồng cầu
+      example: Whole Blood
     BloodGroupEnum:
       type: string
       enum: [A+, A-, B+, B-, AB+, AB-, O+, O-]
@@ -1667,14 +1689,12 @@ components:
           type: string
           format: MongoId
           example: 682f6a3fdb3fb589d23e7654
-        blood_component_id:
-          type: string
-          format: MongoId
-          example: 682f6a3fdb3fb589d23e7654
         start_date_donation:
           type: string
           format: date-time
           example: 2025-05-21T17:48:12.171Z
+        donation_type:
+          $ref: '#/components/schemas/DonationType'
     DonationRegistration:
       type: object
       properties:
@@ -1690,10 +1710,12 @@ components:
           type: string
           format: MongoId
           example: 682f6a3fdb3fb589d23e7654
-        blood_component_id:
-          type: string
+        blood_component_ids:
+          type: array
           format: MongoId
-          example: 682f6a3fdb3fb589d23e7654
+          example: [682f6a3fdb3fb589d23e7654, 682f6a3fdb3fb589d23e7654]
+        donation_type:
+          $ref: '#/components/schemas/DonationType'
         start_date_donation:
           type: string
           format: date-time
@@ -1715,10 +1737,8 @@ components:
           type: string
           format: MongoId
           example: 682f6a3fdb3fb589d23e7654
-        blood_component_id:
-          type: string
-          format: MongoId
-          example: 682f6a3fdb3fb589d23e7654
+        donation_type:
+          $ref: '#/components/schemas/DonationType'
         start_date_donation:
           type: string
           format: date-time

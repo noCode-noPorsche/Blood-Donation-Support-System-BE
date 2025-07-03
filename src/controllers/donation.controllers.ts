@@ -56,13 +56,13 @@ export const createDonationRegistrationController = async (
   res: Response
 ) => {
   const { user_id } = req.decode_authorization as TokenPayload
-  const { blood_group_id, blood_component_id, start_date_donation } = req.body
+  const { body } = req
   const results = await donationService.createDonationRegistration({
     user_id,
-    payload: { blood_group_id, blood_component_id, start_date_donation }
+    payload: body
   })
   res.json({
-    message: DONATION_MESSAGES.REGISTRATION_SUCCESS,
+    message: DONATION_MESSAGES.CREATE_DONATION_REGISTRATION_SUCCESS,
     result: results
   })
 }
@@ -111,11 +111,6 @@ export const updateDonationRegistrationController = async (
     id,
     payload: body
   })
-
-  if (!updatedRegistration) {
-    res.status(404).json({ message: DONATION_MESSAGES.DONATION_REGISTRATION_NOT_FOUND })
-    return
-  }
 
   res.json({
     message: DONATION_MESSAGES.UPDATE_DONATION_REGISTRATION_SUCCESS,

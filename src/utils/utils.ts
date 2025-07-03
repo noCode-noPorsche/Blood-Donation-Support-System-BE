@@ -1,5 +1,4 @@
-import { ObjectId } from 'mongodb'
-import { BloodComponentEnum, BloodGroupEnum } from '~/constants/enum'
+import { BloodComponentEnum, DonationType } from '~/constants/enum'
 import { HTTP_STATUS } from '~/constants/httpStatus'
 import { HEALTH_CHECK_MESSAGES } from '~/constants/messages'
 import { ErrorWithStatus } from '~/models/Error'
@@ -59,4 +58,18 @@ export const bloodGroupMap: Record<string, string[]> = {
   'AB-': ['A-', 'B-', 'AB-', 'O-'],
   'O+': ['O+', 'O-'],
   'O-': ['O-']
+}
+
+export const convertTypeToComponentMap: Record<DonationType, BloodComponentEnum[]> = {
+  [DonationType.WholeBlood]: [
+    BloodComponentEnum.Platelets,
+    BloodComponentEnum.Plasma,
+    BloodComponentEnum.RedBloodCells
+  ],
+  [DonationType.Platelets]: [BloodComponentEnum.Platelets],
+  [DonationType.Plasma]: [BloodComponentEnum.Plasma],
+  [DonationType.RedBloodCells]: [BloodComponentEnum.RedBloodCells],
+  [DonationType.PlateletsPlasma]: [BloodComponentEnum.Platelets, BloodComponentEnum.Plasma],
+  [DonationType.PlasmaRedCells]: [BloodComponentEnum.Plasma, BloodComponentEnum.RedBloodCells],
+  [DonationType.PlateletsRedCells]: [BloodComponentEnum.Platelets, BloodComponentEnum.RedBloodCells]
 }

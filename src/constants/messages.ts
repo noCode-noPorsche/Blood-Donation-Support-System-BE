@@ -80,7 +80,7 @@ export const BLOOD_MESSAGES = {
 } as const
 
 export const DONATION_MESSAGES = {
-  REGISTRATION_SUCCESS: 'Registration success',
+  CREATE_DONATION_REGISTRATION_SUCCESS: 'Create donation registration success',
   REGISTRATION_MUST_BE_A_STRING: 'Registration must be a string',
   REGISTRATION_IS_REQUIRED: 'Registration is required',
   REGISTRATION_IS_INVALID: 'Registration is invalid',
@@ -112,7 +112,9 @@ export const DONATION_MESSAGES = {
   DESCRIPTION_LENGTH_MUST_BE_LESS_THAN_500: 'Description length must be less than 500',
   BLOOD_DONATION_REQUEST_CANNOT_BE_APPROVED_IF_HEALTH_CHECK_RESULTS_ARE_NOT_SATISFACTORY:
     'Blood donation request cannot be approved if health check results are not satisfactory',
-  GET_STATUS_DONATION_HEALTH_PROCESS_SUCCESS: 'Get status donation health process success'
+  GET_STATUS_DONATION_HEALTH_PROCESS_SUCCESS: 'Get status donation health process success',
+  DONATION_TYPE_IS_REQUIRED: 'Donation type is required',
+  DONATION_TYPE_IS_INVALID: 'Donation type is invalid'
 } as const
 
 export const HEALTH_CHECK_MESSAGES = {

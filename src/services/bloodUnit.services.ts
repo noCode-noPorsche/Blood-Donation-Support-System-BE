@@ -106,6 +106,17 @@ class BloodUnitService {
   }
 
   async getBloodUnitsByDonationProcessId(id: string) {
+    const donationProcess = await databaseService.donationProcesses.findOne({
+      _id: new ObjectId(id)
+    })
+
+    if (!donationProcess) {
+      throw new ErrorWithStatus({
+        message: DONATION_MESSAGES.DONATION_PROCESS_NOT_FOUND,
+        status: HTTP_STATUS.NOT_FOUND
+      })
+    }
+
     const bloodUnitResults = await databaseService.bloodUnits
       .aggregate([
         // 1. Match theo donation_process_id
@@ -170,13 +181,6 @@ class BloodUnitService {
         }
       ])
       .toArray()
-
-    if (!bloodUnitResults || bloodUnitResults.length === 0) {
-      throw new ErrorWithStatus({
-        message: DONATION_MESSAGES.DONATION_PROCESS_NOT_FOUND,
-        status: 404
-      })
-    }
 
     return bloodUnitResults
   }

@@ -1,5 +1,5 @@
 import { ObjectId } from 'mongodb'
-import { HealthCheckStatus, UnderlyingHealthCondition, UserRole } from '~/constants/enum'
+import { DonationType, HealthCheckStatus, RequestType, UnderlyingHealthCondition, UserRole } from '~/constants/enum'
 
 interface HealthCheckType {
   _id?: ObjectId
@@ -8,8 +8,10 @@ interface HealthCheckType {
   blood_component_ids?: ObjectId[] | null
   donation_registration_id: ObjectId | null
   donation_process_id: ObjectId | null
+  donation_type?: DonationType
   request_registration_id: ObjectId | null
   request_process_id: ObjectId | null
+  request_type?: RequestType
   weight?: number
   temperature?: number
   heart_rate?: number
@@ -31,8 +33,10 @@ export default class HealthCheck {
   blood_component_ids?: ObjectId[] | null
   donation_registration_id: ObjectId | null
   donation_process_id: ObjectId | null
+  donation_type?: DonationType | null
   request_registration_id: ObjectId | null
   request_process_id: ObjectId | null
+  request_type?: RequestType | null
   weight?: number
   temperature?: number
   heart_rate?: number
@@ -53,8 +57,10 @@ export default class HealthCheck {
     this.blood_component_ids = healthCheck.blood_component_ids || null
     this.donation_registration_id = healthCheck.donation_registration_id || null
     this.donation_process_id = healthCheck.donation_process_id || null
+    this.donation_type = healthCheck.donation_type ?? null
     this.request_registration_id = healthCheck.request_registration_id || null
     this.request_process_id = healthCheck.request_process_id || null
+    this.request_type = healthCheck.request_type ?? null
     this.weight = healthCheck.weight || 0
     this.temperature = healthCheck.temperature || 0
     this.heart_rate = healthCheck.heart_rate || 0

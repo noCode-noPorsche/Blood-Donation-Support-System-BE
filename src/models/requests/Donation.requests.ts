@@ -1,8 +1,8 @@
 import { ParamsDictionary } from 'express-serve-static-core'
-import { DonationProcessStatus, DonationRegistrationStatus } from '~/constants/enum'
+import { DonationProcessStatus, DonationRegistrationStatus, DonationType } from '~/constants/enum'
 export interface DonationRegistrationReqBody {
   blood_group_id?: string
-  blood_component_id?: string
+  donation_type: DonationType
   start_date_donation: string
 }
 
@@ -12,9 +12,9 @@ export interface UpdateDonationRegistrationIdReqParams extends ParamsDictionary 
 
 export interface UpdateDonationRegistrationReqBody {
   blood_group_id?: string
-  blood_component_id?: string
   start_date_donation?: string
   status: DonationRegistrationStatus
+  donation_type: DonationType
 }
 
 export interface GetDonationRegistrationIdReqParams extends ParamsDictionary {

@@ -12,6 +12,7 @@ interface DonationProcessType {
   donation_date?: Date
   description?: string
   is_separated: boolean
+  updated_by: ObjectId
   created_at: Date
   updated_at: Date
 }
@@ -24,10 +25,11 @@ export default class DonationProcess {
   volume_collected?: number
   status: DonationProcessStatus
   donation_date?: Date
+  description?: string
   is_separated: boolean
+  updated_by: ObjectId
   created_at: Date
   updated_at: Date
-  description?: string
   constructor(donationProcess: DonationProcessType) {
     const date = new Date()
     this._id = donationProcess._id || new ObjectId()
@@ -40,6 +42,7 @@ export default class DonationProcess {
     this.donation_date = donationProcess.donation_date || date
     this.description = donationProcess.description || ''
     this.is_separated = donationProcess.is_separated || false
+    this.updated_by = donationProcess.updated_by
     this.created_at = donationProcess.created_at || date
     this.updated_at = donationProcess.updated_at || date
   }

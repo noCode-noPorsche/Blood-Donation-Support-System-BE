@@ -50,6 +50,17 @@ export enum DonationRegistrationStatus {
   Rejected = 'Rejected'
 }
 
+export enum DonationType {
+  WholeBlood = 'Whole Blood', // Hiến máu toàn phần
+  Platelets = 'Platelets', // Hiến tiểu cầu
+  Plasma = 'Plasma', // Hiến huyết tương
+  RedBloodCells = 'Red Blood Cells', // Hiến hồng cầu kép
+
+  PlateletsPlasma = 'Platelets - Plasma', // Hiến tiểu cầu + huyết tương
+  PlasmaRedCells = 'Plasma - Red Blood Cells', // Hiến huyết tương + hồng cầu
+  PlateletsRedCells = 'Platelets - Red Blood Cells' // Hiến tiểu cầu + hồng cầu
+}
+
 export enum DonationProcessStatus {
   Pending = 'Pending',
   Approved = 'Approved',
@@ -82,6 +93,17 @@ export enum RequestRegistrationStatus {
   Pending = 'Pending',
   Approved = 'Approved',
   Rejected = 'Rejected'
+}
+
+export enum RequestType {
+  WholeBlood = 'Whole Blood', // Hiến máu toàn phần
+  Platelets = 'Platelets', // Hiến tiểu cầu
+  Plasma = 'Plasma', // Hiến huyết tương
+  RedBloodCells = 'Red Blood Cells', // Hiến hồng cầu kép
+
+  PlateletsPlasma = 'Platelets - Plasma', // Hiến tiểu cầu + huyết tương
+  PlasmaRedCells = 'Plasma - Red Blood Cells', // Hiến huyết tương + hồng cầu
+  PlateletsRedCells = 'Platelets - Red Blood Cells' // Hiến tiểu cầu + hồng cầu
 }
 
 export enum RequestProcessStatus {
