@@ -191,13 +191,8 @@ export const updateDonationProcessController = async (
 
 export const getDonationProcessByUserIdController = async (req: Request, res: Response) => {
   const { user_id } = req.decode_authorization as TokenPayload
-  console.log('user_id', user_id)
-  const donationProcess = await donationService.getDonationProcessByUserId(user_id)
 
-  if (donationProcess.length === 0) {
-    res.status(404).json({ message: DONATION_MESSAGES.DONATION_PROCESS_NOT_FOUND })
-    return
-  }
+  const donationProcess = await donationService.getDonationProcessByUserId(user_id)
 
   res.json({
     message: DONATION_MESSAGES.GET_DONATION_REQUEST_PROCESS_SUCCESS,

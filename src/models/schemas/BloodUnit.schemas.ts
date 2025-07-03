@@ -13,7 +13,7 @@ interface BloodUnitType {
   volume?: number
   storage_temperature?: number
   note?: string
-  used_at?: Date
+  used_at?: Date | null
   created_at?: Date
   updated_at?: Date
 }
@@ -29,7 +29,7 @@ export default class BloodUnit {
   storage_temperature?: number
   note?: string
   updated_by?: ObjectId
-  used_at?: Date
+  used_at?: Date | null
   created_at?: Date
   updated_at?: Date
   constructor(bloodUnit: BloodUnitType) {
@@ -45,7 +45,7 @@ export default class BloodUnit {
     this.volume = bloodUnit.volume || 0
     this.storage_temperature = bloodUnit.storage_temperature || 0
     this.note = bloodUnit.note || ''
-    this.used_at = bloodUnit.used_at || date
+    this.used_at = bloodUnit.used_at || null
     this.created_at = bloodUnit.created_at || date
     this.updated_at = bloodUnit.updated_at || date
   }

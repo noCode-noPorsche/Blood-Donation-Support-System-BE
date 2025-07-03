@@ -24,7 +24,7 @@ export const getExpirationDateByComponent = (componentName: BloodComponentEnum):
     [BloodComponentEnum.Platelets]: 5,
     [BloodComponentEnum.Plasma]: 365,
     [BloodComponentEnum.WhiteBloodCells]: 1, // not use
-    [BloodComponentEnum.WholeBlood]: 35 // note use
+    [BloodComponentEnum.WholeBlood]: 35 // not use
   }
 
   const days = componentExpiryDays[componentName] ?? 30

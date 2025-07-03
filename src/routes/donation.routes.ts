@@ -144,6 +144,7 @@ donationRouter.patch(
 //   wrapAsync(deleteDonationRegistrationController)
 // )
 
+//Donation Processes
 /**
  * Description. Get all donation request processes for staff or admin
  * Params: is_separated
@@ -154,21 +155,20 @@ donationRouter.patch(
 donationRouter.get('/donation-processes', isStaffOrAdminValidator, wrapAsync(getAllDonationProcessesController))
 
 /**
+ * Description. Get donation process by user id
+ * Path: /donation-processes/user
+ * METHOD: GET
+ * Header: { Authorization: Bearer <access_token>}
+ */
+donationRouter.get('/donation-processes/user', accessTokenValidator, wrapAsync(getDonationProcessByUserIdController))
+
+/**
  * Description. Get donation request processes by id for staff or admin
  * Path: /donation-request-processes/:id
  * METHOD: GET
  * Header: { Authorization: Bearer <access_token>}
  */
 donationRouter.get('/donation-processes/:id', isStaffOrAdminValidator, wrapAsync(getDonationProcessesByIdController))
-
-/**
- * Description. Get donation process by user id
- * Path: /donation-processes/user
- * METHOD: GET
- * Header: { Authorization: Bearer <access_token>}
- *
- */
-donationRouter.get('/donation-processes/user', accessTokenValidator, wrapAsync(getDonationProcessByUserIdController))
 
 /**
  * Description. Update a donation request process for staff or admin
@@ -181,13 +181,7 @@ donationRouter.patch(
   '/donation-processes/:id',
   isStaffOrAdminValidator,
   updateDonationProcessValidator,
-  filterMiddleware<UpdateDonationProcessReqBody>([
-    'status',
-    'description',
-    'donation_date',
-    'volume_collected',
-    'blood_group_id'
-  ]),
+  filterMiddleware<UpdateDonationProcessReqBody>(['status', 'description', 'donation_date', 'volume_collected']),
   wrapAsync(updateDonationProcessController)
 )
 

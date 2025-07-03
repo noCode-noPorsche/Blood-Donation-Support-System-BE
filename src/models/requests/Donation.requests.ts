@@ -26,10 +26,9 @@ export interface GetDonationProcessIdReqParams extends ParamsDictionary {
 }
 
 export interface UpdateDonationProcessReqBody {
-  blood_group_id: string
   volume_collected: number
-  description: string
-  donation_date: string
+  description?: string
+  donation_date?: string
   status: DonationProcessStatus
 }
 

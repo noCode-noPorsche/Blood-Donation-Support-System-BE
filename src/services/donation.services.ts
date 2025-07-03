@@ -16,11 +16,11 @@ import {
   UpdateDonationRegistrationReqBody
 } from '~/models/requests/Donation.requests'
 import BloodUnit from '~/models/schemas/BloodUnit.schemas'
-import { default as DonationProcess, default as DonationRequestProcess } from '~/models/schemas/DonationProcess.schemas'
 import DonationRegistration from '~/models/schemas/DonationRegistration.schemas'
 import HealthCheck from '~/models/schemas/HealthCheck'
-import databaseService from './database.services'
 import { convertTypeToComponentMap } from '~/utils/utils'
+import databaseService from './database.services'
+import DonationProcess from '~/models/schemas/DonationProcess.schemas'
 config()
 
 class DonationService {
@@ -474,16 +474,18 @@ class DonationService {
     if (payload.start_date_donation) updateFields.start_date_donation = new Date(payload.start_date_donation)
 
     // Nếu có thay đổi loại hiến
+    let componentIds: ObjectId[] = []
     if (payload.donation_type) {
       updateFields.donation_type = payload.donation_type
 
+      //Map loại hiến sang các thành phần máu
       const componentNames = convertTypeToComponentMap[payload.donation_type]
       const componentDocs = await databaseService.bloodComponents.find({ name: { $in: componentNames } }).toArray()
 
-      const componentIds = componentDocs.map((comp) => comp._id)
+      componentIds = componentDocs.map((comp) => comp._id)
       updateFields.blood_component_ids = componentIds
     }
-
+    // Cập nhật donation registrations
     const result = await databaseService.donationRegistrations.findOneAndUpdate(
       { _id: new ObjectId(id) },
       {
@@ -492,6 +494,19 @@ class DonationService {
       },
       { returnDocument: 'after' }
     )
+    // Nếu có thay đổi loại hiến, cập nhật luôn bảng healthChecks
+    if (payload.donation_type && componentIds.length > 0) {
+      await databaseService.healthChecks.updateMany(
+        { donation_registration_id: new ObjectId(id) },
+        {
+          $set: {
+            donation_type: payload.donation_type,
+            blood_component_ids: componentIds,
+            updated_at: new Date()
+          }
+        }
+      )
+    }
 
     return result
   }
@@ -554,6 +569,7 @@ class DonationService {
             blood_group_name: '$blood_group_info.name',
             blood_component_id: 1,
             blood_component_name: '$blood_component_info.name',
+            updated_by: 1,
             created_at: 1,
             updated_at: 1
           }
@@ -565,6 +581,14 @@ class DonationService {
   }
 
   async getDonationProcessById(id: string) {
+    const existsDonationProcess = await databaseService.donationProcesses.findOne({ _id: new ObjectId(id) })
+    if (!existsDonationProcess) {
+      throw new ErrorWithStatus({
+        message: DONATION_MESSAGES.DONATION_PROCESS_NOT_FOUND,
+        status: HTTP_STATUS.NOT_FOUND
+      })
+    }
+
     const result = await databaseService.donationProcesses
       .aggregate([
         {
@@ -616,19 +640,13 @@ class DonationService {
             status: 1,
             is_separated: 1,
             description: 1,
+            updated_by: 1,
             created_at: 1,
             updated_at: 1
           }
         }
       ])
       .toArray()
-
-    if (!result || result.length === 0) {
-      throw new ErrorWithStatus({
-        message: DONATION_MESSAGES.DONATION_PROCESS_NOT_FOUND,
-        status: HTTP_STATUS.BAD_REQUEST
-      })
-    }
 
     return result[0]
   }
@@ -639,29 +657,58 @@ class DonationService {
         {
           $match: { user_id: new ObjectId(user_id) }
         },
+        // Join user để lấy username
         {
           $lookup: {
-            from: 'donation_registrations',
-            localField: 'donation_registration_id',
+            from: 'users',
+            localField: 'user_id',
             foreignField: '_id',
-            as: 'donation_registration'
+            as: 'user_info'
           }
         },
         {
           $unwind: {
-            path: '$donation_registration',
+            path: '$user_info',
+            preserveNullAndEmptyArrays: true
+          }
+        },
+        // Join blood_group để lấy tên nhóm máu
+        {
+          $lookup: {
+            from: 'blood_groups',
+            localField: 'blood_group_id',
+            foreignField: '_id',
+            as: 'blood_group_info'
+          }
+        },
+        {
+          $unwind: {
+            path: '$blood_group_info',
             preserveNullAndEmptyArrays: true
           }
         },
         {
           $project: {
-            'donation_registration._id': 0,
-            'donation_registration.created_at': 0,
-            'donation_registration.updated_at': 0
+            _id: 1,
+            donation_registration_id: 1,
+            user_id: 1,
+            username: '$user_info.full_name',
+            blood_group_id: 1,
+            blood_group_name: '$blood_group_info.name',
+            health_check_id: 1,
+            donation_date: 1,
+            volume_collected: 1,
+            status: 1,
+            is_separated: 1,
+            description: 1,
+            updated_by: 1,
+            created_at: 1,
+            updated_at: 1
           }
         }
       ])
       .toArray()
+
     return donationProcesses
   }
 
@@ -678,10 +725,18 @@ class DonationService {
       _id: new ObjectId(id)
     })
 
+    if (!donationProcessResult) {
+      throw new ErrorWithStatus({
+        message: DONATION_MESSAGES.DONATION_PROCESS_NOT_FOUND,
+        status: HTTP_STATUS.NOT_FOUND
+      })
+    }
+
     const healthCheckResult = await databaseService.healthChecks.findOne({
       _id: new ObjectId(donationProcessResult?.health_check_id)
     })
 
+    //Kiểm tra nếu health check đã reject hoặc pending thì donation process ko dc approved
     const isHealthCheckNotApproved = [HealthCheckStatus.Pending, HealthCheckStatus.Rejected].includes(
       healthCheckResult?.status as HealthCheckStatus
     )
@@ -691,13 +746,14 @@ class DonationService {
       throw new ErrorWithStatus({
         message:
           DONATION_MESSAGES.BLOOD_DONATION_REQUEST_CANNOT_BE_APPROVED_IF_HEALTH_CHECK_RESULTS_ARE_NOT_SATISFACTORY,
-        status: 400
+        status: HTTP_STATUS.BAD_REQUEST
       })
     }
 
-    const updateFields: any = {
+    //Cập nhật donation process
+    const updateFields: Partial<DonationProcess> = {
       status: payload.status || DonationProcessStatus.Pending,
-      blood_group_id: payload.blood_group_id ? new ObjectId(payload.blood_group_id) : healthCheckResult?.blood_group_id,
+      blood_group_id: healthCheckResult?.blood_group_id,
       volume_collected: Number(payload.volume_collected)
     }
 
@@ -723,6 +779,7 @@ class DonationService {
       { returnDocument: 'after' }
     )
 
+    //Kiểm tra coi lần đầu approved để tạo ra túi máu tương ứng theo thành phần đã hiến +  tăng số lần đã hiến máu của user
     const wasNotApprovedBefore = donationProcessResult?.status !== DonationProcessStatus.Approved
     const isNowApproved = result?.status === DonationProcessStatus.Approved
 
@@ -734,38 +791,61 @@ class DonationService {
         .toArray()
 
       if (existingUnits.length === 0) {
+        //Lấy thông tin healthCheck để biết danh sách thành phần máu đã chọn
+        const bloodComponentIds = healthCheckResult?.blood_component_ids || []
+
         const now = new Date()
-        const bloodComponentDocs = await databaseService.bloodComponents
-          .find({
-            name: {
-              $in: [BloodComponentEnum.RedBloodCells, BloodComponentEnum.Platelets, BloodComponentEnum.Plasma]
-            }
+        if (bloodComponentIds.length > 0) {
+          const bloodComponentDocs = await databaseService.bloodComponents
+            .find({ _id: { $in: bloodComponentIds } })
+            .toArray()
+          console.log(bloodComponentDocs, 'here')
+          const bloodUnits = bloodComponentDocs.map((comp) => {
+            return new BloodUnit({
+              donation_process_id: new ObjectId(result._id),
+              request_process_id: null,
+              blood_group_id: result.blood_group_id as ObjectId,
+              blood_component_id: comp._id,
+              updated_by: new ObjectId(user_id),
+              status: BloodUnitStatus.Available,
+              volume: 0
+              // expired_at: new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000) // nếu cần
+            })
           })
-          .toArray()
-        const componentMap = bloodComponentDocs.reduce(
-          (acc, comp) => {
-            acc[comp.name] = comp._id
-            return acc
-          },
-          {} as Record<string, ObjectId>
-        )
-        const bloodUnits = [
-          BloodComponentEnum.RedBloodCells,
-          BloodComponentEnum.Platelets,
-          BloodComponentEnum.Plasma
-        ].map((name) => {
-          return new BloodUnit({
-            donation_process_id: new ObjectId(result._id),
-            request_process_id: null,
-            blood_group_id: result.blood_group_id as ObjectId,
-            blood_component_id: componentMap[name],
-            updated_by: new ObjectId(user_id),
-            status: BloodUnitStatus.Available,
-            volume: 0
-            // expired_at: new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)
-          })
-        })
-        await databaseService.bloodUnits.insertMany(bloodUnits)
+
+          await databaseService.bloodUnits.insertMany(bloodUnits)
+        }
+        // const bloodComponentDocs = await databaseService.bloodComponents
+        //   .find({
+        //     name: {
+        //       $in: [BloodComponentEnum.RedBloodCells, BloodComponentEnum.Platelets, BloodComponentEnum.Plasma]
+        //     }
+        //   })
+        //   .toArray()
+        // const componentMap = bloodComponentDocs.reduce(
+        //   (acc, comp) => {
+        //     acc[comp.name] = comp._id
+        //     return acc
+        //   },
+        //   {} as Record<string, ObjectId>
+        // )
+        // const bloodUnits = [
+        //   BloodComponentEnum.RedBloodCells,
+        //   BloodComponentEnum.Platelets,
+        //   BloodComponentEnum.Plasma
+        // ].map((name) => {
+        //   return new BloodUnit({
+        //     donation_process_id: new ObjectId(result._id),
+        //     request_process_id: null,
+        //     blood_group_id: result.blood_group_id as ObjectId,
+        //     blood_component_id: componentMap[name],
+        //     updated_by: new ObjectId(user_id),
+        //     status: BloodUnitStatus.Available,
+        //     volume: 0
+        //     // expired_at: new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)
+        //   })
+        // })
+        // await databaseService.bloodUnits.insertMany(bloodUnits)
       }
       if (result) {
         const userResult = await databaseService.users.findOne({
@@ -776,9 +856,7 @@ class DonationService {
             { _id: new ObjectId(userResult._id) },
             {
               $set: {
-                blood_group_id: payload.blood_group_id
-                  ? new ObjectId(payload.blood_group_id)
-                  : userResult.blood_group_id,
+                blood_group_id: healthCheckResult?.blood_group_id || userResult.blood_group_id,
                 number_of_donations: userResult?.number_of_donations ? userResult.number_of_donations + 1 : 1
               },
               $currentDate: { updated_at: true }
@@ -807,19 +885,19 @@ class DonationService {
   // }
 
   //not use
-  async deleteDonationProcess(id: string) {
-    let parsedId: ObjectId
-    try {
-      parsedId = new ObjectId(id)
-    } catch (err) {
-      return false
-    }
-    const deletedProcess = await databaseService.donationProcesses.findOneAndDelete({ _id: parsedId })
-    if (!deletedProcess) {
-      return null
-    }
-    return new DonationRequestProcess(deletedProcess)
-  }
+  // async deleteDonationProcess(id: string) {
+  //   let parsedId: ObjectId
+  //   try {
+  //     parsedId = new ObjectId(id)
+  //   } catch (err) {
+  //     return false
+  //   }
+  //   const deletedProcess = await databaseService.donationProcesses.findOneAndDelete({ _id: parsedId })
+  //   if (!deletedProcess) {
+  //     return null
+  //   }
+  //   return new DonationRequestProcess(deletedProcess)
+  // }
 }
 
 const donationService = new DonationService()

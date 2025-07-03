@@ -1802,21 +1802,31 @@ components:
       properties:
         status:
           $ref: '#/components/schemas/DonationProcessStatus'
-          description:
-            type: string
-            example: ''
-          donation_date:
-            type: string
-            format: date-time
-            example: 2025-05-21T17:48:12.171Z
-          volume_collected:
-            type: number
-            example: 0
+        description:
+          type: string
+          example: ''
+        donation_date:
+          type: string
+          format: date-time
+          example: 2025-05-21T17:48:12.171Z
+        volume_collected:
+          type: number
+          example: 0
     UpdateStatusDonationProcessReqBody:
       type: object
       properties:
         status:
           $ref: '#/components/schemas/DonationProcessStatus'
+        volume_collected:
+          type: number
+          example: 0
+        description:
+          type: string
+          example: ''
+        donation_date:
+          type: string
+          format: date-time
+          example: 2025-06-21T14:15:45.866Z
     HealthCheckStatus:
       type: string
       enum: [Pending, Approved, Rejected]

@@ -273,7 +273,12 @@ class HealthCheckService {
             $set: {
               blood_group_id: payload.blood_group_id
                 ? new ObjectId(payload.blood_group_id)
-                : resultHealthCheckUpdate.blood_group_id
+                : resultHealthCheckUpdate.blood_group_id,
+              donation_type: payload.donation_type,
+              blood_component_ids:
+                bloodComponentIdsFromType.length > 0
+                  ? bloodComponentIdsFromType
+                  : resultHealthCheck.blood_component_ids || []
             }
           }
         )
@@ -353,7 +358,7 @@ class HealthCheckService {
           status:
             payload.status === HealthCheckStatus.Rejected
               ? DonationProcessStatus.Rejected
-              : DonationProcessStatus.Approved,
+              : DonationProcessStatus.Pending,
           volume_collected: volume,
           blood_group_id: new ObjectId(payload.blood_group_id || (resultUser?.blood_group_id as ObjectId))
         },
