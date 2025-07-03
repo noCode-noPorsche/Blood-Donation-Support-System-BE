@@ -9,7 +9,7 @@ import {
 import { createBlogValidator, updateBlogValidator } from '~/middlewares/blog.middlewares'
 import { filterMiddleware } from '~/middlewares/common.middlewares'
 import { isAdminValidator } from '~/middlewares/user.middlewares'
-import { UpdateBlogReqBody } from '~/models/requests/Blog.requests'
+import { CreateBlogReqBody, UpdateBlogReqBody } from '~/models/requests/Blog.requests'
 import { wrapAsync } from '~/utils/handler'
 
 const blogRouter = express.Router()
@@ -21,7 +21,13 @@ const blogRouter = express.Router()
  * Body: { CreateBlogReqBody }
  * Header: { Authorization: Bearer <access_token>}
  */
-blogRouter.post('/', isAdminValidator, createBlogValidator, wrapAsync(createBlogController))
+blogRouter.post(
+  '/',
+  isAdminValidator,
+  createBlogValidator,
+  filterMiddleware<CreateBlogReqBody>(['author', 'content', 'image', 'title']),
+  wrapAsync(createBlogController)
+)
 
 /**
  * Description. Get all blogs
@@ -50,7 +56,7 @@ blogRouter.patch(
   '/:id',
   isAdminValidator,
   updateBlogValidator,
-  filterMiddleware<UpdateBlogReqBody>(['title', 'content', 'image']),
+  filterMiddleware<UpdateBlogReqBody>(['title', 'content', 'image', 'author']),
   wrapAsync(updateBlogByIdController)
 )
 

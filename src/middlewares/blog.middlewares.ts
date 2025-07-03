@@ -31,6 +31,14 @@ export const createBlogValidator = validate(
         isString: {
           errorMessage: BLOG_MESSAGES.IMAGE_MUST_BE_A_STRING
         }
+      },
+      author: {
+        notEmpty: {
+          errorMessage: BLOG_MESSAGES.AUTHOR_IS_REQUIRED
+        },
+        isString: {
+          errorMessage: BLOG_MESSAGES.AUTHOR_MUST_BE_A_STRING
+        }
       }
     },
     ['body']
@@ -41,28 +49,37 @@ export const updateBlogValidator = validate(
   checkSchema(
     {
       title: {
-        notEmpty: undefined,
+        optional: true,
+        // notEmpty: undefined,
         isString: {
           errorMessage: BLOG_MESSAGES.TITLE_MUST_BE_A_STRING
-        },
-        optional: true
+        }
       },
       content: {
-        notEmpty: undefined,
+        optional: true,
+        // notEmpty: undefined,
         isString: {
           errorMessage: BLOG_MESSAGES.CONTENT_MUST_BE_A_STRING
-        },
-        optional: true
+        }
       },
       image: {
         notEmpty: undefined,
+        optional: true,
         isURL: {
           errorMessage: BLOG_MESSAGES.IMAGE_MUST_BE_A_URL
         },
         isString: {
           errorMessage: BLOG_MESSAGES.IMAGE_MUST_BE_A_STRING
-        },
-        optional: true
+        }
+      },
+      author: {
+        optional: true,
+        // notEmpty: {
+        //   errorMessage: BLOG_MESSAGES.AUTHOR_IS_REQUIRED
+        // },
+        isString: {
+          errorMessage: BLOG_MESSAGES.AUTHOR_MUST_BE_A_STRING
+        }
       }
     },
     ['body']

@@ -4,6 +4,7 @@ export interface CreateBlogReqBody {
   title: string
   content: string
   image: string
+  author: string
 }
 
 export interface GetBlogByIdReqParams {
@@ -14,6 +15,7 @@ export interface UpdateBlogReqBody {
   title?: string
   content?: string
   image?: string
+  author?: string
 }
 
 export interface DeleteBlogByIdReqParams extends ParamsDictionary {

@@ -2280,6 +2280,9 @@ components:
         image:
           type: string
           example: 'link image'
+        author:
+          type: string
+          example: ''
     UpdateBlogReqBody:
       type: object
       properties:
@@ -2292,6 +2295,9 @@ components:
         image:
           type: string
           example: 'link image'
+        author:
+          type: string
+          example: ''
 
   securitySchemes:
     BearerAuth:

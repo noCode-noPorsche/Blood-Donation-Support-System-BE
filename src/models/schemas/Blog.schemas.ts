@@ -7,7 +7,7 @@ interface BlogType {
   image: string
   created_at?: Date
   updated_at?: Date
-  author: ObjectId
+  author: string
   updated_by?: ObjectId
 }
 
@@ -18,7 +18,7 @@ export default class Blog {
   image: string
   created_at?: Date
   updated_at?: Date
-  author: ObjectId
+  author: string
   updated_by?: ObjectId
   constructor(blog: BlogType) {
     const date = new Date()

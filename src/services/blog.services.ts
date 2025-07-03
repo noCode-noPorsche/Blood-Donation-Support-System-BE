@@ -4,6 +4,7 @@ import { ObjectId } from 'mongodb'
 import { ErrorWithStatus } from '~/models/Error'
 import { BLOG_MESSAGES } from '~/constants/messages'
 import { config } from 'dotenv'
+import { HTTP_STATUS } from '~/constants/httpStatus'
 config()
 
 class BlogService {
@@ -13,7 +14,8 @@ class BlogService {
       _id: new ObjectId(),
       created_at: new Date(),
       updated_at: new Date(),
-      author: new ObjectId(user_id)
+      updated_by: new ObjectId(user_id),
+      author: payload.author
     })
     return blog
   }
@@ -28,7 +30,7 @@ class BlogService {
     if (!blog) {
       throw new ErrorWithStatus({
         message: BLOG_MESSAGES.BLOG_NOT_FOUND,
-        status: 404
+        status: HTTP_STATUS.NOT_FOUND
       })
     }
     return blog
@@ -45,7 +47,7 @@ class BlogService {
     if (!blog) {
       throw new ErrorWithStatus({
         message: BLOG_MESSAGES.BLOG_NOT_FOUND,
-        status: 404
+        status: HTTP_STATUS.NOT_FOUND
       })
     }
     return blog
@@ -56,7 +58,7 @@ class BlogService {
     if (!blog) {
       throw new ErrorWithStatus({
         message: BLOG_MESSAGES.BLOG_NOT_FOUND,
-        status: 404
+        status: HTTP_STATUS.NOT_FOUND
       })
     }
     const deleteBlog = await databaseService.blogs.deleteOne({ _id: new ObjectId(id) })
