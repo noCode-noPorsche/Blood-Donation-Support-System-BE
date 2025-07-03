@@ -1,9 +1,10 @@
 import { ParamsDictionary } from 'express-serve-static-core'
-import { HealthCheckStatus, UnderlyingHealthCondition } from '~/constants/enum'
+import { DonationType, HealthCheckStatus, RequestType, UnderlyingHealthCondition } from '~/constants/enum'
 
 export interface UpdateHealthCheckReqBody {
   blood_group_id?: string
-  blood_component_ids?: string[]
+  donation_type?: DonationType
+  request_type?: RequestType
   weight?: number
   temperature?: number
   heart_rate?: number

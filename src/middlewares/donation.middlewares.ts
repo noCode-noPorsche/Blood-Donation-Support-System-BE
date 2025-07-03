@@ -101,11 +101,11 @@ export const updateDonationRegistrationValidator = validate(
       },
       start_date_donation: {
         notEmpty: undefined,
+        optional: true,
         isISO8601: {
           options: { strict: true },
           errorMessage: DONATION_MESSAGES.START_DATE_DONATION_IS_INVALID
-        },
-        optional: true
+        }
       },
       status: {
         notEmpty: {
@@ -120,9 +120,10 @@ export const updateDonationRegistrationValidator = validate(
         }
       },
       donation_type: {
-        notEmpty: {
-          errorMessage: DONATION_MESSAGES.DONATION_TYPE_IS_REQUIRED
-        },
+        // notEmpty: {
+        //   errorMessage: DONATION_MESSAGES.DONATION_TYPE_IS_REQUIRED
+        // },
+        optional: true,
         isIn: {
           options: [Object.values(DonationType)],
           errorMessage: DONATION_MESSAGES.DONATION_TYPE_IS_INVALID

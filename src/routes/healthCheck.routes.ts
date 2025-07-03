@@ -50,8 +50,9 @@ healthCheckRouter.patch(
   isStaffOrAdminValidator,
   updateHealthCheckValidator,
   filterMiddleware<UpdateHealthCheckReqBody>([
-    'blood_component_ids',
     'blood_group_id',
+    'donation_type',
+    'request_type',
     'weight',
     'heart_rate',
     'temperature',

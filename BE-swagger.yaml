@@ -1828,6 +1828,10 @@ components:
           type: string
           format: MongoId
           example: 682f6a3fdb3fb589d23e7654
+        donation_type:
+          $ref: '#/components/schemas/DonationType'
+        request_type:
+          $ref: '#/components/schemas/RequestType'
         weight:
           type: number
           example: 0
@@ -1874,6 +1878,10 @@ components:
           type: string
           format: MongoId
           example: 682f6a3fdb3fb589d23e7654
+        blood_component_ids:
+          type: array
+          format: MongoId
+          example: [682f6a3fdb3fb589d23e7654, 682f6a3fdb3fb589d23e7654]
         donation_registration_id:
           type: string
           format: MongoId
@@ -1882,6 +1890,18 @@ components:
           type: string
           format: MongoId
           example: 682f6a3fdb3fb589d23e7654
+        donation_type:
+          $ref: '#/components/schemas/DonationType'
+        request_registration_id:
+          type: string
+          format: MongoId
+          example: 682f6a3fdb3fb589d23e7654
+        request_process_id:
+          type: string
+          format: MongoId
+          example: 682f6a3fdb3fb589d23e7654
+        request_type:
+          $ref: '#/components/schemas/RequestType'
         weight:
           type: number
           example: 0
@@ -1909,6 +1929,10 @@ components:
           example: ''
         status:
           $ref: '#/components/schemas/HealthCheckStatus'
+        updated_by:
+          type: string
+          format: MongoId
+          example: 682f6a3fdb3fb589d23e7654
         created_at:
           type: string
           format: date-time

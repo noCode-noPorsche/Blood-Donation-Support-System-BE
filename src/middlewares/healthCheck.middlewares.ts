@@ -1,6 +1,12 @@
 import { checkSchema, ParamSchema } from 'express-validator'
-import { BloodGroupEnum, HealthCheckStatus, UnderlyingHealthCondition } from '~/constants/enum'
-import { BLOOD_MESSAGES, HEALTH_CHECK_MESSAGES } from '~/constants/messages'
+import {
+  BloodGroupEnum,
+  DonationType,
+  HealthCheckStatus,
+  RequestType,
+  UnderlyingHealthCondition
+} from '~/constants/enum'
+import { BLOOD_MESSAGES, DONATION_MESSAGES, HEALTH_CHECK_MESSAGES, REQUEST_MESSAGES } from '~/constants/messages'
 import { validate } from '~/utils/validation'
 
 const bloodGroupSchema: ParamSchema = {
@@ -16,6 +22,20 @@ export const updateHealthCheckValidator = validate(
   checkSchema(
     {
       blood_group_id: bloodGroupSchema,
+      donation_type: {
+        optional: true,
+        isIn: {
+          options: [Object.values(DonationType)],
+          errorMessage: DONATION_MESSAGES.DONATION_TYPE_IS_INVALID
+        }
+      },
+      request_type: {
+        optional: true,
+        isIn: {
+          options: [Object.values(RequestType)],
+          errorMessage: REQUEST_MESSAGES.REQUEST_TYPE_IS_INVALID
+        }
+      },
       weight: {
         notEmpty: {
           errorMessage: HEALTH_CHECK_MESSAGES.WEIGHT_IS_REQUIRED
@@ -135,7 +155,6 @@ export const updateHealthCheckValidator = validate(
         }
       }
     },
-
     ['body']
   )
 )

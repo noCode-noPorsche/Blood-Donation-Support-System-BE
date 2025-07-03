@@ -190,7 +190,9 @@ export const REQUEST_MESSAGES = {
   UPDATE_REQUEST_PROCESS_DETAIL_SUCCESS: 'Update request process detail success',
   GET_REQUEST_PROCESS_BLOOD_SUCCESS: 'Get request process blood success',
   REQUEST_PROCESS_BLOOD_NOT_FOUND: 'Request process blood not found',
-  GET_STATUS_REQUEST_HEALTH_PROCESS_SUCCESS: 'Get status request health process success'
+  GET_STATUS_REQUEST_HEALTH_PROCESS_SUCCESS: 'Get status request health process success',
+  REQUEST_TYPE_IS_REQUIRED: 'Request type is required',
+  REQUEST_TYPE_IS_INVALID: 'Request type is invalid'
 } as const
 
 export const BLOG_MESSAGES = {
