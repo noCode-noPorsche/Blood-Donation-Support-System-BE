@@ -55,7 +55,7 @@ export const getStatusRequestHealthProcessByRequestIdController = async (
   })
 }
 
-//Request Donation
+//Request Registration
 export const createRequestRegistrationController = async (
   req: Request<ParamsDictionary, any, CreateRequestRegistrationReqBody>,
   res: Response

@@ -1,5 +1,5 @@
 import { checkSchema } from 'express-validator'
-import { RequestProcessStatus, RequestRegistrationStatus } from '~/constants/enum'
+import { RequestProcessStatus, RequestRegistrationStatus, RequestType } from '~/constants/enum'
 import { REQUEST_MESSAGES, USER_MESSAGES } from '~/constants/messages'
 import usersService from '~/services/user.services'
 import { validate } from '~/utils/validation'
@@ -8,9 +8,6 @@ export const createRequestRegistrationValidator = validate(
   checkSchema(
     {
       blood_group_id: {
-        notEmpty: undefined
-      },
-      blood_component_ids: {
         notEmpty: undefined
       },
       citizen_id_number: {
@@ -53,11 +50,42 @@ export const createRequestRegistrationValidator = validate(
           errorMessage: REQUEST_MESSAGES.IS_EMERGENCY_IS_INVALID
         }
       },
+      request_type: {
+        // notEmpty: {
+        //   errorMessage: DONATION_MESSAGES.DONATION_TYPE_IS_REQUIRED
+        // },
+        optional: true,
+        isIn: {
+          options: [Object.values(RequestType)],
+          errorMessage: REQUEST_MESSAGES.REQUEST_TYPE_IS_INVALID
+        }
+      },
       full_name: {
         notEmpty: undefined
       },
       phone: {
-        notEmpty: undefined
+        notEmpty: {
+          errorMessage: USER_MESSAGES.PHONE_IS_REQUIRED
+        },
+        isString: {
+          errorMessage: USER_MESSAGES.PHONE_MUST_BE_A_STRING
+        },
+        isLength: {
+          options: {
+            min: 10,
+            max: 12
+          },
+          errorMessage: USER_MESSAGES.PHONE_IS_WRONG_FORMAT
+        },
+        custom: {
+          options: async (value) => {
+            const isExistPhone = await usersService.checkPhoneExist(value)
+            if (isExistPhone) {
+              throw new Error(USER_MESSAGES.PHONE_ALREADY_EXISTS)
+            }
+            return true
+          }
+        }
       },
       image: {
         notEmpty: undefined
@@ -75,33 +103,6 @@ export const updateRequestRegistrationValidator = validate(
     {
       blood_group_id: {
         notEmpty: undefined
-      },
-      blood_component_id: {
-        notEmpty: undefined
-      },
-      citizen_id_number: {
-        // notEmpty: {
-        //   errorMessage: USER_MESSAGES.CITIZEN_ID_NUMBER_IS_REQUIRED
-        // },
-        notEmpty: undefined,
-        isLength: {
-          options: { min: 12, max: 12 },
-          errorMessage: USER_MESSAGES.CITIZEN_ID_MUST_BE_EXACTLY_12_DIGITS
-        },
-        matches: {
-          options: [/^\d{12}$/],
-          errorMessage: USER_MESSAGES.CITIZEN_ID_MUST_CONTAIN_ONLY_DIGITS_0_9
-        },
-        trim: true
-        // custom: {
-        //   options: async (value) => {
-        //     const isExistCitizen = await usersService.checkCitizenIDNumber(value)
-        //     if (isExistCitizen) {
-        //       throw new Error(USER_MESSAGES.CITIZEN_ID_NUMBER_ALREADY_EXIST)
-        //     }
-        //     return true
-        //   }
-        // }
       },
       status: {
         notEmpty: {
@@ -136,14 +137,52 @@ export const updateRequestRegistrationValidator = validate(
           errorMessage: REQUEST_MESSAGES.IS_EMERGENCY_IS_INVALID
         }
       },
+      request_type: {
+        // optional: true,
+        notEmpty: {
+          errorMessage: REQUEST_MESSAGES.REQUEST_TYPE_IS_REQUIRED
+        },
+        isIn: {
+          options: [Object.values(RequestType)],
+          errorMessage: REQUEST_MESSAGES.REQUEST_TYPE_IS_INVALID
+        }
+      },
+      image: {
+        notEmpty: undefined
+      },
+      note: {
+        notEmpty: undefined
+      },
       full_name: {
         notEmpty: undefined
       },
       phone: {
         notEmpty: undefined
       },
-      image: {
-        notEmpty: undefined
+      citizen_id_number: {
+        // notEmpty: {
+        //   errorMessage: USER_MESSAGES.CITIZEN_ID_NUMBER_IS_REQUIRED
+        // },
+        // notEmpty: undefined,
+        optional: true,
+        isLength: {
+          options: { min: 12, max: 12 },
+          errorMessage: USER_MESSAGES.CITIZEN_ID_MUST_BE_EXACTLY_12_DIGITS
+        },
+        matches: {
+          options: [/^\d{12}$/],
+          errorMessage: USER_MESSAGES.CITIZEN_ID_MUST_CONTAIN_ONLY_DIGITS_0_9
+        },
+        trim: true
+        // custom: {
+        //   options: async (value) => {
+        //     const isExistCitizen = await usersService.checkCitizenIDNumber(value)
+        //     if (isExistCitizen) {
+        //       throw new Error(USER_MESSAGES.CITIZEN_ID_NUMBER_ALREADY_EXIST)
+        //     }
+        //     return true
+        //   }
+        // }
       }
     },
     ['body']

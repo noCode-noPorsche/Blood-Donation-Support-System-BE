@@ -1,5 +1,5 @@
 import { ObjectId } from 'mongodb'
-import { RequestRegistrationStatus } from '~/constants/enum'
+import { RequestRegistrationStatus, RequestType } from '~/constants/enum'
 
 interface RequestRegistrationType {
   _id?: ObjectId
@@ -9,6 +9,7 @@ interface RequestRegistrationType {
   status: RequestRegistrationStatus
   blood_group_id: ObjectId | null
   blood_component_ids?: ObjectId[] | null
+  request_type: RequestType
   image?: string
   receive_date_request: Date
   update_by: ObjectId
@@ -26,6 +27,7 @@ export default class RequestRegistration {
   status: RequestRegistrationStatus
   blood_group_id: ObjectId | null
   blood_component_ids?: ObjectId[] | null
+  request_type: RequestType
   image?: string
   receive_date_request: Date
   update_by: ObjectId
@@ -42,6 +44,7 @@ export default class RequestRegistration {
     this.status = requestRegistration.status || RequestRegistrationStatus.Pending
     this.blood_group_id = requestRegistration.blood_group_id || null
     this.blood_component_ids = requestRegistration.blood_component_ids || null
+    this.request_type = requestRegistration.request_type || RequestType.WholeBlood
     this.receive_date_request = requestRegistration.receive_date_request || date
     this.image = requestRegistration.image || ''
     this.update_by = requestRegistration.update_by

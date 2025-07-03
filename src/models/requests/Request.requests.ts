@@ -3,13 +3,14 @@ import {
   RequestProcessBloodStatus,
   RequestProcessDetailStatus,
   RequestProcessStatus,
-  RequestRegistrationStatus
+  RequestRegistrationStatus,
+  RequestType
 } from '~/constants/enum'
 export interface CreateRequestRegistrationReqBody {
   citizen_id_number: string
   blood_group_id?: string
-  blood_component_ids?: string[]
-  receive_date_request: Date
+  request_type: RequestType
+  receive_date_request: string
   is_emergency: boolean
   image?: string
   full_name?: string
@@ -19,14 +20,15 @@ export interface CreateRequestRegistrationReqBody {
 
 export interface UpdateRequestRegistrationReqBody {
   blood_group_id?: string
-  blood_component_id?: string
-  receive_date_request: Date
-  is_emergency: boolean
+  receive_date_request?: string
+  request_type: RequestType
+  is_emergency?: boolean
   image?: string
+  status: RequestRegistrationStatus
+  note?: string
   citizen_id_number?: string
   full_name?: string
   phone?: string
-  status: RequestRegistrationStatus
 }
 
 export interface UpdateRequestRegistrationIdReqParams extends ParamsDictionary {

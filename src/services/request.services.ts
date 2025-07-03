@@ -25,7 +25,7 @@ import RequestProcess from '~/models/schemas/RequestProcess.schemas'
 import RequestProcessBlood from '~/models/schemas/RequestProcessBlood.schemas'
 import RequestRegistration from '~/models/schemas/RequestRegistration.schemas'
 import User from '~/models/schemas/User.schemas'
-import { isCompatibleDonor } from '~/utils/utils'
+import { convertTypeToComponentMap, isCompatibleDonor } from '~/utils/utils'
 import databaseService from './database.services'
 config()
 
@@ -185,15 +185,19 @@ class RequestService {
 
     const resultUser = await databaseService.users.findOne({ citizen_id_number: payload.citizen_id_number })
 
+    //Kiểm tra blood_group_id
     const isValidBloodGroupId = ObjectId.isValid(payload.blood_group_id as string)
     const bloodGroupId = isValidBloodGroupId ? new ObjectId(payload.blood_group_id) : resultUser?.blood_group_id || null
 
-    let bloodComponentIds: ObjectId[] | null = null
+    //Từ request_type ra name và tìm id theo name và gán vào 1 mảng
+    const componentNames = convertTypeToComponentMap[payload.request_type]
+    const componentDocs = await databaseService.bloodComponents.find({ name: { $in: componentNames } }).toArray()
+    const componentIds = componentDocs.map((comp) => comp._id)
 
-    if (Array.isArray(payload.blood_component_ids)) {
-      const validIds = payload.blood_component_ids.filter((id) => ObjectId.isValid(id))
-      bloodComponentIds = validIds.map((id) => new ObjectId(id))
-    }
+    // if (Array.isArray(payload.blood_component_ids)) {
+    //   const validIds = payload.blood_component_ids.filter((id) => ObjectId.isValid(id))
+    //   bloodComponentIds = validIds.map((id) => new ObjectId(id))
+    // }
 
     if (!resultUser) {
       const date = new Date()
@@ -223,14 +227,16 @@ class RequestService {
     }
 
     const newRequestRegistration = new RequestRegistration({
-      blood_component_ids: bloodComponentIds,
+      blood_component_ids: componentIds,
       blood_group_id: bloodGroupId,
+      request_type: payload.request_type,
       is_emergency: payload.is_emergency,
       update_by: new ObjectId(user_id),
       image: payload.image,
       health_check_id: healthCheckId,
-      receive_date_request: payload.receive_date_request || new Date(),
+      receive_date_request: new Date(payload.receive_date_request),
       status: RequestRegistrationStatus.Pending,
+      note: payload.note,
       request_process_id: requestProcessId,
       user_id: new ObjectId(userObjectId),
       created_at: new Date(),
@@ -242,11 +248,12 @@ class RequestService {
       _id: healthCheckId,
       user_id: new ObjectId(userObjectId),
       blood_group_id: bloodGroupId as ObjectId,
-      blood_component_ids: bloodComponentIds,
+      blood_component_ids: componentIds,
       donation_process_id: null,
       donation_registration_id: null,
       request_registration_id: resultRequestRegistration.insertedId,
       request_process_id: requestProcessId,
+      request_type: payload.request_type,
       weight: 0,
       temperature: 0,
       heart_rate: 0,
@@ -267,7 +274,7 @@ class RequestService {
       user_id: new ObjectId(userObjectId),
       request_registration_id: resultRequestRegistration.insertedId,
       blood_group_id: bloodGroupId as ObjectId,
-      blood_component_ids: bloodComponentIds,
+      blood_component_ids: componentIds,
       health_check_id: healthCheckId,
       volume_received: 0,
       description: '',
@@ -296,23 +303,46 @@ class RequestService {
     user_id: string
     payload: UpdateRequestRegistrationReqBody
   }) {
+    const existRequestRegistration = await databaseService.requestRegistrations.findOne({ _id: new ObjectId(id) })
+    if (!existRequestRegistration) {
+      throw new ErrorWithStatus({
+        status: HTTP_STATUS.NOT_FOUND,
+        message: REQUEST_MESSAGES.REQUEST_REGISTRATION_NOT_FOUND
+      })
+    }
+    //Kiểm tra blood_group_id
     const isValidBloodGroupId = ObjectId.isValid(payload.blood_group_id as string)
-    const isValidBloodComponentId = ObjectId.isValid(payload.blood_component_id as string)
+    const bloodGroupId = isValidBloodGroupId
+      ? new ObjectId(payload.blood_group_id)
+      : existRequestRegistration.blood_group_id
 
-    const bloodGroupId = isValidBloodGroupId ? new ObjectId(payload.blood_group_id) : null
-    const bloodComponentId = isValidBloodComponentId ? new ObjectId(payload.blood_component_id) : null
+    //Từ request_type ra name và tìm id theo name và gán vào 1 mảng
+    let componentIds = existRequestRegistration.blood_component_ids || []
+    if (payload.request_type) {
+      const componentNames = convertTypeToComponentMap[payload.request_type]
+      if (!Array.isArray(componentNames)) {
+        throw new ErrorWithStatus({
+          status: HTTP_STATUS.BAD_REQUEST,
+          message: 'Invalid request_type provided'
+        })
+      }
+      const componentDocs = await databaseService.bloodComponents.find({ name: { $in: componentNames } }).toArray()
+      componentIds = componentDocs.map((comp) => comp._id)
+    }
 
     const result = await databaseService.requestRegistrations.findOneAndUpdate(
       { _id: new ObjectId(id) },
       {
         $set: {
-          ...payload,
+          request_type: payload.request_type,
           status: payload.status,
           is_emergency: payload.is_emergency,
           image: payload.image,
           update_by: new ObjectId(user_id),
-          receive_date_request: payload.receive_date_request,
-          blood_component_id: bloodComponentId,
+          receive_date_request: payload.receive_date_request
+            ? new Date(payload.receive_date_request)
+            : existRequestRegistration.receive_date_request,
+          blood_component_ids: componentIds,
           blood_group_id: bloodGroupId
         },
         $currentDate: { updated_at: true }
@@ -321,20 +351,33 @@ class RequestService {
         returnDocument: 'after'
       }
     )
+
+    // Nếu request registration có health_check_id thì cập nhật health check liên quan
+    if (payload.request_type && componentIds.length > 0) {
+      await databaseService.healthChecks.updateOne(
+        { _id: new ObjectId(existRequestRegistration.health_check_id) },
+        {
+          $set: {
+            request_type: payload.request_type,
+            blood_component_ids: componentIds
+          },
+          $currentDate: { updated_at: true }
+        }
+      )
+    }
     return result
   }
 
   async getRequestRegistrationByUserId(user_id: string) {
     const requestRegistration = await databaseService.requestRegistrations
-      .find({ user_id: new ObjectId(user_id) })
-      .toArray()
-    return requestRegistration
-  }
-
-  async getAllRequestRegistration() {
-    const requestRegistration = await databaseService.requestRegistrations
       .aggregate([
-        // 1. Join user để lấy full_name, phone
+        {
+          $match: {
+            user_id: new ObjectId(user_id)
+          }
+        },
+
+        // Join user để lấy full_name, phone
         {
           $lookup: {
             from: 'users',
@@ -350,7 +393,7 @@ class RequestService {
           }
         },
 
-        // 2. Join blood_group để lấy name
+        // Join blood_group để lấy name
         {
           $lookup: {
             from: 'blood_groups',
@@ -366,17 +409,7 @@ class RequestService {
           }
         },
 
-        // 3. Join blood_components nếu là mảng
-        {
-          $lookup: {
-            from: 'blood_components',
-            localField: 'blood_component_ids', // lưu ý phải là mảng
-            foreignField: '_id',
-            as: 'blood_component_info'
-          }
-        },
-
-        // 4. Project lại kết quả mong muốn
+        // Project lại kết quả mong muốn
         {
           $project: {
             _id: 1,
@@ -387,28 +420,85 @@ class RequestService {
             blood_group_id: 1,
             blood_component_ids: 1,
             receive_date_request: 1,
+            request_type: 1,
             update_by: 1,
             created_at: 1,
             updated_at: 1,
             is_emergency: 1,
             image: 1,
             note: 1,
-
             // from user
             full_name: '$user_info.full_name',
             phone: '$user_info.phone',
             citizen_id_number: '$user_info.citizen_id_number',
             // from blood_group
-            blood_group_name: '$blood_group_info.name',
+            blood_group_name: '$blood_group_info.name'
+          }
+        }
+      ])
+      .toArray()
 
-            // from blood_components
-            blood_components_name: {
-              $map: {
-                input: '$blood_component_info',
-                as: 'component',
-                in: '$$component.name'
-              }
-            }
+    return requestRegistration
+  }
+
+  async getAllRequestRegistration() {
+    const requestRegistration = await databaseService.requestRegistrations
+      .aggregate([
+        // Join user để lấy full_name, phone
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'user_id',
+            foreignField: '_id',
+            as: 'user_info'
+          }
+        },
+        {
+          $unwind: {
+            path: '$user_info',
+            preserveNullAndEmptyArrays: true
+          }
+        },
+
+        // Join blood_group để lấy name
+        {
+          $lookup: {
+            from: 'blood_groups',
+            localField: 'blood_group_id',
+            foreignField: '_id',
+            as: 'blood_group_info'
+          }
+        },
+        {
+          $unwind: {
+            path: '$blood_group_info',
+            preserveNullAndEmptyArrays: true
+          }
+        },
+        // Project lại kết quả mong muốn
+        {
+          $project: {
+            _id: 1,
+            user_id: 1,
+            request_process_id: 1,
+            health_check_id: 1,
+            status: 1,
+            blood_group_id: 1,
+            blood_component_ids: 1,
+            receive_date_request: 1,
+            request_type: 1,
+            update_by: 1,
+            created_at: 1,
+            updated_at: 1,
+            is_emergency: 1,
+            image: 1,
+            note: 1,
+            // from user
+            full_name: '$user_info.full_name',
+            phone: '$user_info.phone',
+            citizen_id_number: '$user_info.citizen_id_number',
+            // from blood_group
+            blood_group_name: '$blood_group_info.name'
           }
         }
       ])
@@ -425,7 +515,7 @@ class RequestService {
             _id: new ObjectId(id)
           }
         },
-        // 1. Join user để lấy full_name, phone
+        // Join user để lấy full_name, phone
         {
           $lookup: {
             from: 'users',
@@ -441,7 +531,7 @@ class RequestService {
           }
         },
 
-        // 2. Join blood_group để lấy name
+        // Join blood_group để lấy name
         {
           $lookup: {
             from: 'blood_groups',
@@ -457,17 +547,7 @@ class RequestService {
           }
         },
 
-        // 3. Join blood_components nếu là mảng
-        {
-          $lookup: {
-            from: 'blood_components',
-            localField: 'blood_component_ids', // lưu ý phải là mảng
-            foreignField: '_id',
-            as: 'blood_component_info'
-          }
-        },
-
-        // 4. Project lại kết quả mong muốn
+        // Project lại kết quả mong muốn
         {
           $project: {
             _id: 1,
@@ -482,6 +562,7 @@ class RequestService {
             created_at: 1,
             updated_at: 1,
             is_emergency: 1,
+            request_type: 1,
             image: 1,
             note: 1,
 
@@ -490,16 +571,7 @@ class RequestService {
             phone: '$user_info.phone',
             citizen_id_number: '$user_info.citizen_id_number',
             // from blood_group
-            blood_group_name: '$blood_group_info.name',
-
-            // from blood_components
-            blood_components_name: {
-              $map: {
-                input: '$blood_component_info',
-                as: 'component',
-                in: '$$component.name'
-              }
-            }
+            blood_group_name: '$blood_group_info.name'
           }
         }
       ])

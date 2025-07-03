@@ -453,7 +453,9 @@ class DonationService {
     }
 
     const isValidBloodGroupId = ObjectId.isValid(payload.blood_group_id as string)
-    const bloodGroupId = isValidBloodGroupId ? new ObjectId(payload.blood_group_id) : null
+    const bloodGroupId = isValidBloodGroupId
+      ? new ObjectId(payload.blood_group_id)
+      : existsDonationRegistration.blood_group_id
 
     const updateFields: Record<string, any> = {
       status: payload.status
@@ -503,9 +505,9 @@ class DonationService {
         {
           $set: {
             donation_type: payload.donation_type,
-            blood_component_ids: componentIds,
-            updated_at: new Date()
-          }
+            blood_component_ids: componentIds
+          },
+          $currentDate: { updated_at: true }
         }
       )
     }

@@ -83,8 +83,8 @@ requestsRouter.post(
   isStaffOrAdminValidator,
   createRequestRegistrationValidator,
   filterMiddleware<CreateRequestRegistrationReqBody>([
-    'blood_component_ids',
     'blood_group_id',
+    'request_type',
     'citizen_id_number',
     'full_name',
     'image',
@@ -94,6 +94,18 @@ requestsRouter.post(
     'note'
   ]),
   wrapAsync(createRequestRegistrationController)
+)
+
+/**
+ * Description. Get request registration by user id
+ * Path: /user
+ * Method: GET
+ * Header: { Authorization: Bearer <access_token>}
+ */
+requestsRouter.get(
+  '/request-registrations/user',
+  accessTokenValidator,
+  wrapAsync(getRequestRegistrationByUserIdController)
 )
 
 /**
@@ -108,29 +120,18 @@ requestsRouter.patch(
   isStaffOrAdminValidator,
   updateRequestRegistrationValidator,
   filterMiddleware<UpdateRequestRegistrationReqBody>([
-    'blood_component_id',
+    'request_type',
     'blood_group_id',
-    'citizen_id_number',
-    'full_name',
     'image',
+    'status',
     'is_emergency',
-    'phone',
     'receive_date_request',
-    'status'
+    'note',
+    'full_name',
+    'phone',
+    'citizen_id_number'
   ]),
   wrapAsync(updateRequestRegistrationController)
-)
-
-/**
- * Description. Get request registration by user id
- * Path: /user
- * Method: GET
- * Header: { Authorization: Bearer <access_token>}
- */
-requestsRouter.get(
-  '/request-registrations/user',
-  accessTokenValidator,
-  wrapAsync(getRequestRegistrationByUserIdController)
 )
 
 /**

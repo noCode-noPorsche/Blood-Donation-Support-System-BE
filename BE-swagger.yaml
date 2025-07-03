@@ -1961,9 +1961,8 @@ components:
         blood_group_id:
           type: string
           format: MongoId
-        blood_component_id:
-          type: string
-          format: MongoId
+        request_type:
+          $ref: '#/components/schemas/RequestType'
         receive_date_request:
           type: string
           format: date-time
@@ -1997,10 +1996,10 @@ components:
           type: string
           format: MongoId
           example: 682f6a3fdb3fb589d23e7654
-        blood_component_id:
-          type: string
+        blood_component_ids:
+          type: array
           format: MongoId
-          example: 682f6a3fdb3fb589d23e7654
+          example: [682f6a3fdb3fb589d23e7654, 682f6a3fdb3fb589d23e7654]
         request_process_id:
           type: string
           format: MongoId
@@ -2013,6 +2012,8 @@ components:
           type: string
           format: date-time
           example: 2025-05-21T17:48:12.171Z
+        request_type:
+          $ref: '#/components/schemas/RequestType'
         status:
           $ref: '#/components/schemas/RequestRegistrationStatus'
         is_emergency:
@@ -2041,10 +2042,8 @@ components:
           type: string
           format: MongoId
           example: 682f6a3fdb3fb589d23e7654
-        blood_component_id:
-          type: string
-          format: MongoId
-          example: 682f6a3fdb3fb589d23e7654
+        request_type:
+          $ref: '#/components/schemas/RequestType'
         image:
           type: string
         is_emergency:
@@ -2054,6 +2053,10 @@ components:
           type: string
           format: date-time
           example: 2025-05-21T17:48:12.171Z
+        status:
+          $ref: '#/components/schemas/RequestRegistrationStatus'
+        note:
+          type: string
     RequestProcessStatus:
       type: string
       enum: [Pending, Approved, Rejected]
