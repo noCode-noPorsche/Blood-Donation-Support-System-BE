@@ -553,6 +553,16 @@ class DonationService {
           }
         },
         { $unwind: { path: '$blood_component_info', preserveNullAndEmptyArrays: true } },
+        // Join health_checks to get donation_type
+        {
+          $lookup: {
+            from: 'health_checks',
+            localField: 'health_check_id',
+            foreignField: '_id',
+            as: 'health_check'
+          }
+        },
+        { $unwind: { path: '$health_check', preserveNullAndEmptyArrays: true } },
 
         // Project các trường cần thiết
         {
@@ -567,6 +577,7 @@ class DonationService {
             health_check_id: 1,
             donation_date: 1,
             description: 1,
+            donation_type: '$health_check.donation_type',
             blood_group_id: 1,
             blood_group_name: '$blood_group_info.name',
             blood_component_id: 1,
@@ -628,6 +639,16 @@ class DonationService {
             preserveNullAndEmptyArrays: true
           }
         },
+        // Join health_checks to get donation_type
+        {
+          $lookup: {
+            from: 'health_checks',
+            localField: 'health_check_id',
+            foreignField: '_id',
+            as: 'health_check'
+          }
+        },
+        { $unwind: { path: '$health_check', preserveNullAndEmptyArrays: true } },
         {
           $project: {
             _id: 1,
@@ -639,6 +660,7 @@ class DonationService {
             health_check_id: 1,
             donation_date: 1,
             volume_collected: 1,
+            donation_type: '$health_check.donation_type',
             status: 1,
             is_separated: 1,
             description: 1,
@@ -689,6 +711,16 @@ class DonationService {
             preserveNullAndEmptyArrays: true
           }
         },
+        // Join health_checks to get donation_type
+        {
+          $lookup: {
+            from: 'health_checks',
+            localField: 'health_check_id',
+            foreignField: '_id',
+            as: 'health_check'
+          }
+        },
+        { $unwind: { path: '$health_check', preserveNullAndEmptyArrays: true } },
         {
           $project: {
             _id: 1,
@@ -697,6 +729,7 @@ class DonationService {
             username: '$user_info.full_name',
             blood_group_id: 1,
             blood_group_name: '$blood_group_info.name',
+            donation_type: '$health_check.donation_type',
             health_check_id: 1,
             donation_date: 1,
             volume_collected: 1,
