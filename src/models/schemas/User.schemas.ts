@@ -14,7 +14,11 @@ interface UserType {
   number_of_donations?: number
   number_of_requests?: number
   weight: number
-  location?: string
+  location?: {
+    type: 'Point'
+    coordinates: [number, number]
+  }
+  address?: string
   phone: string
   avatar_url?: string
   created_at?: Date
@@ -35,7 +39,11 @@ export default class User {
   number_of_donations?: number
   number_of_requests?: number
   weight: number
-  location: string
+  location: {
+    type: 'Point'
+    coordinates: [number, number]
+  }
+  address?: string
   phone: string
   avatar_url: string
   created_at: Date
@@ -55,7 +63,11 @@ export default class User {
     this.number_of_donations = user.number_of_donations || 0
     this.number_of_requests = user.number_of_requests || 0
     this.weight = user.weight || 0
-    this.location = user.location || ''
+    this.location = user.location || {
+      type: 'Point',
+      coordinates: [0, 0]
+    }
+    this.address = user.address || ''
     this.phone = user.phone || ''
     this.avatar_url = user.avatar_url || ''
     this.created_at = user.created_at || date

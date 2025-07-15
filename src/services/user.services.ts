@@ -52,7 +52,12 @@ class UsersService {
       date_of_birth: new Date(payload.date_of_birth),
       password: hashPassword(payload.password),
       role: UserRole.Customer,
-      blood_group_id: payload.blood_group_id ? new ObjectId(payload.blood_group_id) : undefined
+      blood_group_id: payload.blood_group_id ? new ObjectId(payload.blood_group_id) : undefined,
+      location: {
+        type: 'Point',
+        coordinates: [payload.longitude || 0, payload.latitude || 0]
+      },
+      address: payload.address || ''
     })
 
     const result = await databaseService.users.insertOne(newUser)
@@ -193,7 +198,13 @@ class UsersService {
       {
         $set: {
           ...payload,
-          date_of_birth: new Date(payload.date_of_birth as string)
+          date_of_birth: new Date(payload.date_of_birth as string),
+          location: {
+            type: 'Point',
+            coordinates: [payload.longitude || 0, payload.latitude || 0]
+          },
+          address: payload.address || '',
+          blood_group_id: payload.blood_group_id ? new ObjectId(payload.blood_group_id) : null // hoặc undefined nếu bạn muốn bỏ qua
         },
         $currentDate: {
           updated_at: true

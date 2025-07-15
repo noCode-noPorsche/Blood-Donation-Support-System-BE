@@ -49,7 +49,13 @@ export const USER_MESSAGES = {
   CITIZEN_ID_NUMBER_IS_REQUIRED: 'Citizen ID number is required',
   CITIZEN_ID_NUMBER_ALREADY_EXIST: 'Citizen already exists',
   CITIZEN_ID_MUST_BE_EXACTLY_12_DIGITS: 'Citizen ID must be exactly 12 digits',
-  CITIZEN_ID_MUST_CONTAIN_ONLY_DIGITS_0_9: 'Citizen ID must contain only digits (0–9)'
+  CITIZEN_ID_MUST_CONTAIN_ONLY_DIGITS_0_9: 'Citizen ID must contain only digits (0–9)',
+  CITIZEN_ID_MUST_BE_A_STRING: 'Citizen ID must be a string',
+  CITIZEN_ID_LENGTH_MUST_BE_12: 'Citizen ID length must be 12',
+  GET_PROFILE_BY_CITIZEN_ID_NUMBER_SUCCESS: 'Get profile by citizen ID number success',
+  GET_ALL_USERS_SUCCESS: 'Get all users success',
+  ADDRESS_LENGTH_MUST_BE_LESS_THAN_200: 'Address length must be less than 200',
+  ADDRESS_MUST_BE_A_STRING: 'Address must be a string'
 } as const
 
 export const BLOOD_MESSAGES = {

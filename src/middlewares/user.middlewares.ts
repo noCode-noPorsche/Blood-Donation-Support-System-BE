@@ -5,7 +5,7 @@ import { hashPassword } from '~/utils/crypto'
 import { verifyToken } from '~/utils/jwt'
 import { HTTP_STATUS } from '~/constants/httpStatus'
 import { JsonWebTokenError } from 'jsonwebtoken'
-import { capitalize } from 'lodash'
+import { add, capitalize } from 'lodash'
 import { Request } from 'express'
 import { validate } from '~/utils/validation'
 import usersService from '~/services/user.services'
@@ -211,6 +211,19 @@ export const registerValidator = validate(
           }
         }
       },
+      address: {
+        optional: true,
+        isString: {
+          errorMessage: USER_MESSAGES.ADDRESS_MUST_BE_A_STRING
+        }
+        // isLength: {
+        //   options: {
+        //     min: 1,
+        //     max: 200
+        //   },
+        //   errorMessage: USER_MESSAGES.ADDRESS_LENGTH_MUST_BE_LESS_THAN_200
+        // }
+      },
       gender: genderSchema,
       password: passwordSchema,
       confirm_password: confirmPasswordSchema,
@@ -341,6 +354,19 @@ export const updateMeValidator = validate(
           errorMessage: USER_MESSAGES.AVATAR_MUST_BE_A_URL
         },
         trim: true
+      },
+      address: {
+        optional: true,
+        isString: {
+          errorMessage: USER_MESSAGES.ADDRESS_MUST_BE_A_STRING
+        }
+        // isLength: {
+        //   options: {
+        //     min: 1,
+        //     max: 200
+        //   },
+        //   errorMessage: USER_MESSAGES.ADDRESS_LENGTH_MUST_BE_LESS_THAN_200
+        // }
       }
     },
     ['body']

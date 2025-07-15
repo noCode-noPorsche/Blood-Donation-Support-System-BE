@@ -1,6 +1,5 @@
 import { ParamsDictionary } from 'express-serve-static-core'
 import { JwtPayload } from 'jsonwebtoken'
-import { ObjectId } from 'mongodb'
 import { TokenType, UserGender, UserRole } from '~/constants/enum'
 
 export interface RegisterReqBody {
@@ -14,6 +13,9 @@ export interface RegisterReqBody {
   gender: UserGender
   phone: string
   blood_group_id?: string
+  address?: string
+  latitude?: number
+  longitude?: number
 }
 
 export interface TokenPayload extends JwtPayload {
@@ -36,7 +38,10 @@ export interface UpdateMeReqBody {
   gender?: UserGender
   avatar_url?: string
   weight?: number
-  blood_group_id?: ObjectId
+  blood_group_id?: string
+  address?: string
+  latitude?: number
+  longitude?: number
 }
 
 export interface ChangePasswordReqBody {

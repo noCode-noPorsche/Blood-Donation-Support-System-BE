@@ -29,7 +29,6 @@ export const registerController = async (
   res: Response,
   next: NextFunction
 ) => {
-  // throw new Error('Error!!!!!!!')
   const result = await usersService.register(req.body)
   res.json({
     message: USER_MESSAGES.REGISTER_SUCCESS,

@@ -1397,7 +1397,7 @@ components:
         weight:
           type: number
           example: 0
-        location:
+        address:
           type: string
           example: ''
         avatar_url:
@@ -1435,7 +1435,7 @@ components:
         avatar_url:
           type: string
           example: ''
-        location:
+        address::
           type: string
           example: ''
         blood_group_id:
