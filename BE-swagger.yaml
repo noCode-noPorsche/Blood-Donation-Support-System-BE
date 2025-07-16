@@ -1243,6 +1243,27 @@ paths:
           description: UnAuthorization
       security:
         - BearerAuth: []
+  /api/requests/request-process-bloods/{id}/confirm:
+    get:
+      tags:
+        - Request Process Bloods
+      summary: Confirm Request Process Bloods By Process Id for Staff or Admin
+      description: Confirm Request Process Bloods By Process Id for Staff or Admin
+      operationId: confirmRequestProcessBloodsByProcessId
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: MongoId
+          required: true
+      responses:
+        default:
+          description: Get status request process blood success
+        '401':
+          description: UnAuthorization
+      security:
+        - BearerAuth: []
   /api/blogs:
     get:
       tags:
