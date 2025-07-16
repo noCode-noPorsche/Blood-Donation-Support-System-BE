@@ -224,3 +224,14 @@ export const BLOG_MESSAGES = {
   DELETE_BLOG_SUCCESS: 'Delete blog success',
   IMAGE_MUST_BE_A_URL: 'Image must be a URL'
 } as const
+
+export const DASHBOARD_MESSAGES = {
+  GET_ALL_REQUEST_NUMBER_SUCCESS: 'Get all request number success',
+  GET_ALL_REQUEST_NUMBER_FAILED: 'Get all request number failed',
+  GET_ALL_DONATION_NUMBER_SUCCESS: 'Get all donation number success',
+  GET_ALL_DONATION_NUMBER_FAILED: 'Get all donation number failed',
+  GET_ALL_USER_NUMBER_SUCCESS: 'Get all user number success',
+  GET_ALL_USER_NUMBER_FAILED: 'Get all user number failed',
+  GET_BLOOD_STOCK_SUMMARY_SUCCESS: 'Get blood stock summary success',
+  GET_BLOOD_STOCK_SUMMARY_FAILED: 'Get blood stock summary failed'
+} as const

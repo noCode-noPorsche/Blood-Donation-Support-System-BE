@@ -33,6 +33,8 @@ tags:
     description: Operations about request process bloods
   - name: Blogs
     description: Operations about blogs
+  - name: Dashboards
+    description: Operations about dashboards
 paths:
   /api/users/login:
     post:
@@ -1366,6 +1368,94 @@ paths:
           description: UnAuthorization
       security:
         - BearerAuth: []
+  /api/dashboards/number-donation:
+    get:
+      tags:
+        - Dashboards
+      summary: Get Dashboard Number Donation for Admin or Staff
+      description: Get dashboard number donation for admin or staff
+      operationId: getDashboardNumberDonation
+      responses:
+        default:
+          description: Get dashboard number donation success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  number_donation:
+                    type: integer
+                    example: 1000
+        '401':
+          description: UnAuthorization
+      security:
+        - BearerAuth: []
+  /api/dashboards/number-request:
+    get:
+      tags:
+        - Dashboards
+      summary: Get Dashboard Number Request for Admin or Staff
+      description: Get dashboard number request for admin or staff
+      operationId: getDashboardNumberRequest
+      responses:
+        default:
+          description: Get dashboard number request success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  number_request:
+                    type: integer
+                    example: 500
+        '401':
+          description: UnAuthorization
+      security:
+        - BearerAuth: []
+  /api/dashboards/number-user:
+    get:
+      tags:
+        - Dashboards
+      summary: Get Dashboard Number User for Admin or Staff
+      description: Get dashboard number user for admin or staff
+      operationId: getDashboardNumberUser
+      responses:
+        default:
+          description: Get dashboard number user success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  number_user:
+                    type: integer
+                    example: 2000
+        '401':
+          description: UnAuthorization
+      security:
+        - BearerAuth: []
+  /api/dashboards/blood-stock-summary:
+    get:
+      tags:
+        - Dashboards
+      summary: Get Dashboard Blood Stock Summary for Admin or Staff
+      description: Get dashboard blood stock summary for admin or staff
+      operationId: getDashboardBloodStockSummary
+      responses:
+        default:
+          description: Get dashboard blood stock summary success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  blood_stock_summary:
+                    type: array
+                    $ref: '#/components/schemas/BloodStockSummary'
+        '401':
+          description: UnAuthorization
+      security:
+        - BearerAuth: []
 components:
   schemas:
     RegisterBody:
@@ -2345,7 +2435,18 @@ components:
         author:
           type: string
           example: ''
-
+    BloodStockSummary:
+      type: object
+      properties:
+        blood_component_name:
+          type: string
+          example: 'Plasma'
+        total_volume:
+          type: number
+          example: 1000
+        total_units:
+          type: integer
+          example: 8
   securitySchemes:
     BearerAuth:
       type: http
