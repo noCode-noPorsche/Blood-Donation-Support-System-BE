@@ -1244,7 +1244,7 @@ paths:
       security:
         - BearerAuth: []
   /api/requests/request-process-bloods/{id}/confirm:
-    get:
+    patch:
       tags:
         - Request Process Bloods
       summary: Confirm Request Process Bloods By Process Id for Staff or Admin
