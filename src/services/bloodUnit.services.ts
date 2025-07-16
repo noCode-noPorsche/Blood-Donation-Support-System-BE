@@ -173,7 +173,7 @@ class BloodUnitService {
             updated_by: 1,
             created_at: 1,
             updated_at: 1,
-
+            storage_temperature: 1,
             // bổ sung tên nhóm máu và thành phần máu
             blood_group_name: '$blood_group_info.name',
             blood_component_name: '$blood_component_info.name'

@@ -46,6 +46,14 @@ export const isCompatibleDonor = async (receiverGroupId: string, donorGroupId: s
   const receiverName = await bloodService.getBloodGroupNameById(receiverGroupId)
   const donorName = await bloodService.getBloodGroupNameById(donorGroupId)
 
+  if (!receiverName) {
+    throw new Error(`Blood group not found for receiverGroupId: ${receiverGroupId}`)
+  }
+
+  if (!donorName) {
+    throw new Error(`Blood group not found for donorGroupId: ${donorGroupId}`)
+  }
+
   return bloodGroupMap[receiverName]?.includes(donorName)
 }
 

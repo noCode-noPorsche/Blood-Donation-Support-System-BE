@@ -7,6 +7,7 @@ import BloodUnit from '~/models/schemas/BloodUnit.schemas'
 import DonationRequestProcess from '~/models/schemas/DonationProcess.schemas'
 import DonationRegistration from '~/models/schemas/DonationRegistration.schemas'
 import HealthCheck from '~/models/schemas/HealthCheck'
+import Notification from '~/models/schemas/Notification.schemas'
 import RefreshToken from '~/models/schemas/RefreshToken.schemas'
 import RequestProcess from '~/models/schemas/RequestProcess.schemas'
 import RequestProcessBlood from '~/models/schemas/RequestProcessBlood.schemas'
@@ -72,6 +73,9 @@ class DatabaseService {
   }
   get blogs(): Collection<Blog> {
     return this.db.collection(process.env.DB_BLOGS_COLLECTION as string)
+  }
+  get notifications(): Collection<Notification> {
+    return this.db.collection(process.env.DB_NOTIFICATIONS_COLLECTION as string)
   }
 }
 

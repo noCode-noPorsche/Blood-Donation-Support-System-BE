@@ -105,7 +105,9 @@ usersRouter.patch(
     'gender',
     'full_name',
     'blood_group_id',
-    'address'
+    'address',
+    'latitude',
+    'longitude'
   ]),
   wrapAsync(updateMeController)
 )

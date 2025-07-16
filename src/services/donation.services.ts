@@ -479,7 +479,7 @@ class DonationService {
 
     // Nếu có thay đổi loại hiến
     let componentIds: ObjectId[] = []
-    if (payload.donation_type) {
+    if ('donation_type' in payload && payload.donation_type) {
       updateFields.donation_type = payload.donation_type
 
       //Map loại hiến sang các thành phần máu
@@ -791,7 +791,8 @@ class DonationService {
     const updateFields: Partial<DonationProcess> = {
       status: payload.status || DonationProcessStatus.Pending,
       blood_group_id: healthCheckResult?.blood_group_id,
-      volume_collected: Number(payload.volume_collected)
+      volume_collected: Number(payload.volume_collected),
+      description: payload.description || ''
     }
 
     if (payload.donation_date) {

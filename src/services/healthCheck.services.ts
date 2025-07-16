@@ -1,6 +1,12 @@
 import { config } from 'dotenv'
 import { ObjectId } from 'mongodb'
-import { DonationProcessStatus, HealthCheckStatus, RequestProcessStatus } from '~/constants/enum'
+import {
+  DonationProcessStatus,
+  HealthCheckStatus,
+  RequestProcessDetailStatus,
+  RequestProcessStatus,
+  RequestType
+} from '~/constants/enum'
 import { HTTP_STATUS } from '~/constants/httpStatus'
 import { HEALTH_CHECK_MESSAGES, USER_MESSAGES } from '~/constants/messages'
 import { ErrorWithStatus } from '~/models/Error'
@@ -205,14 +211,17 @@ class HealthCheckService {
 
     const finalWeight = payload.weight ?? resultUser.weight
 
+    // Kiểm tra trọng lượng có hợp lệ không và chỉ từ chối nếu là quy trình hiến máu
     let isRejectedDueToWeight = false
-    if (finalWeight < 42) {
+    const isDonationProcess = !!resultHealthCheck.donation_process_id || !!resultHealthCheck.donation_registration_id
+
+    if (finalWeight < 42 && isDonationProcess) {
       payload.status = HealthCheckStatus.Rejected
       isRejectedDueToWeight = true
     }
 
+    //Kiểm tra xem có donation_type hoặc request_type không
     let bloodComponentIdsFromType: ObjectId[] = []
-
     if (payload.donation_type) {
       const componentNames = convertTypeToComponentMap[payload.donation_type]
       const componentDocs = await databaseService.bloodComponents.find({ name: { $in: componentNames } }).toArray()
@@ -339,8 +348,8 @@ class HealthCheckService {
 
     // await databaseService.donationProcesses.updateOne({ health_check_id: new ObjectId(id) }, donationUpdate)
 
-    if (resultHealthCheckUpdate?.donation_registration_id) {
-      // HealthCheck này thuộc quy trình hiến máu - Donation Registration
+    if (resultHealthCheckUpdate?.donation_process_id) {
+      // HealthCheck này thuộc quy trình hiến máu - Donation Process
       const volume = calculateDonationVolume(finalWeight)
 
       const donationUpdate: {
@@ -367,13 +376,14 @@ class HealthCheckService {
         }
       }
       await databaseService.donationProcesses.updateOne({ health_check_id: new ObjectId(id) }, donationUpdate)
-    } else if (resultHealthCheckUpdate?.request_registration_id) {
-      // HealthCheck này thuộc quy trình nhận máu - Request Registration
+    } else if (resultHealthCheckUpdate?.request_process_id) {
+      // HealthCheck này thuộc quy trình nhận máu - Request Process
       const requestUpdate: {
         $set: Partial<{
           status: RequestProcessStatus
           blood_group_id: ObjectId
           blood_component_ids: ObjectId[]
+          request_type: RequestType
         }>
         $currentDate: {
           updated_at: true
@@ -388,7 +398,8 @@ class HealthCheckService {
           blood_component_ids:
             bloodComponentIdsFromType.length > 0
               ? bloodComponentIdsFromType
-              : resultHealthCheck.blood_component_ids || []
+              : resultHealthCheck.blood_component_ids || [],
+          request_type: payload.request_type
         },
         $currentDate: {
           updated_at: true
@@ -396,6 +407,29 @@ class HealthCheckService {
       }
 
       await databaseService.requestProcesses.updateOne({ health_check_id: new ObjectId(id) }, requestUpdate)
+
+      // Cập nhật request_process_detail nếu có request_process_id
+      if (resultHealthCheckUpdate.request_process_id && payload.request_type && bloodComponentIdsFromType.length > 0) {
+        const requestProcessId = new ObjectId(resultHealthCheckUpdate.request_process_id)
+
+        // Xoá các request_process_detail cũ
+        await databaseService.requestProcessDetails.deleteMany({ request_process_id: requestProcessId })
+
+        const defaultVolume = 0 // hoặc payload.volume nếu bạn có
+
+        const detailsToInsert = bloodComponentIdsFromType.map((componentId) => ({
+          request_process_id: requestProcessId,
+          blood_component_id: componentId,
+          blood_group_id: new ObjectId(payload.blood_group_id || (resultUser?.blood_group_id as ObjectId)),
+          volume_required: defaultVolume,
+          status: RequestProcessDetailStatus.Pending,
+          updated_by: new ObjectId(user_id),
+          created_at: new Date(),
+          updated_at: new Date()
+        }))
+
+        await databaseService.requestProcessDetails.insertMany(detailsToInsert)
+      }
     }
 
     //Create Request Process Blood

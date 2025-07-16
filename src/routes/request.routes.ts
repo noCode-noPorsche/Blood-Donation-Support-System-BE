@@ -1,5 +1,6 @@
 import express from 'express'
 import {
+  confirmRequestProcessBloodByProcessIdController,
   createRequestRegistrationController,
   getAllRequestHealthProcessByUserIdController,
   getAllRequestProcessController,
@@ -190,15 +191,7 @@ requestsRouter.patch(
   '/request-processes/:id',
   isStaffOrAdminValidator,
   updateRequestProcessValidator,
-  filterMiddleware<UpdateRequestProcessIdReqBody>([
-    'blood_component_ids',
-    'blood_group_id',
-    'description',
-    'is_emergency',
-    'request_date',
-    'status',
-    'volume_received'
-  ]),
+  filterMiddleware<UpdateRequestProcessIdReqBody>(['description', 'is_emergency', 'request_date', 'status']),
   wrapAsync(updateRequestProcessByIdController)
 )
 
@@ -254,6 +247,19 @@ requestsRouter.patch(
   isStaffOrAdminValidator,
   // filterMiddleware<UpdateRequestProcessDetailIdReqBody>(['status', 'volume_required']),
   wrapAsync(updateRequestProcessBloodByProcessIdController)
+)
+
+/**
+ * Description. Confirm Status Request Process Blood by request process id
+ * Path: /:id
+ * Method: PATCH
+ * Body:
+ * Header: { Authorization: Bearer <access_token>}
+ */
+requestsRouter.patch(
+  '/request-process-bloods/:id/confirm',
+  isStaffOrAdminValidator,
+  wrapAsync(confirmRequestProcessBloodByProcessIdController)
 )
 
 export default requestsRouter

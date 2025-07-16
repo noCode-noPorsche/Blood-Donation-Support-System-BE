@@ -115,10 +115,12 @@ export enum RequestProcessStatus {
 export enum RequestProcessBloodStatus {
   Pending = 'Pending',
   Selected = 'Selected',
-  Cancel = 'Canceled'
+  Canceled = 'Canceled',
+  Done = 'Done'
 }
 
 export enum RequestProcessDetailStatus {
   Pending = 'Pending',
-  Matched = 'Matched'
+  Matched = 'Matched',
+  Canceled = 'Canceled'
 }

@@ -2,6 +2,7 @@ import { Request, Response } from 'express'
 import { ParamsDictionary } from 'express-serve-static-core'
 import { REQUEST_MESSAGES } from '~/constants/messages'
 import {
+  ConfirmRequestProcessBloodIdReqParams,
   CreateRequestRegistrationReqBody,
   GetRequestHealthProcessByRequestIdReqParams,
   GetRequestProcessBloodIdReqParams,
@@ -205,7 +206,20 @@ export const updateRequestProcessBloodByProcessIdController = async (
   const { body } = req
   const result = await requestsService.updateRequestProcessBloodByProcessId({ id, user_id, payload: body })
   res.json({
-    message: REQUEST_MESSAGES.GET_REQUEST_PROCESS_BLOOD_SUCCESS,
+    message: REQUEST_MESSAGES.UPDATE_REQUEST_PROCESS_BLOOD_SUCCESS,
+    result: result
+  })
+}
+
+export const confirmRequestProcessBloodByProcessIdController = async (
+  req: Request<ConfirmRequestProcessBloodIdReqParams, any, any>,
+  res: Response
+) => {
+  const { user_id } = req.decode_authorization as TokenPayload
+  const { id } = req.params
+  const result = await requestsService.confirmRequestProcessBloodTaken({ id, user_id })
+  res.json({
+    message: REQUEST_MESSAGES.CONFIRM_REQUEST_PROCESS_BLOOD_SUCCESS,
     result: result
   })
 }

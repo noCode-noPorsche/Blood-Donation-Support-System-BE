@@ -16,6 +16,9 @@ export interface CreateRequestRegistrationReqBody {
   full_name?: string
   phone?: string
   note?: string
+  address?: string
+  latitude?: number
+  longitude?: number
 }
 
 export interface UpdateRequestRegistrationReqBody {
@@ -49,9 +52,7 @@ export interface UpdateRequestProcessIdReqParams extends ParamsDictionary {
 
 export interface UpdateRequestProcessIdReqBody {
   is_emergency: boolean
-  blood_component_ids?: string[]
   blood_group_id?: string
-  volume_received?: number
   status: RequestProcessStatus
   description?: string
   request_date?: Date
@@ -79,9 +80,14 @@ export interface UpdateRequestProcessBloodIdReqParams extends ParamsDictionary {
   id: string
 }
 
+export interface ConfirmRequestProcessBloodIdReqParams extends ParamsDictionary {
+  id: string
+}
+
 export interface UpdateRequestProcessBloodIdReqBody {
   status: RequestProcessBloodStatus
   blood_component_id: string
+  blood_unit_id: string
 }
 
 export interface GetRequestHealthProcessByRequestIdReqParams extends ParamsDictionary {

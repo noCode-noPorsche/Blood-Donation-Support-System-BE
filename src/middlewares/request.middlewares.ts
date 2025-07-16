@@ -64,9 +64,10 @@ export const createRequestRegistrationValidator = validate(
         notEmpty: undefined
       },
       phone: {
-        notEmpty: {
-          errorMessage: USER_MESSAGES.PHONE_IS_REQUIRED
-        },
+        // notEmpty: {
+        //   errorMessage: USER_MESSAGES.PHONE_IS_REQUIRED
+        // },
+        optional: true,
         isString: {
           errorMessage: USER_MESSAGES.PHONE_MUST_BE_A_STRING
         },

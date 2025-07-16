@@ -8,7 +8,6 @@ interface RequestProcessType {
   health_check_id?: ObjectId
   blood_group_id: ObjectId
   blood_component_ids: ObjectId[] | null
-  volume_received?: number
   status: RequestProcessStatus
   is_emergency: boolean
   request_date?: Date
@@ -24,14 +23,13 @@ export default class RequestProcess {
   health_check_id?: ObjectId
   blood_group_id: ObjectId
   blood_component_ids: ObjectId[] | null
-  volume_received?: number
   status: RequestProcessStatus
   is_emergency: boolean
+  description?: string
   request_date?: Date
   updated_by: ObjectId
   created_at: Date
   updated_at: Date
-  description?: string
   constructor(requestProcess: RequestProcessType) {
     const date = new Date()
     this._id = requestProcess._id || new ObjectId()
@@ -40,7 +38,6 @@ export default class RequestProcess {
     this.health_check_id = requestProcess.health_check_id || new ObjectId()
     this.blood_group_id = requestProcess.blood_group_id || ''
     this.blood_component_ids = requestProcess.blood_component_ids || []
-    this.volume_received = requestProcess.volume_received
     this.status = requestProcess.status || RequestProcessStatus.Pending
     this.is_emergency = requestProcess.is_emergency
     this.request_date = requestProcess.request_date || date

@@ -1710,6 +1710,18 @@ components:
           type: string
           format: MongoId
           example: 682f6a3fdb3fb589d23e7654
+        blood_group_name:
+          type: string
+          example: 'B+'
+        citizen_id_number:
+          type: string
+          example: 123456789123
+        phone:
+          type: string
+          example: 0987654321
+        full_name:
+          type: string
+          example: 'Thao Nguyen'
         blood_component_ids:
           type: array
           format: MongoId
@@ -1771,6 +1783,8 @@ components:
         blood_group_name:
           type: string
           example: 'B+'
+        donation_type:
+          $ref: '#/components/schemas/DonationType'
         username:
           type: string
           example: 'Thao Nguyen'
@@ -1888,6 +1902,9 @@ components:
           type: string
           format: MongoId
           example: 682f6a3fdb3fb589d23e7654
+        blood_group_name:
+          type: string
+          example: 'B+'
         blood_component_ids:
           type: array
           format: MongoId
@@ -1996,6 +2013,18 @@ components:
           type: string
           format: MongoId
           example: 682f6a3fdb3fb589d23e7654
+        blood_group_name:
+          type: string
+          example: 'B+'
+        citizen_id_number:
+          type: string
+          example: 123123123123
+        phone:
+          type: string
+          example: 0987654321
+        full_name:
+          type: string
+          example: 'Thao Nguyen'
         blood_component_ids:
           type: array
           format: MongoId
@@ -2080,6 +2109,9 @@ components:
           type: string
           format: MongoId
           example: 682f6a3fdb3fb589d23e7654
+        blood_group_name:
+          type: string
+          example: 'B+'
         request_registration_id:
           type: string
           format: MongoId
@@ -2088,6 +2120,8 @@ components:
           type: string
           format: MongoId
           example: 682f6a3fdb3fb589d23e7654
+        request_type:
+          $ref: '#/components/schemas/RequestType'
         request_date:
           type: string
           format: date-time
@@ -2103,8 +2137,6 @@ components:
           type: string
           format: MongoId
           example: 682f6a3fdb3fb589d23e7654
-        image:
-          type: string
         created_at:
           type: string
           format: date-time
@@ -2116,10 +2148,6 @@ components:
     UpdateRequestProcessReqBody:
       type: object
       properties:
-        blood_component_ids:
-          type: array
-          format: MongoId
-          example: [682f6a3fdb3fb589d23e7654, 682f6a3fdb3fb589d23e7654]
         blood_group_id:
           type: string
           format: MongoId
@@ -2166,10 +2194,16 @@ components:
           type: string
           format: MongoId
           example: 682f6a3fdb3fb589d23e7654
+        blood_group_name:
+          type: string
+          example: 'B+'
         blood_component_id:
           type: string
           format: MongoId
           example: 682f6a3fdb3fb589d23e7654
+        blood_component_name:
+          type: string
+          example: 'Plasma'
         volume_required:
           type: number
           example: 100
@@ -2210,10 +2244,16 @@ components:
           type: string
           format: MongoId
           example: 682f6a3fdb3fb589d23e7654
+        blood_group_name:
+          type: string
+          example: 'B+'
         blood_component_id:
           type: string
           format: MongoId
           example: 682f6a3fdb3fb589d23e7654
+        blood_component_name:
+          type: string
+          example: 'Plasma'
         blood_unit_id:
           type: string
           format: MongoId
@@ -2238,6 +2278,10 @@ components:
     UpdateRequestProcessBloodReqBody:
       type: object
       properties:
+        blood_unit_id:
+          type: string
+          format: MongoId
+          example: 682f6a3fdb3fb589d23e7654
         blood_component_id:
           type: string
           format: MongoId

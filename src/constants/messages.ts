@@ -198,7 +198,10 @@ export const REQUEST_MESSAGES = {
   REQUEST_PROCESS_BLOOD_NOT_FOUND: 'Request process blood not found',
   GET_STATUS_REQUEST_HEALTH_PROCESS_SUCCESS: 'Get status request health process success',
   REQUEST_TYPE_IS_REQUIRED: 'Request type is required',
-  REQUEST_TYPE_IS_INVALID: 'Request type is invalid'
+  REQUEST_TYPE_IS_INVALID: 'Request type is invalid',
+  REQUEST_TYPE_INVALID: 'Request type invalid',
+  CONFIRM_REQUEST_PROCESS_BLOOD_SUCCESS: 'Confirm request process blood success',
+  UPDATE_REQUEST_PROCESS_BLOOD_SUCCESS: 'Update request process blood success'
 } as const
 
 export const BLOG_MESSAGES = {
