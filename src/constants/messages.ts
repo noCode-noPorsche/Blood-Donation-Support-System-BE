@@ -235,3 +235,12 @@ export const DASHBOARD_MESSAGES = {
   GET_BLOOD_STOCK_SUMMARY_SUCCESS: 'Get blood stock summary success',
   GET_BLOOD_STOCK_SUMMARY_FAILED: 'Get blood stock summary failed'
 } as const
+
+export const NOTIFICATION_MESSAGES = {
+  CHECKED_IN_DONATION_SUCCESS: 'Đã checked in hiến máu thành công',
+  CHECKED_IN_DONATION_BODY: 'Mời bạn đến địa điểm khám sáng lọc để kiểm tra sức khỏe trước khi hiến máu.',
+  GET_NOTIFICATIONS_SUCCESS: 'Get notifications success',
+  GET_NOTIFICATIONS_FAILED: 'Get notifications failed',
+  MARK_NOTIFICATION_AS_READ_SUCCESS: 'Mark notification as read success',
+  MARK_NOTIFICATION_AS_READ_FAILED: 'Mark notification as read failed'
+} as const

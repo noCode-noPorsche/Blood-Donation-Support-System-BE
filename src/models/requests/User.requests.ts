@@ -16,6 +16,8 @@ export interface RegisterReqBody {
   address?: string
   latitude?: number
   longitude?: number
+  image?: string
+  fcm_token?: string
 }
 
 export interface TokenPayload extends JwtPayload {

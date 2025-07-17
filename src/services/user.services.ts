@@ -10,6 +10,7 @@ import databaseService from './database.services'
 import RefreshToken from '~/models/schemas/RefreshToken.schemas'
 import { ErrorWithStatus } from '~/models/Error'
 import { HTTP_STATUS } from '~/constants/httpStatus'
+import { sendPushNotification } from '~/utils/notification'
 config()
 
 class UsersService {
@@ -57,7 +58,11 @@ class UsersService {
         type: 'Point',
         coordinates: [payload.longitude || 0, payload.latitude || 0]
       },
-      address: payload.address || ''
+      address: payload.address || '',
+      avatar_url: payload.image || '',
+      created_at: new Date(),
+      updated_at: new Date(),
+      fcm_token: payload.fcm_token || ''
     })
 
     const result = await databaseService.users.insertOne(newUser)
@@ -85,6 +90,12 @@ class UsersService {
         token: refresh_token
       })
     )
+    await sendPushNotification({
+      fcmToken:
+        'dIpRCH6uc_DwMNe12sVHIQ:APA91bG5gDCwGpTuUgkB-UKl5Lg3SN7UwGJxmMbBAH8eY5RhsVzyQDwnHIgx06mIbcQBH9Wb6_tO41qZbZAOYbOvui2f2APQmoL_Uy8D0m9qb7yylMfU65A',
+      title: 'Login Successful',
+      body: `Welcome back, ${user.full_name}!`
+    })
     return {
       access_token,
       refresh_token

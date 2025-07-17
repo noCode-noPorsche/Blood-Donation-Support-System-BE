@@ -8,7 +8,7 @@ import {
   HealthCheckStatus
 } from '~/constants/enum'
 import { HTTP_STATUS } from '~/constants/httpStatus'
-import { DONATION_MESSAGES } from '~/constants/messages'
+import { DONATION_MESSAGES, NOTIFICATION_MESSAGES } from '~/constants/messages'
 import { ErrorWithStatus } from '~/models/Error'
 import {
   DonationRegistrationReqBody,
@@ -21,6 +21,8 @@ import HealthCheck from '~/models/schemas/HealthCheck'
 import { convertTypeToComponentMap } from '~/utils/utils'
 import databaseService from './database.services'
 import DonationProcess from '~/models/schemas/DonationProcess.schemas'
+import { sendPushNotification } from '~/utils/notification'
+import Notification from '~/models/schemas/Notification.schemas'
 config()
 
 class DonationService {
@@ -510,6 +512,35 @@ class DonationService {
           $currentDate: { updated_at: true }
         }
       )
+    }
+
+    // Gửi thông báo nếu status chuyển sang "checked-in" và trước đó chưa phải checked-in
+    if (
+      payload.status === DonationRegistrationStatus.CheckedIn &&
+      existsDonationRegistration.status !== DonationRegistrationStatus.CheckedIn
+    ) {
+      const user = await databaseService.users.findOne({ _id: existsDonationRegistration.user_id })
+
+      if (user?.fcm_token) {
+        const title = NOTIFICATION_MESSAGES.CHECKED_IN_DONATION_SUCCESS
+        const body = NOTIFICATION_MESSAGES.CHECKED_IN_DONATION_BODY
+
+        // 1. Gửi push notification
+        await sendPushNotification({
+          fcmToken: user.fcm_token,
+          title,
+          body
+        })
+
+        // 2. Lưu thông báo vào DB
+        const notification = new Notification({
+          receiver_id: user._id,
+          title,
+          message: body
+        })
+
+        await databaseService.notifications.insertOne(notification)
+      }
     }
 
     return result

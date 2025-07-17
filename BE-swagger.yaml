@@ -35,6 +35,8 @@ tags:
     description: Operations about blogs
   - name: Dashboards
     description: Operations about dashboards
+  - name: Notifications
+    description: Operations about notifications
 paths:
   /api/users/login:
     post:
@@ -1477,6 +1479,69 @@ paths:
           description: UnAuthorization
       security:
         - BearerAuth: []
+  /api/notifications/user:
+    get:
+      tags:
+        - Notifications
+      summary: Get All Notifications for User
+      description: Get all notifications for user
+      operationId: getAllNotifications
+      responses:
+        default:
+          description: Get all notifications success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Notification'
+        '401':
+          description: UnAuthorization
+      security:
+        - BearerAuth: []
+  /api/notifications/{id}/read:
+    patch:
+      tags:
+        - Notifications
+      summary: Mark Notification As Read By Id
+      description: Mark Notification As Read By Id
+      operationId: markNotificationAsReadById
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: MongoId
+      responses:
+        default:
+          description: Update notification success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+        '401':
+          description: UnAuthorization
+      security:
+        - BearerAuth: []
+  /api/notifications/user/read-all:
+    patch:
+      tags:
+        - Notifications
+      summary: Mark All Notification As Read By User Id
+      description: Mark All Notification As Read By User Id
+      operationId: markAllNotificationsAsReadByUserId
+      responses:
+        default:
+          description: Mark All Notification As Read By User Id success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+        '401':
+          description: UnAuthorization
+      security:
+        - BearerAuth: []
 components:
   schemas:
     RegisterBody:
@@ -2468,6 +2533,30 @@ components:
         total_units:
           type: integer
           example: 8
+    Notification:
+      type: object
+      properties:
+        _id:
+          type: string
+          format: MongoId
+          example: 682f6a3fdb3fb589d23e7654
+        receiver_id:
+          type: string
+          format: MongoId
+          example: 682f6a3fdb3fb589d23e7654
+        title:
+          type: string
+          example: 'New Blood Donation Event'
+        message:
+          type: string
+          example: 'Join us for a blood donation event this weekend!'
+        is_read:
+          type: boolean
+          example: false
+        created_at:
+          type: string
+          format: date-time
+          example: 2025-05-21T17:48:12.171Z
   securitySchemes:
     BearerAuth:
       type: http

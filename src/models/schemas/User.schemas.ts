@@ -24,6 +24,7 @@ interface UserType {
   created_at?: Date
   updated_at?: Date
   forgot_password_token?: string
+  fcm_token?: string
 }
 
 export default class User {
@@ -49,6 +50,7 @@ export default class User {
   created_at: Date
   updated_at: Date
   forgot_password_token: string
+  fcm_token?: string
   constructor(user: UserType) {
     const date = new Date()
     this._id = user._id
@@ -73,5 +75,6 @@ export default class User {
     this.created_at = user.created_at || date
     this.updated_at = user.updated_at || date
     this.forgot_password_token = user.forgot_password_token || ''
+    this.fcm_token = user.fcm_token || ''
   }
 }
