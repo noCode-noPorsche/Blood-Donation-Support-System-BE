@@ -4,6 +4,7 @@ import { RequestProcessStatus, RequestRegistrationStatus, RequestType } from '~/
 import { HTTP_STATUS } from '~/constants/httpStatus'
 import { REQUEST_MESSAGES, USER_MESSAGES } from '~/constants/messages'
 import usersService from '~/services/user.services'
+import { wrapAsync } from '~/utils/handler'
 import { validate } from '~/utils/validation'
 
 export const createRequestRegistrationValidator = [
@@ -80,14 +81,14 @@ export const createRequestRegistrationValidator = [
   ),
 
   //  Custom middleware để kiểm tra trùng phone nếu CCCD chưa tồn tại
-  async (req: Request, res: Response, next: NextFunction) => {
+  wrapAsync(async (req: Request, res: Response, next: NextFunction) => {
     const { citizen_id_number, phone } = req.body
 
     const user = await usersService.getProfileByCitizenIdNumber(citizen_id_number)
     if (!user && phone) {
       const phoneExist = await usersService.checkPhoneExist(phone)
       if (phoneExist) {
-        return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        res.status(HTTP_STATUS.BAD_REQUEST).json({
           message: USER_MESSAGES.PHONE_ALREADY_EXISTS,
           errors: [
             {
@@ -97,11 +98,12 @@ export const createRequestRegistrationValidator = [
             }
           ]
         })
+        return //Kết thúc response tại đây, không return res object
       }
     }
 
     next()
-  }
+  })
 ]
 
 export const updateRequestRegistrationValidator = validate(
