@@ -17,7 +17,8 @@ import usersService from '~/services/user.services'
 export const loginController = async (req: Request, res: Response) => {
   const user = req.user as User
   const user_id = user._id as ObjectId
-  const result = await usersService.login(user_id.toString())
+  const { fcm_token } = req.body
+  const result = await usersService.login(user_id.toString(), fcm_token)
   res.json({
     message: USER_MESSAGES.LOGIN_SUCCESS,
     result

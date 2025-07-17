@@ -81,7 +81,7 @@ class UsersService {
     }
   }
 
-  async login(user_id: string) {
+  async login(user_id: string, fcm_token?: string) {
     const user = (await databaseService.users.findOne({ _id: new ObjectId(user_id) })) as User
     const [access_token, refresh_token] = await this.signAccessAndRefreshToken(user_id, user?.role)
     await databaseService.refreshToken.insertOne(
@@ -90,12 +90,9 @@ class UsersService {
         token: refresh_token
       })
     )
-    await sendPushNotification({
-      fcmToken:
-        'dIpRCH6uc_DwMNe12sVHIQ:APA91bG5gDCwGpTuUgkB-UKl5Lg3SN7UwGJxmMbBAH8eY5RhsVzyQDwnHIgx06mIbcQBH9Wb6_tO41qZbZAOYbOvui2f2APQmoL_Uy8D0m9qb7yylMfU65A',
-      title: 'Login Successful',
-      body: `Welcome back, ${user.full_name}!`
-    })
+    if (fcm_token) {
+      await databaseService.users.updateOne({ _id: new ObjectId(user_id) }, { $set: { fcm_token } })
+    }
     return {
       access_token,
       refresh_token
