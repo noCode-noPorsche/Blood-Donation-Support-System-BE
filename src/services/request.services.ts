@@ -1396,9 +1396,7 @@ class RequestService {
             status: RequestProcessBloodStatus.Done,
             updated_by: new ObjectId(user_id)
           },
-          $currentDate: { updated_at: true },
-
-          returnDocument: 'after'
+          $currentDate: { updated_at: true }
         }
       )
 
@@ -1426,8 +1424,8 @@ class RequestService {
           updated_by: new ObjectId(user_id)
         },
         $currentDate: { updated_at: true }
-      },
-      { returnDocument: 'after' }
+      }
+      // { returnDocument: 'after' }
     )
     // 5. Cập nhật số lần hiến máu (number_of_requests) của user lên 1
     if (updatedProcess?.user_id) {
