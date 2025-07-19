@@ -3,9 +3,13 @@ import {
   getAllBloodUnitsController,
   getAllBloodUnitsRelativeController,
   getBloodUnitByDonationProcessIdController,
-  updateBloodUnitsController
+  updateBloodUnitsController,
+  updateStatusBloodUnitsController
 } from '~/controllers/bloodUnit.controllers'
+import { updateStatusBloodUnitsValidation } from '~/middlewares/bloodUnit.middlewares'
+import { filterMiddleware } from '~/middlewares/common.middlewares'
 import { isStaffOrAdminValidator } from '~/middlewares/user.middlewares'
+import { UpdateStatusBloodUnitsReqBody } from '~/models/requests/BloodUnit.requests'
 import { wrapAsync } from '~/utils/handler'
 
 const bloodUnitRouter = express.Router()
@@ -23,6 +27,21 @@ bloodUnitRouter.patch(
   //   updateBloodUnitsValidation,
   //   filterMiddleware<UpdateBloodUnitsReqBody>(['blood_component_id', 'blood_group_id', 'status', 'volume']),
   wrapAsync(updateBloodUnitsController)
+)
+
+/**
+ * Description. Update status blood units id for staff or admin
+ * Path: /:id/status
+ * Method: PATCH
+ * Body: { UpdateStatusBloodUnitsReqBody }
+ * Header: { Authorization: Bearer <access_token>}
+ */
+bloodUnitRouter.patch(
+  '/:id/status',
+  isStaffOrAdminValidator,
+  updateStatusBloodUnitsValidation,
+  filterMiddleware<UpdateStatusBloodUnitsReqBody>(['status']),
+  wrapAsync(updateStatusBloodUnitsController)
 )
 
 /**

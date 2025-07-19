@@ -23,3 +23,10 @@ export interface UpdateBloodUnitsByDonationProcessIdReqParams extends ParamsDict
 export interface GetBloodUnitsByDonationProcessIdReqParams extends ParamsDictionary {
   id: string
 }
+export interface UpdateStatusBloodUnitsReqBody {
+  status: BloodUnitStatus
+}
+
+export interface UpdateStatusBloodUnitsIdReqPảrams extends ParamsDictionary {
+  id: string
+}

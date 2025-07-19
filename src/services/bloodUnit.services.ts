@@ -4,7 +4,7 @@ import { BloodComponentEnum, BloodUnitStatus } from '~/constants/enum'
 import { HTTP_STATUS } from '~/constants/httpStatus'
 import { BLOOD_MESSAGES, DONATION_MESSAGES } from '~/constants/messages'
 import { ErrorWithStatus } from '~/models/Error'
-import { UpdateBloodUnitsReqBody } from '~/models/requests/BloodUnit.requests'
+import { UpdateBloodUnitsReqBody, UpdateStatusBloodUnitsReqBody } from '~/models/requests/BloodUnit.requests'
 import { bloodGroupMap, getExpirationDateByComponent, isCompatibleDonor } from '~/utils/utils'
 import databaseService from './database.services'
 import bloodService from './blood.services'
@@ -332,6 +332,39 @@ class BloodUnitService {
         }
       ])
       .toArray()
+
+    return result
+  }
+
+  async updateStatusBloodUnits({
+    id,
+    payload,
+    user_id
+  }: {
+    id: string
+    payload: UpdateStatusBloodUnitsReqBody
+    user_id: string
+  }) {
+    const bloodUnit = await databaseService.bloodUnits.findOne({ _id: new ObjectId(id) })
+
+    if (!bloodUnit) {
+      throw new ErrorWithStatus({
+        message: BLOOD_MESSAGES.BLOOD_UNIT_NOT_FOUND,
+        status: HTTP_STATUS.NOT_FOUND
+      })
+    }
+
+    const result = await databaseService.bloodUnits.findOneAndUpdate(
+      { _id: new ObjectId(id) },
+      {
+        $set: {
+          status: payload.status,
+          updated_by: new ObjectId(user_id)
+        },
+        $currentDate: { updated_at: true }
+      },
+      { returnDocument: 'after' }
+    )
 
     return result
   }

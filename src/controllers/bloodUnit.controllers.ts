@@ -57,3 +57,18 @@ export const getAllBloodUnitsRelativeController = async (req: Request, res: Resp
     result: bloodUnits
   })
 }
+
+export const updateStatusBloodUnitsController = async (
+  req: Request<UpdateBloodUnitsByDonationProcessIdReqParams, any, UpdateBloodUnitsReqBody>,
+  res: Response
+) => {
+  const { user_id } = req.decode_authorization as TokenPayload
+  const { id } = req.params
+  const { body } = req
+  const bloodUnits = await bloodUnitService.updateStatusBloodUnits({ id, payload: body, user_id })
+
+  res.json({
+    message: BLOOD_MESSAGES.UPDATE_BLOOD_UNITS_STATUS_SUCCESS,
+    result: bloodUnits
+  })
+}

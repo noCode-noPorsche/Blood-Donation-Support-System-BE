@@ -422,6 +422,42 @@ paths:
           description: UnAuthorization
       security:
         - BearerAuth: []
+  /api/blood-units/{id}/status:
+    patch:
+      tags:
+        - Blood Units
+      summary: Update Blood Units Status by Id for Staff or Admin
+      description: Update Blood Units Status by Id for Staff or Admin
+      operationId: updateStatusBloodUnitsById
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: MongoId
+      requestBody:
+        description: Information update blood units status
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateBloodUnitStatusReqBody'
+        required: true
+      responses:
+        default:
+          description: Update blood units status success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Update blood units status success
+        '401':
+          description: UnAuthorization
+      security:
+        - BearerAuth: []
   /api/blood-units/{blood_group_id}/{blood_component_ids}:
     get:
       tags:
@@ -1782,7 +1818,7 @@ components:
     BloodUnitsStatus:
       type: string
       enum: [Available, Reserved, Used, Expired, Damaged]
-      example:
+      example: Expired
     BloodUnits:
       type: object
       properties:
@@ -1846,6 +1882,11 @@ components:
         storage_temperature:
           type: number
           example: 0
+        status:
+          $ref: '#/components/schemas/BloodUnitsStatus'
+    UpdateBloodUnitStatusReqBody:
+      type: object
+      properties:
         status:
           $ref: '#/components/schemas/BloodUnitsStatus'
     CreateBloodGroupReqBody:

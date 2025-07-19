@@ -82,7 +82,9 @@ export const BLOOD_MESSAGES = {
   UPDATE_BLOOD_UNITS_FAIL: 'Update blood units fail',
   BLOOD_UNIT_STATUS_IS_REQUIRED: 'Blood unit status is required',
   BLOOD_UNIT_STATUS_MUST_BE_A_STRING: 'Blood unit status status must be a string',
-  BLOOD_UNIT_STATUS_MUST_BE_ONE_OF_THE_FOLLOWING_VALUES: 'Blood unit status must be one of the followings values'
+  BLOOD_UNIT_STATUS_MUST_BE_ONE_OF_THE_FOLLOWING_VALUES: 'Blood unit status must be one of the followings values',
+  UPDATE_BLOOD_UNITS_STATUS_SUCCESS: 'Update blood units status success',
+  BLOOD_UNIT_NOT_FOUND: 'Blood unit not found'
 } as const
 
 export const DONATION_MESSAGES = {

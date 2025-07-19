@@ -86,3 +86,23 @@ export const updateBloodUnitsValidation = validate(
     ['body']
   )
 )
+
+export const updateStatusBloodUnitsValidation = validate(
+  checkSchema(
+    {
+      status: {
+        notEmpty: {
+          errorMessage: BLOOD_MESSAGES.BLOOD_UNIT_STATUS_IS_REQUIRED
+        },
+        isString: {
+          errorMessage: BLOOD_MESSAGES.BLOOD_UNIT_STATUS_MUST_BE_A_STRING
+        },
+        isIn: {
+          options: [[BloodUnitStatus.Expired, BloodUnitStatus.Damaged]], // chỉ cho phép 2 giá trị này
+          errorMessage: BLOOD_MESSAGES.BLOOD_UNIT_STATUS_MUST_BE_ONE_OF_THE_FOLLOWING_VALUES
+        }
+      }
+    },
+    ['body']
+  )
+)
