@@ -2,7 +2,9 @@ import { NextFunction, Request, Response } from 'express'
 import { checkSchema } from 'express-validator'
 import { RequestProcessStatus, RequestRegistrationStatus, RequestType } from '~/constants/enum'
 import { HTTP_STATUS } from '~/constants/httpStatus'
-import { REQUEST_MESSAGES, USER_MESSAGES } from '~/constants/messages'
+import { BLOOD_MESSAGES, REQUEST_MESSAGES, USER_MESSAGES } from '~/constants/messages'
+import { ErrorWithStatus } from '~/models/Error'
+import bloodService from '~/services/blood.services'
 import usersService from '~/services/user.services'
 import { wrapAsync } from '~/utils/handler'
 import { validate } from '~/utils/validation'
@@ -12,7 +14,18 @@ export const createRequestRegistrationValidator = [
     checkSchema(
       {
         blood_group_id: {
-          notEmpty: undefined
+          optional: true,
+          custom: {
+            options: async (value: string) => {
+              const isBloodGroupExist = await bloodService.isBloodGroupIdExist(value)
+              if (!isBloodGroupExist) {
+                throw new ErrorWithStatus({
+                  message: BLOOD_MESSAGES.BLOOD_GROUP_NOT_FOUND,
+                  status: HTTP_STATUS.BAD_REQUEST
+                })
+              }
+            }
+          }
         },
         citizen_id_number: {
           notEmpty: {
@@ -53,10 +66,14 @@ export const createRequestRegistrationValidator = [
           }
         },
         full_name: {
-          notEmpty: undefined
+          notEmpty: {
+            errorMessage: USER_MESSAGES.FULL_NAME_IS_REQUIRED
+          }
         },
         phone: {
-          optional: true,
+          notEmpty: {
+            errorMessage: USER_MESSAGES.PHONE_IS_REQUIRED
+          },
           isString: {
             errorMessage: USER_MESSAGES.PHONE_MUST_BE_A_STRING
           },
@@ -101,7 +118,6 @@ export const createRequestRegistrationValidator = [
         return //Kết thúc response tại đây, không return res object
       }
     }
-
     next()
   })
 ]
@@ -110,7 +126,18 @@ export const updateRequestRegistrationValidator = validate(
   checkSchema(
     {
       blood_group_id: {
-        notEmpty: undefined
+        optional: true,
+        custom: {
+          options: async (value: string) => {
+            const isBloodGroupExist = await bloodService.isBloodGroupIdExist(value)
+            if (!isBloodGroupExist) {
+              throw new ErrorWithStatus({
+                message: BLOOD_MESSAGES.BLOOD_GROUP_NOT_FOUND,
+                status: HTTP_STATUS.BAD_REQUEST
+              })
+            }
+          }
+        }
       },
       status: {
         notEmpty: {
@@ -125,25 +152,18 @@ export const updateRequestRegistrationValidator = validate(
         }
       },
       receive_date_request: {
-        // notEmpty: {
-        //   errorMessage: REQUEST_MESSAGES.RECEIVE_DATE_REQUEST_IS_REQUIRED
-        // },
-        notEmpty: undefined,
-
+        optional: true,
         isISO8601: {
           options: { strict: true },
           errorMessage: REQUEST_MESSAGES.RECEIVE_DATE_REQUEST_IS_INVALID
         }
       },
       is_emergency: {
-        // notEmpty: {
-        //   errorMessage: REQUEST_MESSAGES.IS_EMERGENCY_IS_REQUIRED
-        // },
-        notEmpty: undefined,
-
+        optional: true,
         isBoolean: {
           errorMessage: REQUEST_MESSAGES.IS_EMERGENCY_IS_INVALID
-        }
+        },
+        toBoolean: true
       },
       request_type: {
         // optional: true,
@@ -156,22 +176,18 @@ export const updateRequestRegistrationValidator = validate(
         }
       },
       image: {
-        notEmpty: undefined
+        optional: true
       },
       note: {
-        notEmpty: undefined
+        optional: true
       },
       full_name: {
-        notEmpty: undefined
+        optional: true
       },
       phone: {
-        notEmpty: undefined
+        optional: true
       },
       citizen_id_number: {
-        // notEmpty: {
-        //   errorMessage: USER_MESSAGES.CITIZEN_ID_NUMBER_IS_REQUIRED
-        // },
-        // notEmpty: undefined,
         optional: true,
         isLength: {
           options: { min: 12, max: 12 },
@@ -213,20 +229,21 @@ export const updateRequestProcessValidator = validate(
         }
       },
       blood_group_id: {
-        notEmpty: undefined
+        optional: true,
+        custom: {
+          options: async (value: string) => {
+            const isBloodGroupExist = await bloodService.isBloodGroupIdExist(value)
+            if (!isBloodGroupExist) {
+              throw new ErrorWithStatus({
+                message: BLOOD_MESSAGES.BLOOD_GROUP_NOT_FOUND,
+                status: HTTP_STATUS.BAD_REQUEST
+              })
+            }
+          }
+        }
       },
       description: {
-        notEmpty: undefined
-      },
-      volume_received: {
-        isNumeric: {
-          errorMessage: REQUEST_MESSAGES.VOLUME_RECEIVED_MUST_BE_A_NUMBER
-        },
-        isInt: {
-          options: { min: 0 },
-          errorMessage: REQUEST_MESSAGES.VOLUME_RECEIVED_MUST_BE_POSITIVE
-        },
-        toInt: true
+        optional: true
       },
       is_emergency: {
         notEmpty: {

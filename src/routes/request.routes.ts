@@ -73,7 +73,7 @@ requestsRouter.get(
 
 // Request Registration
 /**
- * Description. Create a new request registration
+ * Description. Create a new request registration for Admin or Staff
  * Path: /
  * Method: POST
  * Body: { CreateRequestRegistrationReqBody }
@@ -86,13 +86,13 @@ requestsRouter.post(
   filterMiddleware<CreateRequestRegistrationReqBody>([
     'blood_group_id',
     'request_type',
-    'citizen_id_number',
-    'full_name',
     'image',
     'is_emergency',
-    'phone',
     'receive_date_request',
-    'note'
+    'note',
+    'citizen_id_number',
+    'full_name',
+    'phone'
   ]),
   wrapAsync(createRequestRegistrationController)
 )
@@ -110,8 +110,8 @@ requestsRouter.get(
 )
 
 /**
- * Description. Update a request registration by id
- * Path: /
+ * Description. Update a request registration by id for Admin or Staff
+ * Path: /:id
  * Method: PATCH
  * Body: { UpdateRequestRegistrationReqBody }
  * Header: { Authorization: Bearer <access_token>}
@@ -136,7 +136,7 @@ requestsRouter.patch(
 )
 
 /**
- * Description. Get All request registration for Admin or Staff
+ * Description. Get all request registration for Admin or Staff
  * Path: /
  * Method: GET
  * Header: { Authorization: Bearer <access_token>}
@@ -144,7 +144,7 @@ requestsRouter.patch(
 requestsRouter.get('/request-registrations', isStaffOrAdminValidator, wrapAsync(getAllRequestRegistrationController))
 
 /**
- * Description. Get request registration by id
+ * Description. Get request registration by id for Admin or Staff
  * Path: /:id
  * Method: GET
  * Header: { Authorization: Bearer <access_token>}
@@ -165,7 +165,7 @@ requestsRouter.get(
 requestsRouter.get('/request-processes/user', accessTokenValidator, wrapAsync(getRequestProcessByUserIdController))
 
 /**
- * Description. Get All request Process for Admin or Staff
+ * Description. Get All request Process for Admin or Staff for Admin or Staff
  * Path: /
  * Method: GET
  * Header: { Authorization: Bearer <access_token>}
@@ -173,7 +173,7 @@ requestsRouter.get('/request-processes/user', accessTokenValidator, wrapAsync(ge
 requestsRouter.get('/request-processes', isStaffOrAdminValidator, wrapAsync(getAllRequestProcessController))
 
 /**
- * Description. Get request Process by id
+ * Description. Get request Process by id for Admin or Staff
  * Path: /:id
  * Method: GET
  * Header: { Authorization: Bearer <access_token>}
@@ -181,7 +181,7 @@ requestsRouter.get('/request-processes', isStaffOrAdminValidator, wrapAsync(getA
 requestsRouter.get('/request-processes/:id', isStaffOrAdminValidator, wrapAsync(getRequestProcessByIdController))
 
 /**
- * Description. Update request Process by id
+ * Description. Update request Process by id for Admin or Staff
  * Path: /:id
  * Method: PATCH
  * Body: { UpdateRequestRegistrationReqBody }
@@ -191,13 +191,19 @@ requestsRouter.patch(
   '/request-processes/:id',
   isStaffOrAdminValidator,
   updateRequestProcessValidator,
-  filterMiddleware<UpdateRequestProcessIdReqBody>(['description', 'is_emergency', 'request_date', 'status']),
+  filterMiddleware<UpdateRequestProcessIdReqBody>([
+    'description',
+    'is_emergency',
+    'request_date',
+    'status',
+    'blood_group_id'
+  ]),
   wrapAsync(updateRequestProcessByIdController)
 )
 
 //Request Process Detail
 /**
- * Description. Get Request Process Detail by request process id
+ * Description. Get Request Process Detail by request process id for Admin or Staff
  * Path: /:id
  * Method: GET
  * Header: { Authorization: Bearer <access_token>}
@@ -209,7 +215,7 @@ requestsRouter.get(
 )
 
 /**
- * Description. Update Request Process Detail by request process id
+ * Description. Update Request Process Detail by request process id for Admin or Staff
  * Path: /:id
  * Method: PATCH
  * Body:
@@ -224,7 +230,7 @@ requestsRouter.patch(
 
 //Request Process Blood
 /**
- * Description. Get Request Process Blood by request process id
+ * Description. Get Request Process Blood by request process id for Admin or Staff
  * Path: /:id
  * Method: GET
  * Header: { Authorization: Bearer <access_token>}
@@ -236,7 +242,7 @@ requestsRouter.get(
 )
 
 /**
- * Description. Update Request Process Blood by request process id
+ * Description. Update Request Process Blood by request process id for Admin or Staff
  * Path: /:id
  * Method: PATCH
  * Body:
@@ -250,7 +256,7 @@ requestsRouter.patch(
 )
 
 /**
- * Description. Confirm Status Request Process Blood by request process id
+ * Description. Confirm Status Request Process Blood by request process id for Admin or Staff
  * Path: /:id
  * Method: PATCH
  * Body:

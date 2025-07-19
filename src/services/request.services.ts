@@ -172,7 +172,7 @@ class RequestService {
     return combined
   }
 
-  //Request Donation
+  //Request Registration
   async createRequestRegistration({
     user_id,
     payload
@@ -207,7 +207,7 @@ class RequestService {
         email: '',
         phone: payload.phone || '',
         full_name: payload.full_name || '',
-        date_of_birth: new Date(),
+        date_of_birth: date,
         gender: UserGender.Other,
         role: UserRole.Customer,
         weight: 0,
@@ -217,13 +217,14 @@ class RequestService {
         updated_at: date,
         location: {
           type: 'Point',
-          coordinates: [payload.longitude || 0, payload.latitude || 0]
+          coordinates: [0, 0]
         },
-        address: payload.address || '',
+        address: '',
         number_of_donations: 0,
         number_of_requests: 0,
         password: '',
-        forgot_password_token: ''
+        forgot_password_token: '',
+        fcm_token: ''
       })
       const result = await databaseService.users.insertOne(newUser)
       userObjectId = result.insertedId
@@ -278,9 +279,9 @@ class RequestService {
       _id: requestProcessId,
       user_id: new ObjectId(userObjectId),
       request_registration_id: resultRequestRegistration.insertedId,
+      health_check_id: healthCheckId,
       blood_group_id: bloodGroupId as ObjectId,
       blood_component_ids: componentIds,
-      health_check_id: healthCheckId,
       description: '',
       status: RequestProcessStatus.Pending,
       is_emergency: payload.is_emergency,
@@ -298,7 +299,7 @@ class RequestService {
     // await databaseService.requestProcessDetails.deleteMany({ request_process_id: result?._id })
 
     // Tạo mới từng detail dựa trên kiểu nhận máu
-    const defaultVolume = 0 // hoặc từ payload nếu bạn cho phép nhập
+    const defaultVolume = 0
     const detailsToInsert = componentIds.map((componentId) => ({
       request_process_id: requestProcessId,
       blood_component_id: componentId,
@@ -346,12 +347,12 @@ class RequestService {
     let componentIds = existRequestRegistration.blood_component_ids || []
     if (payload.request_type) {
       const componentNames = convertTypeToComponentMap[payload.request_type]
-      if (!Array.isArray(componentNames)) {
-        throw new ErrorWithStatus({
-          status: HTTP_STATUS.BAD_REQUEST,
-          message: REQUEST_MESSAGES.REQUEST_TYPE_INVALID
-        })
-      }
+      // if (!Array.isArray(componentNames)) {
+      //   throw new ErrorWithStatus({
+      //     status: HTTP_STATUS.BAD_REQUEST,
+      //     message: REQUEST_MESSAGES.REQUEST_TYPE_INVALID
+      //   })
+      // }
       const componentDocs = await databaseService.bloodComponents.find({ name: { $in: componentNames } }).toArray()
       componentIds = componentDocs.map((comp) => comp._id)
     }
@@ -362,7 +363,8 @@ class RequestService {
         $set: {
           request_type: payload.request_type || existRequestRegistration.request_type,
           status: payload.status || existRequestRegistration.status,
-          is_emergency: payload.is_emergency || existRequestRegistration.is_emergency,
+          is_emergency:
+            typeof payload.is_emergency === 'boolean' ? payload.is_emergency : existRequestRegistration.is_emergency,
           image: payload.image || existRequestRegistration.image,
           update_by: new ObjectId(user_id),
           receive_date_request: payload.receive_date_request
@@ -378,6 +380,26 @@ class RequestService {
         returnDocument: 'after'
       }
     )
+
+    //Cập nhật user nếu có thay đổi
+    if (result) {
+      if (payload.full_name || payload.phone || payload.citizen_id_number) {
+        const updateUser: any = {}
+        if (payload.full_name) updateUser.full_name = payload.full_name
+        if (payload.phone) updateUser.phone = payload.phone
+        if (payload.citizen_id_number) updateUser.citizen_id_number = payload.citizen_id_number
+        if (payload.blood_group_id) {
+          updateUser.blood_group_id = bloodGroupId
+        }
+        await databaseService.users.updateOne(
+          { _id: existRequestRegistration.user_id },
+          {
+            $set: updateUser,
+            $currentDate: { updated_at: true }
+          }
+        )
+      }
+    }
 
     // Nếu request registration có health_check_id thì cập nhật health check liên quan
     if (payload.request_type && componentIds.length > 0) {
@@ -402,7 +424,9 @@ class RequestService {
           $set: {
             request_type: payload.request_type,
             blood_component_ids: componentIds,
-            blood_group_id: bloodGroupId as ObjectId
+            blood_group_id: bloodGroupId as ObjectId,
+            is_emergency:
+              typeof payload.is_emergency === 'boolean' ? payload.is_emergency : existRequestRegistration.is_emergency
           },
           $currentDate: { updated_at: true }
         }
@@ -672,6 +696,20 @@ class RequestService {
           }
         },
         {
+          $lookup: {
+            from: 'users',
+            localField: 'user_id',
+            foreignField: '_id',
+            as: 'user_info'
+          }
+        },
+        {
+          $unwind: {
+            path: '$user_info',
+            preserveNullAndEmptyArrays: true
+          }
+        },
+        {
           $project: {
             _id: 1,
             user_id: 1,
@@ -687,7 +725,10 @@ class RequestService {
             created_at: 1,
             updated_at: 1,
             request_type: 1,
-            blood_group_name: '$blood_group_info.name'
+            blood_group_name: '$blood_group_info.name',
+            full_name: '$user_info.full_name',
+            phone: '$user_info.phone',
+            citizen_id_number: '$user_info.citizen_id_number'
           }
         }
       ])
@@ -714,6 +755,20 @@ class RequestService {
           }
         },
         {
+          $lookup: {
+            from: 'users',
+            localField: 'user_id',
+            foreignField: '_id',
+            as: 'user_info'
+          }
+        },
+        {
+          $unwind: {
+            path: '$user_info',
+            preserveNullAndEmptyArrays: true
+          }
+        },
+        {
           $project: {
             _id: 1,
             user_id: 1,
@@ -730,7 +785,10 @@ class RequestService {
             updated_at: 1,
             request_type: 1,
             // from blood_group
-            blood_group_name: '$blood_group_info.name'
+            blood_group_name: '$blood_group_info.name',
+            full_name: '$user_info.full_name',
+            phone: '$user_info.phone',
+            citizen_id_number: '$user_info.citizen_id_number'
           }
         }
       ])
@@ -760,6 +818,20 @@ class RequestService {
           }
         },
         {
+          $lookup: {
+            from: 'users',
+            localField: 'user_id',
+            foreignField: '_id',
+            as: 'user_info'
+          }
+        },
+        {
+          $unwind: {
+            path: '$user_info',
+            preserveNullAndEmptyArrays: true
+          }
+        },
+        {
           $project: {
             _id: 1,
             user_id: 1,
@@ -775,7 +847,10 @@ class RequestService {
             created_at: 1,
             updated_at: 1,
             request_type: 1,
-            blood_group_name: '$blood_group_info.name'
+            blood_group_name: '$blood_group_info.name',
+            full_name: '$user_info.full_name',
+            phone: '$user_info.phone',
+            citizen_id_number: '$user_info.citizen_id_number'
           }
         }
       ])
@@ -808,10 +883,10 @@ class RequestService {
       })
     }
 
-    // const isValidBloodGroupId = ObjectId.isValid(payload.blood_group_id as string)
-    // const bloodGroupId = isValidBloodGroupId
-    //   ? new ObjectId(payload.blood_group_id)
-    //   : resultRequestProcess.blood_group_id
+    const isValidBloodGroupId = ObjectId.isValid(payload.blood_group_id as string)
+    const bloodGroupId = isValidBloodGroupId
+      ? new ObjectId(payload.blood_group_id)
+      : resultRequestProcess.blood_group_id
 
     const result = await databaseService.requestProcesses.findOneAndUpdate(
       { _id: new ObjectId(id) },
@@ -821,6 +896,7 @@ class RequestService {
           is_emergency: payload.is_emergency,
           description: payload.description,
           request_date: payload.request_date,
+          blood_group_id: bloodGroupId,
           updated_by: new ObjectId(user_id)
         },
         $currentDate: { updated_at: true }
@@ -981,6 +1057,15 @@ class RequestService {
     payload: UpdateRequestProcessDetailIdReqBody[]
   }) {
     const requestProcessId = new ObjectId(id)
+
+    const resultRequestProcess = await databaseService.requestProcesses.findOne({ _id: requestProcessId })
+    if (!resultRequestProcess) {
+      throw new ErrorWithStatus({
+        message: REQUEST_MESSAGES.REQUEST_PROCESS_NOT_FOUND,
+        status: HTTP_STATUS.NOT_FOUND
+      })
+    }
+
     const existingDetails = await databaseService.requestProcessDetails
       .find({ request_process_id: requestProcessId })
       .toArray()
@@ -993,7 +1078,6 @@ class RequestService {
     }
 
     const updateRequestProcessDetail = []
-    const requestProcessBloodList = []
 
     for (const item of payload) {
       if (!item.blood_component_id) continue
@@ -1015,7 +1099,6 @@ class RequestService {
         { _id: detailToUpdate._id },
         {
           $set: {
-            // request_process_id: requestProcessId,
             blood_component_id: componentId,
             volume_required: item.volume_required,
             status: item.status || detailToUpdate.status,
@@ -1035,21 +1118,10 @@ class RequestService {
           request_process_id: new ObjectId(id)
         })
 
-        const requestProcess = await databaseService.requestProcesses.findOne({
-          _id: requestProcessId
-        })
-
-        if (!requestProcess?.blood_group_id) {
+        if (!resultRequestProcess?.blood_group_id) {
           throw new ErrorWithStatus({
             message: 'Request process is missing blood_group_id',
             status: HTTP_STATUS.BAD_REQUEST
-          })
-        }
-
-        if (!requestProcess) {
-          throw new ErrorWithStatus({
-            message: 'Không tìm thấy request process',
-            status: HTTP_STATUS.NOT_FOUND
           })
         }
 
@@ -1066,7 +1138,7 @@ class RequestService {
         const compatibleUnits = []
         for (const unit of allAvailableUnits) {
           const isCompatible = await isCompatibleDonor(
-            requestProcess?.blood_group_id.toString() as string,
+            resultRequestProcess?.blood_group_id.toString() as string,
             unit.blood_group_id.toString() as string
           )
           if (isCompatible) {
@@ -1076,7 +1148,7 @@ class RequestService {
 
         const insertedBloodMappings: RequestProcessBlood[] = []
         // 3. Với từng thành phần cần thiết, lọc túi máu tương ứng
-        for (const componentId of requestProcess?.blood_component_ids || []) {
+        for (const componentId of resultRequestProcess?.blood_component_ids || []) {
           const matchingUnits = compatibleUnits.filter(
             (unit) => unit.blood_component_id.toString() === componentId.toString()
           )
@@ -1156,7 +1228,7 @@ class RequestService {
 
     if (!requestProcessBlood || requestProcessBlood.length === 0) {
       throw new ErrorWithStatus({
-        message: REQUEST_MESSAGES.REQUEST_PROCESS_DETAIL_NOT_FOUND,
+        message: REQUEST_MESSAGES.REQUEST_PROCESS_NOT_FOUND,
         status: HTTP_STATUS.NOT_FOUND
       })
     }
@@ -1317,9 +1389,8 @@ class RequestService {
       console.log('Found blood record, current status:', blood.status)
 
       if (item.status !== RequestProcessBloodStatus.Selected) continue
-
       const updateResult = await databaseService.requestProcessBloods.findOneAndUpdate(
-        { _id: blood._id },
+        { blood_unit_id: blood.blood_unit_id },
         {
           $set: {
             status: RequestProcessBloodStatus.Selected,

@@ -55,7 +55,8 @@ export const USER_MESSAGES = {
   GET_PROFILE_BY_CITIZEN_ID_NUMBER_SUCCESS: 'Get profile by citizen ID number success',
   GET_ALL_USERS_SUCCESS: 'Get all users success',
   ADDRESS_LENGTH_MUST_BE_LESS_THAN_200: 'Address length must be less than 200',
-  ADDRESS_MUST_BE_A_STRING: 'Address must be a string'
+  ADDRESS_MUST_BE_A_STRING: 'Address must be a string',
+  FULL_NAME_IS_REQUIRED: 'Full name is required'
 } as const
 
 export const BLOOD_MESSAGES = {

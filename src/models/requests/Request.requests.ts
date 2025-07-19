@@ -16,9 +16,6 @@ export interface CreateRequestRegistrationReqBody {
   full_name?: string
   phone?: string
   note?: string
-  address?: string
-  latitude?: number
-  longitude?: number
 }
 
 export interface UpdateRequestRegistrationReqBody {

@@ -26,6 +26,7 @@ import requestsService from '~/services/request.services'
 export const getAllRequestHealthProcessByUserIdController = async (req: Request, res: Response) => {
   const { user_id } = req.decode_authorization as TokenPayload
   const result = await requestsService.getRequestHealthProcessByUserId(user_id)
+
   res.json({
     message: REQUEST_MESSAGES.GET_REQUEST_REGISTRATION_BY_USER_SUCCESS,
     result: result
@@ -38,6 +39,7 @@ export const getRequestHealthProcessByRequestIdController = async (
 ) => {
   const { id } = req.params
   const result = await requestsService.getRequestHealthProcessByRequestId(id)
+
   res.json({
     message: REQUEST_MESSAGES.GET_REQUEST_REGISTRATION_SUCCESS,
     result: result
@@ -50,6 +52,7 @@ export const getStatusRequestHealthProcessByRequestIdController = async (
 ) => {
   const { id } = req.params
   const result = await requestsService.getStatusRequestHealthProcessByRequestId(id)
+
   res.json({
     message: REQUEST_MESSAGES.GET_STATUS_REQUEST_HEALTH_PROCESS_SUCCESS,
     result: result
@@ -64,6 +67,7 @@ export const createRequestRegistrationController = async (
   const { user_id } = req.decode_authorization as TokenPayload
   const { body } = req
   const result = await requestsService.createRequestRegistration({ user_id, payload: body })
+
   res.json({
     message: REQUEST_MESSAGES.CREATE_REQUEST_REGISTRATION_SUCCESS,
     result: result
@@ -77,7 +81,9 @@ export const updateRequestRegistrationController = async (
   const { id } = req.params
   const { user_id } = req.decode_authorization as TokenPayload
   const { body } = req
+  console.log(typeof req.body.is_emergency, req.body.is_emergency)
   const result = await requestsService.updateRequestRegistration({ id, user_id, payload: body })
+
   res.json({
     message: REQUEST_MESSAGES.UPDATE_REQUEST_REGISTRATION_SUCCESS,
     result: result
@@ -87,6 +93,7 @@ export const updateRequestRegistrationController = async (
 export const getRequestRegistrationByUserIdController = async (req: Request, res: Response) => {
   const { user_id } = req.decode_authorization as TokenPayload
   const result = await requestsService.getRequestRegistrationByUserId(user_id)
+
   res.json({
     message: REQUEST_MESSAGES.GET_REQUEST_REGISTRATION_BY_USER_SUCCESS,
     result: result
@@ -95,6 +102,7 @@ export const getRequestRegistrationByUserIdController = async (req: Request, res
 
 export const getAllRequestRegistrationController = async (req: Request, res: Response) => {
   const result = await requestsService.getAllRequestRegistration()
+
   res.json({
     message: REQUEST_MESSAGES.GET_REQUEST_REGISTRATION_SUCCESS,
     result: result
@@ -117,6 +125,7 @@ export const getRequestRegistrationByIdController = async (
 export const getRequestProcessByUserIdController = async (req: Request, res: Response) => {
   const { user_id } = req.decode_authorization as TokenPayload
   const result = await requestsService.getRequestProcessByUserId(user_id)
+
   res.json({
     message: REQUEST_MESSAGES.GET_REQUEST_PROCESS_SUCCESS,
     result: result
@@ -125,6 +134,7 @@ export const getRequestProcessByUserIdController = async (req: Request, res: Res
 
 export const getAllRequestProcessController = async (req: Request, res: Response) => {
   const result = await requestsService.getAllRequestProcess()
+
   res.json({
     message: REQUEST_MESSAGES.GET_REQUEST_PROCESS_SUCCESS,
     result: result
@@ -137,6 +147,7 @@ export const getRequestProcessByIdController = async (
 ) => {
   const { id } = req.params
   const result = await requestsService.getRequestProcessById(id)
+
   res.json({
     message: REQUEST_MESSAGES.GET_REQUEST_PROCESS_SUCCESS,
     result: result
@@ -151,6 +162,7 @@ export const updateRequestProcessByIdController = async (
   const { id } = req.params
   const { body } = req
   const result = await requestsService.updateRequestProcessById({ id, user_id, payload: body })
+
   res.json({
     message: REQUEST_MESSAGES.UPDATE_REQUEST_PROCESS_SUCCESS,
     result: result
@@ -178,6 +190,7 @@ export const updateRequestProcessDetailByProcessIdController = async (
   const { user_id } = req.decode_authorization as TokenPayload
   const { body } = req
   const result = await requestsService.updateRequestProcessDetailByProcessId({ id, user_id, payload: body })
+
   res.json({
     message: REQUEST_MESSAGES.UPDATE_REQUEST_PROCESS_DETAIL_SUCCESS,
     result: result
