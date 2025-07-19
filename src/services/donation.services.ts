@@ -1,12 +1,6 @@
 import { config } from 'dotenv'
 import { ObjectId } from 'mongodb'
-import {
-  BloodComponentEnum,
-  BloodUnitStatus,
-  DonationProcessStatus,
-  DonationRegistrationStatus,
-  HealthCheckStatus
-} from '~/constants/enum'
+import { BloodUnitStatus, DonationProcessStatus, DonationRegistrationStatus, HealthCheckStatus } from '~/constants/enum'
 import { HTTP_STATUS } from '~/constants/httpStatus'
 import { DONATION_MESSAGES, NOTIFICATION_MESSAGES } from '~/constants/messages'
 import { ErrorWithStatus } from '~/models/Error'
@@ -16,14 +10,13 @@ import {
   UpdateDonationRegistrationReqBody
 } from '~/models/requests/Donation.requests'
 import BloodUnit from '~/models/schemas/BloodUnit.schemas'
+import DonationProcess from '~/models/schemas/DonationProcess.schemas'
 import DonationRegistration from '~/models/schemas/DonationRegistration.schemas'
 import HealthCheck from '~/models/schemas/HealthCheck'
+import Notification from '~/models/schemas/Notification.schemas'
+import { sendPushNotification } from '~/utils/notification'
 import { convertTypeToComponentMap } from '~/utils/utils'
 import databaseService from './database.services'
-import DonationProcess from '~/models/schemas/DonationProcess.schemas'
-import { sendPushNotification } from '~/utils/notification'
-import Notification from '~/models/schemas/Notification.schemas'
-import e from 'express'
 config()
 
 class DonationService {
@@ -349,7 +342,7 @@ class DonationService {
       })
     }
 
-    return donationRegistration[0] // chỉ trả về 1 bản ghi
+    return donationRegistration[0]
   }
 
   async getDonationRegistrationByUserId(user_id: string) {
@@ -526,24 +519,23 @@ class DonationService {
     ) {
       const user = await databaseService.users.findOne({ _id: existsDonationRegistration.user_id })
 
-      if (user?.fcm_token) {
-        const title = NOTIFICATION_MESSAGES.CHECKED_IN_DONATION_SUCCESS
-        const body = NOTIFICATION_MESSAGES.CHECKED_IN_DONATION_BODY
+      // Lưu thông báo vào DB
+      const title = NOTIFICATION_MESSAGES.CHECKED_IN_DONATION_SUCCESS
+      const body = NOTIFICATION_MESSAGES.CHECKED_IN_DONATION_BODY
 
-        // 1. Gửi push notification
+      const notification = new Notification({
+        receiver_id: user?._id as ObjectId,
+        title,
+        message: body
+      })
+      await databaseService.notifications.insertOne(notification)
+      // Gửi push notification
+      if (user?.fcm_token) {
         await sendPushNotification({
           fcmToken: user.fcm_token,
           title,
           body
         })
-
-        // 2. Lưu thông báo vào DB
-        const notification = new Notification({
-          receiver_id: user._id,
-          title,
-          message: body
-        })
-        await databaseService.notifications.insertOne(notification)
       }
     }
     return result
@@ -556,7 +548,6 @@ class DonationService {
     const donationProcesses = await databaseService.donationProcesses
       .aggregate([
         ...matchStage,
-
         // Join user để lấy tên người hiến
         {
           $lookup: {
@@ -567,8 +558,7 @@ class DonationService {
           }
         },
         { $unwind: { path: '$user_info', preserveNullAndEmptyArrays: true } },
-
-        // Join blood_groups
+        // Join blood_groups để lấy tên nhóm máu
         {
           $lookup: {
             from: 'blood_groups',
@@ -578,18 +568,7 @@ class DonationService {
           }
         },
         { $unwind: { path: '$blood_group_info', preserveNullAndEmptyArrays: true } },
-
-        // Join blood_components
-        {
-          $lookup: {
-            from: 'blood_components',
-            localField: 'blood_component_id',
-            foreignField: '_id',
-            as: 'blood_component_info'
-          }
-        },
-        { $unwind: { path: '$blood_component_info', preserveNullAndEmptyArrays: true } },
-        // Join health_checks to get donation_type
+        // Join health_checks để lấy thông tin về loại hiến máu
         {
           $lookup: {
             from: 'health_checks',
@@ -605,7 +584,9 @@ class DonationService {
           $project: {
             _id: 1,
             user_id: 1,
-            username: '$user_info.full_name',
+            full_name: '$user_info.full_name',
+            phone: '$user_info.phone',
+            citizen_id_number: '$user_info.citizen_id_number',
             is_separated: 1,
             status: 1,
             volume_collected: 1,
@@ -616,8 +597,6 @@ class DonationService {
             donation_type: '$health_check.donation_type',
             blood_group_id: 1,
             blood_group_name: '$blood_group_info.name',
-            blood_component_id: 1,
-            blood_component_name: '$blood_component_info.name',
             updated_by: 1,
             created_at: 1,
             updated_at: 1
@@ -675,7 +654,7 @@ class DonationService {
             preserveNullAndEmptyArrays: true
           }
         },
-        // Join health_checks to get donation_type
+        // Join health_checks để lấy thông tin về loại hiến máu
         {
           $lookup: {
             from: 'health_checks',
@@ -690,7 +669,9 @@ class DonationService {
             _id: 1,
             donation_registration_id: 1,
             user_id: 1,
-            username: '$user_info.full_name',
+            full_name: '$user_info.full_name',
+            phone: '$user_info.phone',
+            citizen_id_number: '$user_info.citizen_id_number',
             blood_group_id: 1,
             blood_group_name: '$blood_group_info.name',
             health_check_id: 1,
@@ -747,7 +728,7 @@ class DonationService {
             preserveNullAndEmptyArrays: true
           }
         },
-        // Join health_checks to get donation_type
+        // Join health_checks để lấy thông tin về loại hiến máu
         {
           $lookup: {
             from: 'health_checks',
@@ -762,7 +743,9 @@ class DonationService {
             _id: 1,
             donation_registration_id: 1,
             user_id: 1,
-            username: '$user_info.full_name',
+            full_name: '$user_info.full_name',
+            phone: '$user_info.phone',
+            citizen_id_number: '$user_info.citizen_id_number',
             blood_group_id: 1,
             blood_group_name: '$blood_group_info.name',
             donation_type: '$health_check.donation_type',
@@ -836,15 +819,6 @@ class DonationService {
     const result = await databaseService.donationProcesses.findOneAndUpdate(
       { _id: new ObjectId(id) },
       {
-        // $set: {
-        //   ...payload,
-        //   status: payload.status || DonationProcessStatus.Pending,
-        //   blood_group_id: payload.blood_group_id
-        //     ? new ObjectId(payload.blood_group_id)
-        //     : healthCheckResult?.blood_group_id,
-        //   donation_date: new Date(payload.donation_date) || undefined,
-        //   volume_collected: Number(payload.volume_collected)
-        // },
         $set: updateFields,
         $currentDate: { updated_at: true }
       },
@@ -866,12 +840,10 @@ class DonationService {
         //Lấy thông tin healthCheck để biết danh sách thành phần máu đã chọn
         const bloodComponentIds = healthCheckResult?.blood_component_ids || []
 
-        const now = new Date()
         if (bloodComponentIds.length > 0) {
           const bloodComponentDocs = await databaseService.bloodComponents
             .find({ _id: { $in: bloodComponentIds } })
             .toArray()
-          console.log(bloodComponentDocs, 'here')
           const bloodUnits = bloodComponentDocs.map((comp) => {
             return new BloodUnit({
               donation_process_id: new ObjectId(result._id),
@@ -881,7 +853,6 @@ class DonationService {
               updated_by: new ObjectId(user_id),
               status: BloodUnitStatus.Available,
               volume: 0
-              // expired_at: new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000) // nếu cần
             })
           })
 
@@ -935,41 +906,29 @@ class DonationService {
             }
           )
         }
+        // Lưu thông báo vào DB
+        const title = NOTIFICATION_MESSAGES.SUCCESSFULLY_DONATED_BLOOD
+        const body = NOTIFICATION_MESSAGES.CHECKED_IN_DONATION_BODY
+
+        const notification = new Notification({
+          receiver_id: userResult?._id as ObjectId,
+          title,
+          message: body
+        })
+        await databaseService.notifications.insertOne(notification)
+        // Gửi push notification
+        if (userResult?.fcm_token) {
+          await sendPushNotification({
+            fcmToken: userResult.fcm_token,
+            title,
+            body
+          })
+        }
       }
     }
 
     return result
   }
-
-  //not use
-  // async deleteDonationRegistration(id: string) {
-  //   let parsedId: ObjectId
-  //   try {
-  //     parsedId = new ObjectId(id)
-  //   } catch (err) {
-  //     return false
-  //   }
-  //   const deletedRegistration = await databaseService.donationRegistrations.findOneAndDelete({ _id: parsedId })
-  //   if (!deletedRegistration) {
-  //     return null
-  //   }
-  //   return new DonationRegistration(deletedRegistration)
-  // }
-
-  //not use
-  // async deleteDonationProcess(id: string) {
-  //   let parsedId: ObjectId
-  //   try {
-  //     parsedId = new ObjectId(id)
-  //   } catch (err) {
-  //     return false
-  //   }
-  //   const deletedProcess = await databaseService.donationProcesses.findOneAndDelete({ _id: parsedId })
-  //   if (!deletedProcess) {
-  //     return null
-  //   }
-  //   return new DonationRequestProcess(deletedProcess)
-  // }
 }
 
 const donationService = new DonationService()

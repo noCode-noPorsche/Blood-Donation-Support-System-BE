@@ -8,8 +8,6 @@ import {
 import { TokenPayload } from '~/models/requests/User.requests'
 import bloodUnitService from '~/services/bloodUnit.services'
 
-export const createBloodUnitsController = async (req: Request, res: Response) => {}
-
 export const updateBloodUnitsController = async (
   req: Request<UpdateBloodUnitsByDonationProcessIdReqParams, any, UpdateBloodUnitsReqBody[]>,
   res: Response
@@ -18,6 +16,7 @@ export const updateBloodUnitsController = async (
   const { id } = req.params
   const { body } = req
   const updateBloodUnits = await bloodUnitService.updateBloodUnitsFromDonation({ id, payload: body, user_id })
+
   res.json({
     message: BLOOD_MESSAGES.UPDATE_BLOOD_UNITS_SUCCESS,
     result: updateBloodUnits
@@ -30,6 +29,7 @@ export const getBloodUnitByDonationProcessIdController = async (
 ) => {
   const { id } = req.params
   const bloodUnits = await bloodUnitService.getBloodUnitsByDonationProcessId(id)
+
   res.json({
     message: BLOOD_MESSAGES.GET_BLOOD_UNITS_SUCCESS,
     result: bloodUnits
@@ -38,6 +38,7 @@ export const getBloodUnitByDonationProcessIdController = async (
 
 export const getAllBloodUnitsController = async (req: Request, res: Response) => {
   const bloodUnits = await bloodUnitService.getAllBloodUnits()
+
   res.json({
     message: BLOOD_MESSAGES.GET_BLOOD_UNITS_SUCCESS,
     result: bloodUnits
@@ -46,7 +47,6 @@ export const getAllBloodUnitsController = async (req: Request, res: Response) =>
 
 export const getAllBloodUnitsRelativeController = async (req: Request, res: Response) => {
   const { blood_group_id, blood_component_ids } = req.params
-
   const bloodUnits = await bloodUnitService.getAllBloodUnitsRelative({
     blood_group_id,
     blood_component_ids: blood_component_ids.split(',') //chuyển thành mảng

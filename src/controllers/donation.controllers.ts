@@ -20,6 +20,7 @@ import donationService from '~/services/donation.services'
 export const getAllDonationHealthProcessByUserIdController = async (req: Request, res: Response) => {
   const { user_id } = req.decode_authorization as TokenPayload
   const donationHealthProcess = await donationService.getAllDonationHealthProcessByUserId(user_id)
+
   res.json({
     message: DONATION_MESSAGES.GET_ALL_DONATION_REGISTRATIONS_SUCCESS,
     result: donationHealthProcess
@@ -32,6 +33,7 @@ export const getDonationHealthProcessByDonationIdController = async (
 ) => {
   const { id } = req.params
   const donationHealthProcess = await donationService.getDonationHealthProcessByDonationId(id)
+
   res.json({
     message: DONATION_MESSAGES.GET_ALL_DONATION_REGISTRATIONS_SUCCESS,
     result: donationHealthProcess
@@ -44,6 +46,7 @@ export const getStatusDonationHealthProcessByDonationIdController = async (
 ) => {
   const { id } = req.params
   const donationHealthProcessStatus = await donationService.getStatusDonationHealthProcessByDonationId(id)
+
   res.json({
     message: DONATION_MESSAGES.GET_STATUS_DONATION_HEALTH_PROCESS_SUCCESS,
     result: donationHealthProcessStatus
@@ -61,6 +64,7 @@ export const createDonationRegistrationController = async (
     user_id,
     payload: body
   })
+
   res.json({
     message: DONATION_MESSAGES.CREATE_DONATION_REGISTRATION_SUCCESS,
     result: results
@@ -69,6 +73,7 @@ export const createDonationRegistrationController = async (
 
 export const getAllDonationRegistrationsController = async (req: Request, res: Response) => {
   const donationRegistration = await donationService.getAllDonationRegistration()
+
   res.json({
     message: DONATION_MESSAGES.GET_ALL_DONATION_REGISTRATIONS_SUCCESS,
     result: donationRegistration
@@ -80,7 +85,6 @@ export const getDonationRegistrationByIdController = async (
   res: Response
 ) => {
   const { id } = req.params
-
   const donationRegistrationById = await donationService.getDonationRegistrationId(id)
 
   res.json({
@@ -91,7 +95,6 @@ export const getDonationRegistrationByIdController = async (
 
 export const getDonationRegistrationByUserIdController = async (req: Request, res: Response) => {
   const { user_id } = req.decode_authorization as TokenPayload
-
   const donationRegistrationByUserId = await donationService.getDonationRegistrationByUserId(user_id)
 
   res.json({
@@ -156,11 +159,6 @@ export const updateDonationProcessController = async (
     user_id
   })
 
-  if (!updatedProcess) {
-    res.status(404).json({ message: DONATION_MESSAGES.DONATION_PROCESS_NOT_FOUND })
-    return
-  }
-
   res.json({
     message: DONATION_MESSAGES.UPDATE_DONATION_REQUEST_PROCESS_SUCCESS,
     result: updatedProcess
@@ -169,7 +167,6 @@ export const updateDonationProcessController = async (
 
 export const getDonationProcessByUserIdController = async (req: Request, res: Response) => {
   const { user_id } = req.decode_authorization as TokenPayload
-
   const donationProcess = await donationService.getDonationProcessByUserId(user_id)
 
   res.json({
@@ -183,36 +180,10 @@ export const getDonationProcessesByIdController = async (
   res: Response
 ) => {
   const { id } = req.params
-  const result = await donationService.getDonationProcessById(id)
+  const donationProcess = await donationService.getDonationProcessById(id)
 
   res.json({
     message: DONATION_MESSAGES.GET_DONATION_REQUEST_PROCESS_SUCCESS,
-    result: result
+    result: donationProcess
   })
 }
-// export const updateDonationRequestProcessController = async (req: Request, res: Response): Promise<void> => {
-//   const { id } = req.params
-//   const { status, volumeCollected, donationDate, description } = req.body
-
-//   if (!ObjectId.isValid(id)) {
-//     res.status(400).json({ message: DONATION_MESSAGES.DONATION_REQUEST_PROCESS_ID_INVALID })
-//     return
-//   }
-
-//   const updatedProcess = await donationService.updateDonationRequestProcess(id, {
-//     status,
-//     volumeCollected,
-//     donationDate: donationDate ? new Date(donationDate) : undefined,
-//     description
-//   })
-
-//   if (!updatedProcess) {
-//     res.status(404).json({ message: DONATION_MESSAGES.DONATION_REQUEST_PROCESS_NOT_FOUND })
-//     return
-//   }
-
-//   res.status(200).json({
-//     message: DONATION_MESSAGES.UPDATE_DONATION_REQUEST_PROCESS_SUCCESS,
-//     result: updatedProcess
-//   })
-// }

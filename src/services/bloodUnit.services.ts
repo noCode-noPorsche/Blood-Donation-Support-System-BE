@@ -29,7 +29,10 @@ class BloodUnitService {
     })
 
     if (!donationProcess) {
-      throw new ErrorWithStatus({ message: 'Không tìm thấy quy trình hiến máu', status: HTTP_STATUS.NOT_FOUND })
+      throw new ErrorWithStatus({
+        message: DONATION_MESSAGES.DONATION_PROCESS_NOT_FOUND,
+        status: HTTP_STATUS.NOT_FOUND
+      })
     }
 
     if (totalVolume !== donationProcess.volume_collected) {
@@ -92,7 +95,7 @@ class BloodUnitService {
       }
     }
 
-    // Cập nhật is_separated = true
+    // Cập nhật is_separated = true cho donation process
     await databaseService.donationProcesses.updateOne(
       { _id: new ObjectId(id) },
       {

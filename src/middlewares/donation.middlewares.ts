@@ -85,7 +85,6 @@ export const updateDonationRegistrationValidator = validate(
   checkSchema(
     {
       blood_group_id: {
-        notEmpty: undefined,
         optional: true,
         custom: {
           options: async (value: string) => {
@@ -156,12 +155,11 @@ export const updateDonationProcessValidator = validate(
         },
         isInt: {
           options: { min: 250, max: 450 },
-          errorMessage: DONATION_MESSAGES.VOLUME_COLLECTED_MUST_BE_POSITIVE
+          errorMessage: DONATION_MESSAGES.VOLUME_COLLECTED_MUST_BE_A_NUMBER_BETWEEN_250_AND_450
         },
         toInt: true
       },
       donation_date: {
-        notEmpty: undefined,
         optional: true,
         isISO8601: {
           options: { strict: true },
@@ -169,7 +167,6 @@ export const updateDonationProcessValidator = validate(
         }
       },
       description: {
-        notEmpty: undefined,
         optional: true,
         isString: {
           errorMessage: DONATION_MESSAGES.DESCRIPTION_MUST_BE_A_STRING

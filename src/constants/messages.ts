@@ -120,7 +120,8 @@ export const DONATION_MESSAGES = {
     'Blood donation request cannot be approved if health check results are not satisfactory',
   GET_STATUS_DONATION_HEALTH_PROCESS_SUCCESS: 'Get status donation health process success',
   DONATION_TYPE_IS_REQUIRED: 'Donation type is required',
-  DONATION_TYPE_IS_INVALID: 'Donation type is invalid'
+  DONATION_TYPE_IS_INVALID: 'Donation type is invalid',
+  VOLUME_COLLECTED_MUST_BE_A_NUMBER_BETWEEN_250_AND_450: 'Volume collected must be a number between 250 and 450'
 } as const
 
 export const HEALTH_CHECK_MESSAGES = {
@@ -168,7 +169,10 @@ export const HEALTH_CHECK_MESSAGES = {
   DESCRIPTION_LENGTH_MUST_BE_LESS_THAN_500: 'Description length must be less than 500',
   UNDERLYING_CONDITIONS_MUST_BE_AN_ARRAY: 'Underlying health conditions must be an array',
   UNDERLYING_CONDITIONS_INVALID_VALUES: 'Underlying health conditions must contain valid values',
-  THE_MINIUM_WEIGHT_REQUIRED_TO_DONATION_BLOOD_IS_42KG: 'The minimum weight required to donate blood is 42kg'
+  THE_MINIUM_WEIGHT_REQUIRED_TO_DONATION_BLOOD_IS_42KG: 'The minimum weight required to donate blood is 42kg',
+  UNABLE_TO_UPDATE_HEALTH_CHECK_NOT_CHECKED_IN: 'Unable to update health check because donor has not checked-in.',
+  UNABLE_TO_UPDATE_HEALTH_CHECK_PENDING_REQUEST:
+    'Unable to update health check because blood donation request is still pending.'
 } as const
 
 export const REQUEST_MESSAGES = {
@@ -237,8 +241,11 @@ export const DASHBOARD_MESSAGES = {
 } as const
 
 export const NOTIFICATION_MESSAGES = {
-  CHECKED_IN_DONATION_SUCCESS: 'Đã checked in hiến máu thành công',
+  CHECKED_IN_DONATION_SUCCESS: 'Đã checked in hiến máu thành công!',
   CHECKED_IN_DONATION_BODY: 'Mời bạn đến địa điểm khám sáng lọc để kiểm tra sức khỏe trước khi hiến máu.',
+  SUCCESSFULLY_DONATED_BLOOD: 'Hoàn thành hiến máu thành công!',
+  MESSAGE_AFTER_SUCCESSFULLY_DONATED_BLOOD:
+    'Cảm ơn bạn đã hiến máu! Vui lòng nghỉ ngơi đầy đủ, uống nhiều nước và tránh vận động mạnh trong 24 giờ tới. Chúng tôi kính chúc bạn sức khỏe dồi dào.',
   GET_NOTIFICATIONS_SUCCESS: 'Get notifications success',
   GET_NOTIFICATIONS_FAILED: 'Get notifications failed',
   MARK_NOTIFICATION_AS_READ_SUCCESS: 'Mark notification as read success',

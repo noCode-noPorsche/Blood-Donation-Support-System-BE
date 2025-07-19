@@ -1,12 +1,9 @@
 import { checkSchema, ParamSchema } from 'express-validator'
-import {
-  BloodGroupEnum,
-  DonationType,
-  HealthCheckStatus,
-  RequestType,
-  UnderlyingHealthCondition
-} from '~/constants/enum'
+import { DonationType, HealthCheckStatus, RequestType, UnderlyingHealthCondition } from '~/constants/enum'
+import { HTTP_STATUS } from '~/constants/httpStatus'
 import { BLOOD_MESSAGES, DONATION_MESSAGES, HEALTH_CHECK_MESSAGES, REQUEST_MESSAGES } from '~/constants/messages'
+import { ErrorWithStatus } from '~/models/Error'
+import bloodService from '~/services/blood.services'
 import { validate } from '~/utils/validation'
 
 const bloodGroupSchema: ParamSchema = {
@@ -15,6 +12,17 @@ const bloodGroupSchema: ParamSchema = {
   },
   isString: {
     errorMessage: BLOOD_MESSAGES.BLOOD_GROUP_MUST_BE_A_STRING
+  },
+  custom: {
+    options: async (value: string) => {
+      const isBloodGroupExist = await bloodService.isBloodGroupIdExist(value)
+      if (!isBloodGroupExist) {
+        throw new ErrorWithStatus({
+          message: BLOOD_MESSAGES.BLOOD_GROUP_NOT_FOUND,
+          status: HTTP_STATUS.BAD_REQUEST
+        })
+      }
+    }
   }
 }
 

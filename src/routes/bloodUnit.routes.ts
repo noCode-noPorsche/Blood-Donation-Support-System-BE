@@ -1,6 +1,5 @@
 import express from 'express'
 import {
-  createBloodUnitsController,
   getAllBloodUnitsController,
   getAllBloodUnitsRelativeController,
   getBloodUnitByDonationProcessIdController,
@@ -12,16 +11,7 @@ import { wrapAsync } from '~/utils/handler'
 const bloodUnitRouter = express.Router()
 
 /**
- * Description. Create a new blood unit
- * Path: /
- * Method: POST
- * Body: { CreateBloodUnitsReqBody }
- * Header: { Authorization: Bearer <access_token>}
- */
-bloodUnitRouter.post('/', isStaffOrAdminValidator, wrapAsync(createBloodUnitsController))
-
-/**
- * Description. Update blood units by donation process id
+ * Description. Update blood units by donation process id for staff or admin
  * Path: /:id
  * Method: PATCH
  * Body: { UpdateBloodUnitsReqBody }
@@ -36,7 +26,7 @@ bloodUnitRouter.patch(
 )
 
 /**
- * Description. Get blood unit by donation process id
+ * Description. Get blood unit by donation process id for staff or admin
  * Path: /:id
  * Method: GET
  * Header: { Authorization: Bearer <access_token>}
@@ -44,7 +34,7 @@ bloodUnitRouter.patch(
 bloodUnitRouter.get('/:id', isStaffOrAdminValidator, wrapAsync(getBloodUnitByDonationProcessIdController))
 
 /**
- * Description. Get all blood unit
+ * Description. Get all blood unit for staff or admin
  * Path: /
  * Method: GET
  * Header: { Authorization: Bearer <access_token>}
@@ -52,8 +42,8 @@ bloodUnitRouter.get('/:id', isStaffOrAdminValidator, wrapAsync(getBloodUnitByDon
 bloodUnitRouter.get('/', isStaffOrAdminValidator, wrapAsync(getAllBloodUnitsController))
 
 /**
- * Description. Get all blood unit relative
- * Path: /blood_group_id=?
+ * Description. Get all blood unit relative to blood group and blood component ids for staff or admin
+ * Path: /blood_group_id/:blood_component_ids
  * Method: GET
  * Header: { Authorization: Bearer <access_token>}
  */

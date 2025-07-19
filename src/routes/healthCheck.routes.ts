@@ -15,7 +15,7 @@ import { wrapAsync } from '~/utils/handler'
 const healthCheckRouter = express.Router()
 
 /**
- * Description. Get all health checks
+ * Description. Get all health checks for staff or admin
  * Path: /
  * Method: GET
  * Header: { Authorization: Bearer <access_token>}
@@ -31,7 +31,7 @@ healthCheckRouter.get('/', isStaffOrAdminValidator, wrapAsync(getAllHealthChecks
 healthCheckRouter.get('/user', accessTokenValidator, wrapAsync(getHealthCheckByUserIdController))
 
 /**
- * Description. Get health checks by id
+ * Description. Get health checks by id for staff or admin
  * Path: /:id
  * Method: GET
  * Header: { Authorization: Bearer <access_token>}
@@ -39,7 +39,7 @@ healthCheckRouter.get('/user', accessTokenValidator, wrapAsync(getHealthCheckByU
 healthCheckRouter.get('/:id', isStaffOrAdminValidator, wrapAsync(getHealthCheckByIdController))
 
 /**
- * Description. Update health checks by id
+ * Description. Update health checks by id for staff or admin
  * Path: /:id
  * Method: PATCH
  * Body: { UpdateHealthCheckReqBody }
