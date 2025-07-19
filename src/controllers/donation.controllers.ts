@@ -1,9 +1,9 @@
 import { Request, Response } from 'express'
-import { NextFunction, ParamsDictionary } from 'express-serve-static-core'
+import { ParamsDictionary } from 'express-serve-static-core'
 import { DonationProcessStatus } from '~/constants/enum'
 import { DONATION_MESSAGES } from '~/constants/messages'
 import {
-  DonationRegistrationReqBody,
+  CreateDonationRegistrationReqBody,
   GetDonationHealthProcessByDonationIdReqParams,
   GetDonationProcessIdReqParams,
   GetDonationRegistrationIdReqParams,
@@ -52,7 +52,7 @@ export const getStatusDonationHealthProcessByDonationIdController = async (
 
 //Donation Registration
 export const createDonationRegistrationController = async (
-  req: Request<ParamsDictionary, any, DonationRegistrationReqBody>,
+  req: Request<ParamsDictionary, any, CreateDonationRegistrationReqBody>,
   res: Response
 ) => {
   const { user_id } = req.decode_authorization as TokenPayload
@@ -77,8 +77,7 @@ export const getAllDonationRegistrationsController = async (req: Request, res: R
 
 export const getDonationRegistrationByIdController = async (
   req: Request<GetDonationRegistrationIdReqParams, any, any>,
-  res: Response,
-  next: NextFunction
+  res: Response
 ) => {
   const { id } = req.params
 
@@ -90,7 +89,7 @@ export const getDonationRegistrationByIdController = async (
   })
 }
 
-export const getDonationRegistrationByUserIdController = async (req: Request, res: Response, next: NextFunction) => {
+export const getDonationRegistrationByUserIdController = async (req: Request, res: Response) => {
   const { user_id } = req.decode_authorization as TokenPayload
 
   const donationRegistrationByUserId = await donationService.getDonationRegistrationByUserId(user_id)
@@ -117,27 +116,6 @@ export const updateDonationRegistrationController = async (
     result: updatedRegistration
   })
 }
-
-// export const deleteDonationRegistrationController = async (req: Request, res: Response): Promise<void> => {
-//   const { id } = req.params
-
-//   if (!ObjectId.isValid(id)) {
-//     res.status(400).json({ message: DONATION_MESSAGES.DONATION_REGISTRATION_ID_INVALID })
-//     return
-//   }
-
-//   const deletedRegistration = await donationService.deleteDonationRegistration(id)
-
-//   if (!deletedRegistration) {
-//     res.status(404).json({ message: DONATION_MESSAGES.DONATION_REGISTRATION_NOT_FOUND })
-//     return
-//   }
-
-//   res.status(200).json({
-//     message: DONATION_MESSAGES.DELETE_DONATION_REGISTRATION_SUCCESS,
-//     result: deletedRegistration
-//   })
-// }
 
 //Donation Process
 export const getAllDonationProcessesController = async (req: Request, res: Response) => {

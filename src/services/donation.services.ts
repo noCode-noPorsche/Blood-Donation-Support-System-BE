@@ -11,7 +11,7 @@ import { HTTP_STATUS } from '~/constants/httpStatus'
 import { DONATION_MESSAGES, NOTIFICATION_MESSAGES } from '~/constants/messages'
 import { ErrorWithStatus } from '~/models/Error'
 import {
-  DonationRegistrationReqBody,
+  CreateDonationRegistrationReqBody,
   UpdateDonationProcessReqBody,
   UpdateDonationRegistrationReqBody
 } from '~/models/requests/Donation.requests'
@@ -23,6 +23,7 @@ import databaseService from './database.services'
 import DonationProcess from '~/models/schemas/DonationProcess.schemas'
 import { sendPushNotification } from '~/utils/notification'
 import Notification from '~/models/schemas/Notification.schemas'
+import e from 'express'
 config()
 
 class DonationService {
@@ -156,7 +157,13 @@ class DonationService {
   }
 
   //Donation Registration
-  async createDonationRegistration({ user_id, payload }: { user_id: string; payload: DonationRegistrationReqBody }) {
+  async createDonationRegistration({
+    user_id,
+    payload
+  }: {
+    user_id: string
+    payload: CreateDonationRegistrationReqBody
+  }) {
     const donationProcessId = new ObjectId()
     const healthCheckId = new ObjectId()
 
@@ -175,12 +182,12 @@ class DonationService {
     const newDonationRegistration = new DonationRegistration({
       ...payload,
       user_id: new ObjectId(user_id),
-      status: DonationRegistrationStatus.Approved,
       donation_process_id: donationProcessId,
       health_check_id: healthCheckId,
       blood_group_id: bloodGroupId,
       blood_component_ids: componentIds,
       donation_type: payload.donation_type,
+      status: DonationRegistrationStatus.Approved,
       start_date_donation: new Date(payload.start_date_donation),
       created_at: new Date(),
       updated_at: new Date()
@@ -224,7 +231,7 @@ class DonationService {
       description: '',
       is_separated: false,
       status: DonationProcessStatus.Pending,
-      donation_date: new Date(),
+      donation_date: new Date(payload.start_date_donation),
       updated_by: new ObjectId(user_id),
       created_at: new Date(),
       updated_at: new Date()
@@ -251,19 +258,6 @@ class DonationService {
           }
         },
         { $unwind: { path: '$blood_group', preserveNullAndEmptyArrays: true } },
-
-        // Join blood component
-        // {
-        //   $lookup: {
-        //     from: 'blood_components',
-        //     localField: 'blood_component_id',
-        //     foreignField: '_id',
-        //     as: 'blood_component'
-        //   }
-        // },
-        // { $unwind: { path: '$blood_component', preserveNullAndEmptyArrays: true } },
-
-        // Join user info
         {
           $lookup: {
             from: 'users',
@@ -284,7 +278,6 @@ class DonationService {
             blood_group_name: { $ifNull: ['$blood_group.name', null] },
             blood_component_ids: 1,
             donation_type: 1,
-            // blood_component: '$blood_component.name',
             start_date_donation: 1,
             created_at: 1,
             updated_at: 1,
@@ -307,7 +300,6 @@ class DonationService {
             _id: new ObjectId(id)
           }
         },
-
         // Join blood group
         {
           $lookup: {
@@ -318,7 +310,6 @@ class DonationService {
           }
         },
         { $unwind: { path: '$blood_group', preserveNullAndEmptyArrays: true } },
-
         // Join user
         {
           $lookup: {
@@ -367,7 +358,6 @@ class DonationService {
         {
           $match: { user_id: new ObjectId(user_id) }
         },
-
         // Join blood group
         {
           $lookup: {
@@ -383,17 +373,6 @@ class DonationService {
             preserveNullAndEmptyArrays: true
           }
         },
-
-        // Join blood components (nhiều thành phần)
-        // {
-        //   $lookup: {
-        //     from: 'blood_components',
-        //     localField: 'blood_component_ids',
-        //     foreignField: '_id',
-        //     as: 'blood_components'
-        //   }
-        // },
-
         // Join user
         {
           $lookup: {
@@ -417,18 +396,12 @@ class DonationService {
             donation_process_id: 1,
             health_check_id: 1,
             status: 1,
+            blood_component_ids: 1,
             donation_type: 1,
             start_date_donation: 1,
             created_at: 1,
             updated_at: 1,
             blood_group_name: { $ifNull: ['$blood_group.name', null] },
-            // blood_components: {
-            //   $map: {
-            //     input: '$blood_components',
-            //     as: 'comp',
-            //     in: '$$comp.name'
-            //   }
-            // },
             full_name: '$user.full_name',
             citizen_id_number: '$user.citizen_id_number',
             phone: '$user.phone'
@@ -438,9 +411,11 @@ class DonationService {
       .toArray()
 
     if (!donationRegistration || donationRegistration.length === 0) {
-      return null
+      throw new ErrorWithStatus({
+        message: DONATION_MESSAGES.DONATION_REGISTRATION_NOT_FOUND,
+        status: HTTP_STATUS.NOT_FOUND
+      })
     }
-
     return donationRegistration
   }
 
@@ -460,7 +435,8 @@ class DonationService {
       : existsDonationRegistration.blood_group_id
 
     const updateFields: Record<string, any> = {
-      status: payload.status
+      status: payload.status || existsDonationRegistration.status,
+      blood_group_id: bloodGroupId
     }
 
     if (bloodGroupId) {
@@ -471,13 +447,41 @@ class DonationService {
         { _id: existsDonationRegistration.user_id },
         {
           $set: {
-            blood_group_id: bloodGroupId,
-            updated_at: new Date()
-          }
+            blood_group_id: bloodGroupId
+          },
+          $currentDate: { updated_at: true }
+        }
+      )
+
+      //Cập nhật blood_group_id trong health checks
+      await databaseService.healthChecks.updateOne(
+        { donation_registration_id: new ObjectId(id) },
+        {
+          $set: { blood_group_id: bloodGroupId },
+          $currentDate: { updated_at: true }
+        }
+      )
+
+      //Cập nhật blood_group_id trong donation processes
+      await databaseService.donationProcesses.updateOne(
+        { donation_registration_id: new ObjectId(id) },
+        {
+          $set: { blood_group_id: bloodGroupId },
+          $currentDate: { updated_at: true }
         }
       )
     }
-    if (payload.start_date_donation) updateFields.start_date_donation = new Date(payload.start_date_donation)
+    if (payload.start_date_donation) {
+      updateFields.start_date_donation = new Date(payload.start_date_donation)
+      //Cập nhật start_date_donation trong donation processes
+      await databaseService.donationProcesses.updateOne(
+        { donation_registration_id: new ObjectId(id) },
+        {
+          $set: { donation_date: new Date(payload.start_date_donation) },
+          $currentDate: { updated_at: true }
+        }
+      )
+    }
 
     // Nếu có thay đổi loại hiến
     let componentIds: ObjectId[] = []
@@ -491,6 +495,7 @@ class DonationService {
       componentIds = componentDocs.map((comp) => comp._id)
       updateFields.blood_component_ids = componentIds
     }
+
     // Cập nhật donation registrations
     const result = await databaseService.donationRegistrations.findOneAndUpdate(
       { _id: new ObjectId(id) },
@@ -502,7 +507,7 @@ class DonationService {
     )
     // Nếu có thay đổi loại hiến, cập nhật luôn bảng healthChecks
     if (payload.donation_type && componentIds.length > 0) {
-      await databaseService.healthChecks.updateMany(
+      await databaseService.healthChecks.updateOne(
         { donation_registration_id: new ObjectId(id) },
         {
           $set: {
@@ -538,11 +543,9 @@ class DonationService {
           title,
           message: body
         })
-
         await databaseService.notifications.insertOne(notification)
       }
     }
-
     return result
   }
 

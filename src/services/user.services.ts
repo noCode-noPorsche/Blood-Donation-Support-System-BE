@@ -1,16 +1,15 @@
-import { USER_MESSAGES } from './../constants/messages'
+import { config } from 'dotenv'
+import { ObjectId } from 'mongodb'
+import { TokenType, UserRole } from '~/constants/enum'
+import { HTTP_STATUS } from '~/constants/httpStatus'
+import { ErrorWithStatus } from '~/models/Error'
+import { RegisterReqBody, UpdateMeReqBody } from '~/models/requests/User.requests'
+import RefreshToken from '~/models/schemas/RefreshToken.schemas'
 import User from '~/models/schemas/User.schemas'
 import { hashPassword } from '~/utils/crypto'
 import { signToken } from '~/utils/jwt'
-import { ObjectId } from 'mongodb'
-import { config } from 'dotenv'
-import { TokenType, UserRole } from '~/constants/enum'
-import { RegisterReqBody, UpdateMeReqBody } from '~/models/requests/User.requests'
+import { USER_MESSAGES } from './../constants/messages'
 import databaseService from './database.services'
-import RefreshToken from '~/models/schemas/RefreshToken.schemas'
-import { ErrorWithStatus } from '~/models/Error'
-import { HTTP_STATUS } from '~/constants/httpStatus'
-import { sendPushNotification } from '~/utils/notification'
 config()
 
 class UsersService {
@@ -144,23 +143,23 @@ class UsersService {
       { citizen_id_number: citizen_id_number },
       { projection: { password: 0 } }
     )
-    if (!user) {
-      throw new ErrorWithStatus({
-        message: USER_MESSAGES.USER_NOT_FOUND,
-        status: HTTP_STATUS.NOT_FOUND
-      })
-    }
-    return user
-  }
-
-  async getAllUser() {
-    const user = await databaseService.users.find({}, { projection: { password: 0 } }).toArray()
     // if (!user) {
     //   throw new ErrorWithStatus({
     //     message: USER_MESSAGES.USER_NOT_FOUND,
     //     status: HTTP_STATUS.NOT_FOUND
     //   })
     // }
+    return user
+  }
+
+  async getAllUser() {
+    const user = await databaseService.users.find({}, { projection: { password: 0 } }).toArray()
+    if (!user) {
+      throw new ErrorWithStatus({
+        message: USER_MESSAGES.USER_NOT_FOUND,
+        status: HTTP_STATUS.NOT_FOUND
+      })
+    }
     return user
   }
 

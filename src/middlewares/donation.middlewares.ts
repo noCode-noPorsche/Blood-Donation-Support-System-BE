@@ -85,19 +85,19 @@ export const updateDonationRegistrationValidator = validate(
   checkSchema(
     {
       blood_group_id: {
-        // ...bloodGroupSchema,
-        notEmpty: undefined
-        // custom: {
-        //   options: async (value: string) => {
-        //     const isBloodGroupExist = await bloodService.isBloodGroupIdExist(value)
-        //     if (!isBloodGroupExist) {
-        //       throw new ErrorWithStatus({
-        //         message: BLOOD_MESSAGES.BLOOD_GROUP_NOT_FOUND,
-        //         status: HTTP_STATUS.BAD_REQUEST
-        //       })
-        //     }
-        //   }
-        // }
+        notEmpty: undefined,
+        optional: true,
+        custom: {
+          options: async (value: string) => {
+            const isBloodGroupExist = await bloodService.isBloodGroupIdExist(value)
+            if (!isBloodGroupExist) {
+              throw new ErrorWithStatus({
+                message: BLOOD_MESSAGES.BLOOD_GROUP_NOT_FOUND,
+                status: HTTP_STATUS.BAD_REQUEST
+              })
+            }
+          }
+        }
       },
       start_date_donation: {
         notEmpty: undefined,
@@ -108,9 +108,10 @@ export const updateDonationRegistrationValidator = validate(
         }
       },
       status: {
-        notEmpty: {
-          errorMessage: DONATION_MESSAGES.STATUS_IS_REQUIRED
-        },
+        // notEmpty: {
+        //   errorMessage: DONATION_MESSAGES.STATUS_IS_REQUIRED
+        // },
+        optional: true,
         isString: {
           errorMessage: DONATION_MESSAGES.STATUS_MUST_BE_A_STRING
         },

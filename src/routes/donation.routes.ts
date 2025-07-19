@@ -2,7 +2,6 @@ import express from 'express'
 import {
   createDonationRegistrationController,
   getAllDonationHealthProcessByUserIdController,
-  // deleteDonationRegistrationController,
   getAllDonationProcessesController,
   getAllDonationRegistrationsController,
   getDonationHealthProcessByDonationIdController,
@@ -21,7 +20,11 @@ import {
   updateDonationRegistrationValidator
 } from '~/middlewares/donation.middlewares'
 import { accessTokenValidator, isStaffOrAdminValidator } from '~/middlewares/user.middlewares'
-import { UpdateDonationProcessReqBody, UpdateDonationRegistrationReqBody } from '~/models/requests/Donation.requests'
+import {
+  CreateDonationRegistrationReqBody,
+  UpdateDonationProcessReqBody,
+  UpdateDonationRegistrationReqBody
+} from '~/models/requests/Donation.requests'
 
 import { wrapAsync } from '~/utils/handler'
 
@@ -66,7 +69,7 @@ donationRouter.get(
 
 //Donation Registration
 /**
- * Description. Create a new donation
+ * Description. Create a new donation registration
  * Path: /donation-registrations
  * METHOD: POST
  * Body : { DonationRegistrationReqBody }
@@ -76,6 +79,7 @@ donationRouter.post(
   '/donation-registrations',
   accessTokenValidator,
   createDonationValidator,
+  filterMiddleware<CreateDonationRegistrationReqBody>(['blood_group_id', 'start_date_donation', 'donation_type']),
   wrapAsync(createDonationRegistrationController)
 )
 
@@ -100,7 +104,7 @@ donationRouter.get(
 )
 
 /**
- * Description. Get donation registration by id
+ * Description. Get donation registration by id for staff or admin
  * Path: /donation-registrations/:id
  * METHOD: GET
  * Header: { Authorization: Bearer <access_token>}
@@ -130,19 +134,6 @@ donationRouter.patch(
   ]),
   wrapAsync(updateDonationRegistrationController)
 )
-
-//Note
-/**
- * Description. Delete a donation registration
- * Path: /donation-registration/:id
- * METHOD: DELETE
- */
-// donationRouter.delete(
-//   '/donation-registration/:id',
-//   accessTokenValidator,
-//   isAdminValidator,
-//   wrapAsync(deleteDonationRegistrationController)
-// )
 
 //Donation Processes
 /**
