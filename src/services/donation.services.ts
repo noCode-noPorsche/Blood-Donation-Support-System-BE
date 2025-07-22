@@ -525,6 +525,7 @@ class DonationService {
 
       const notification = new Notification({
         receiver_id: user?._id as ObjectId,
+        donation_registration_id: new ObjectId(id),
         title,
         message: body
       })
@@ -908,10 +909,11 @@ class DonationService {
         }
         // Lưu thông báo vào DB
         const title = NOTIFICATION_MESSAGES.SUCCESSFULLY_DONATED_BLOOD
-        const body = NOTIFICATION_MESSAGES.CHECKED_IN_DONATION_BODY
+        const body = NOTIFICATION_MESSAGES.MESSAGE_AFTER_SUCCESSFULLY_DONATED_BLOOD
 
         const notification = new Notification({
           receiver_id: userResult?._id as ObjectId,
+          donation_registration_id: new ObjectId(donationProcessResult?.donation_registration_id),
           title,
           message: body
         })
