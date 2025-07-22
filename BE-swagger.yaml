@@ -1845,6 +1845,8 @@ components:
         volume:
           type: number
           example: 0
+        donation_type:
+          $ref: '#/components/schemas/DonationType'
         status:
           $ref: '#/components/schemas/BloodUnitsStatus'
         update_by:

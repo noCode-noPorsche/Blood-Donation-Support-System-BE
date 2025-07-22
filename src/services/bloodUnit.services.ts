@@ -161,6 +161,21 @@ class BloodUnitService {
           }
         },
 
+        {
+          $lookup: {
+            from: 'health_checks',
+            localField: 'donation_process_id',
+            foreignField: 'donation_process_id',
+            as: 'health_check_info'
+          }
+        },
+        {
+          $unwind: {
+            path: '$health_check_info',
+            preserveNullAndEmptyArrays: true
+          }
+        },
+
         // 4. Project kết quả mong muốn
         {
           $project: {
@@ -179,7 +194,8 @@ class BloodUnitService {
             storage_temperature: 1,
             // bổ sung tên nhóm máu và thành phần máu
             blood_group_name: '$blood_group_info.name',
-            blood_component_name: '$blood_component_info.name'
+            blood_component_name: '$blood_component_info.name',
+            donation_type: '$health_check_info.donation_type'
           }
         }
       ])
