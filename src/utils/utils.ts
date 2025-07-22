@@ -3,6 +3,7 @@ import { HTTP_STATUS } from '~/constants/httpStatus'
 import { HEALTH_CHECK_MESSAGES } from '~/constants/messages'
 import { ErrorWithStatus } from '~/models/Error'
 import bloodService from '~/services/blood.services'
+import geolib, { isPointWithinRadius } from 'geolib'
 
 export const calculateDonationVolume = (weight: number) => {
   if (weight < 42) {
@@ -80,4 +81,16 @@ export const convertTypeToComponentMap: Record<DonationType, BloodComponentEnum[
   [DonationType.PlateletsPlasma]: [BloodComponentEnum.Platelets, BloodComponentEnum.Plasma],
   [DonationType.PlasmaRedCells]: [BloodComponentEnum.Plasma, BloodComponentEnum.RedBloodCells],
   [DonationType.PlateletsRedCells]: [BloodComponentEnum.Platelets, BloodComponentEnum.RedBloodCells]
+}
+
+export function filterPointsWithinRadius(
+  origin: { latitude: number; longitude: number },
+  points: { id: string | number; name?: string; latitude: number; longitude: number }[],
+  radiusKm: number
+): { id: string | number; name?: string; latitude: number; longitude: number }[] {
+  const radiusMeters = radiusKm * 1000
+
+  return points.filter((point) =>
+    isPointWithinRadius({ latitude: point.latitude, longitude: point.longitude }, origin, radiusMeters)
+  )
 }

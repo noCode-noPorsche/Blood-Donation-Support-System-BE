@@ -37,6 +37,8 @@ tags:
     description: Operations about dashboards
   - name: Notifications
     description: Operations about notifications
+  - name: Locations
+    description: Operations about locations
 paths:
   /api/users/login:
     post:
@@ -1578,6 +1580,33 @@ paths:
           description: UnAuthorization
       security:
         - BearerAuth: []
+  /api/locations/find-compatible-donors:
+    post:
+      tags:
+        - Locations
+      summary: Find Compatible Donors for Admin or Staff
+      description: Find compatible donors based on location and blood group for admin or staff
+      operationId: findCompatibleDonors
+      requestBody:
+        description: Information to find compatible donors
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FindCompatibleDonorsReqBody'
+        required: true
+      responses:
+        default:
+          description: Find compatible donors success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '401':
+          description: UnAuthorization
+      security:
+        - BearerAuth: []
 components:
   schemas:
     RegisterBody:
@@ -2600,6 +2629,16 @@ components:
           type: string
           format: date-time
           example: 2025-05-21T17:48:12.171Z
+    FindCompatibleDonorsReqBody:
+      type: object
+      properties:
+        blood_group_name:
+          type: string
+          $ref: '#/components/schemas/BloodGroupEnum'
+          example: 'B+'
+        radiusKm:
+          type: number
+          example: 50
   securitySchemes:
     BearerAuth:
       type: http

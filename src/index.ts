@@ -16,6 +16,7 @@ import bloodUnitRouter from './routes/bloodUnit.routes'
 import requestsRouter from './routes/request.routes'
 import dashboardRouter from './routes/dashboard.routes'
 import notificationRouter from './routes/notification.routes'
+import locationRouter from './routes/location.routes'
 
 const file = fs.readFileSync(path.resolve('BE-swagger.yaml'), 'utf8')
 const swaggerDocument = YAML.parse(file)
@@ -62,6 +63,7 @@ app.use('/api/requests', requestsRouter)
 app.use('/api/blogs', blogRouter)
 app.use('/api/notifications', notificationRouter)
 app.use('/api/dashboards', dashboardRouter)
+app.use('/api/locations', locationRouter)
 app.use(defaultErrorHandler)
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))

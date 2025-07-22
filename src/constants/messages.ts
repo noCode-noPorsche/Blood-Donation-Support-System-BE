@@ -254,3 +254,13 @@ export const NOTIFICATION_MESSAGES = {
   MARK_NOTIFICATION_AS_READ_SUCCESS: 'Mark notification as read success',
   MARK_NOTIFICATION_AS_READ_FAILED: 'Mark notification as read failed'
 } as const
+
+export const LOCATION_MESSAGES = {
+  FIND_COMPATIBLE_DONORS_NEARBY_SUCCESS: 'Find compatible donors nearby success',
+  FIND_COMPATIBLE_DONORS_NEARBY_FAILED: 'Find compatible donors nearby failed',
+  RADIUS_KM_IS_REQUIRED: 'Radius in kilometers is required',
+  RADIUS_KM_MUST_BE_A_NUMBER: 'Radius in kilometers must be a number',
+  RADIUS_KM_MUST_BE_POSITIVE: 'Radius in kilometers must be positive',
+  BLOOD_GROUP_NAME_MUST_BE_A_STRING: 'Blood group name must be a string',
+  BLOOD_GROUP_NAME_LENGTH_MUST_BE_LESS_THAN_50: 'Blood group name length must be less than 50'
+} as const
