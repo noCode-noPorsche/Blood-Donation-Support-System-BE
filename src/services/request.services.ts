@@ -27,7 +27,7 @@ import RequestRegistration from '~/models/schemas/RequestRegistration.schemas'
 import User from '~/models/schemas/User.schemas'
 import { convertTypeToComponentMap, isCompatibleDonor } from '~/utils/utils'
 import databaseService from './database.services'
-import { update } from 'lodash'
+import { create } from 'lodash'
 config()
 
 class RequestService {
@@ -68,6 +68,7 @@ class RequestService {
         receive_date_request: regis.receive_date_request,
         is_emergency: regis.is_emergency,
         image: regis.image || null,
+        created_at: regis.created_at,
 
         // Health check
         weight: healthCheck?.weight,
@@ -125,6 +126,7 @@ class RequestService {
       receive_date_request: regis.receive_date_request,
       is_emergency: regis.is_emergency,
       image: regis.image || null,
+      created_at: regis.created_at,
 
       // Health Check
       weight: healthCheck?.weight,

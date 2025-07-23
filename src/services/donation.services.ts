@@ -62,6 +62,7 @@ class DonationService {
         description: donationProcess?.description || healthCheck?.description,
         volume_collected: donationProcess?.volume_collected,
         donation_date: donationProcess?.donation_date,
+        created_at: regis.created_at,
 
         // Chỉ lấy name
         blood_group: bloodGroup?.name ?? null
@@ -114,6 +115,7 @@ class DonationService {
       description: donationProcess?.description || healthCheck?.description,
       volume_collected: donationProcess?.volume_collected,
       donation_date: donationProcess?.donation_date,
+      created_at: regis.created_at,
 
       // Chỉ lấy name
       blood_group: bloodGroup?.name ?? null
