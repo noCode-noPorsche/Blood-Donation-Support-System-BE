@@ -175,7 +175,8 @@ export const HEALTH_CHECK_MESSAGES = {
   THE_MINIUM_WEIGHT_REQUIRED_TO_DONATION_BLOOD_IS_42KG: 'The minimum weight required to donate blood is 42kg',
   UNABLE_TO_UPDATE_HEALTH_CHECK_NOT_CHECKED_IN: 'Unable to update health check because donor has not checked-in.',
   UNABLE_TO_UPDATE_HEALTH_CHECK_PENDING_REQUEST:
-    'Unable to update health check because blood donation request is still pending.'
+    'Unable to update health check because blood donation request is still pending.',
+  UNABLE_TO_DONATE_DUE_TO_HEALTH_CONDITION: 'Unable to donate due to underlying health conditions.'
 } as const
 
 export const REQUEST_MESSAGES = {

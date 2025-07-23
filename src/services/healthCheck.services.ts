@@ -8,7 +8,8 @@ import {
   RequestProcessDetailStatus,
   RequestProcessStatus,
   RequestRegistrationStatus,
-  RequestType
+  RequestType,
+  UnderlyingHealthCondition
 } from '~/constants/enum'
 import { HTTP_STATUS } from '~/constants/httpStatus'
 import { HEALTH_CHECK_MESSAGES, REQUEST_MESSAGES, USER_MESSAGES } from '~/constants/messages'
@@ -290,14 +291,80 @@ class HealthCheckService {
 
     const finalWeight = payload.weight ?? resultUser.weight
 
-    // Kiểm tra trọng lượng có hợp lệ không và chỉ từ chối nếu là quy trình hiến máu
-    let isRejectedDueToWeight = false
-    const isDonationProcess = !!resultHealthCheck.donation_process_id || !!resultHealthCheck.donation_registration_id
+    // Kiểm tra tình trạng bệnh nền có bị loại trừ không
+    const disqualifyingConditions: UnderlyingHealthCondition[] = [
+      UnderlyingHealthCondition.Diabetes,
+      UnderlyingHealthCondition.Hypertension,
+      UnderlyingHealthCondition.HeartDisease,
+      UnderlyingHealthCondition.Cancer,
+      UnderlyingHealthCondition.Thalassemia,
+      UnderlyingHealthCondition.Hemophilia,
+      UnderlyingHealthCondition.Epilepsy,
+      UnderlyingHealthCondition.ActivePulmonaryTuberculosis,
+      UnderlyingHealthCondition.SevereAnemia,
+      UnderlyingHealthCondition.SevereNeurologicalDisorder,
+      UnderlyingHealthCondition.HIV,
+      UnderlyingHealthCondition.HepatitisBorC
+    ]
+    const conditions = Array.isArray(payload.underlying_health_condition)
+      ? payload.underlying_health_condition
+      : [payload.underlying_health_condition]
 
-    if (finalWeight < 42 && isDonationProcess) {
-      payload.status = HealthCheckStatus.Rejected
-      isRejectedDueToWeight = true
+    const hasDisqualifyingCondition = conditions.some((cond) =>
+      disqualifyingConditions.includes(cond as UnderlyingHealthCondition)
+    )
+
+    // Nếu bị bệnh không đủ điều kiện hoặc dưới 42kg, thì reject luôn
+    const isDonationProcess = !!resultHealthCheck.donation_process_id || !!resultHealthCheck.donation_registration_id
+    const shouldReject = (finalWeight < 42 || hasDisqualifyingCondition) && isDonationProcess
+
+    if (shouldReject) {
+      const rejectionReason =
+        finalWeight < 42
+          ? HEALTH_CHECK_MESSAGES.THE_MINIUM_WEIGHT_REQUIRED_TO_DONATION_BLOOD_IS_42KG
+          : HEALTH_CHECK_MESSAGES.UNABLE_TO_DONATE_DUE_TO_HEALTH_CONDITION
+
+      // Cập nhật healthCheck.status = Rejected
+      await databaseService.healthChecks.findOneAndUpdate(
+        { _id: new ObjectId(id) },
+        {
+          $set: {
+            status: HealthCheckStatus.Rejected,
+            weight: finalWeight,
+            underlying_health_condition: payload.underlying_health_condition,
+            updated_by: new ObjectId(user_id),
+            description: rejectionReason
+          },
+          $currentDate: { updated_at: true }
+        }
+      )
+
+      // Cập nhật donationProcess.status = Rejected nếu là quy trình hiến máu
+      if (isDonationProcess && resultHealthCheck.donation_process_id) {
+        await databaseService.donationProcesses.updateOne(
+          { health_check_id: new ObjectId(id) },
+          {
+            $set: { status: DonationProcessStatus.Rejected },
+            $currentDate: { updated_at: true }
+          }
+        )
+      }
+
+      // Sau khi cập nhật xong, mới quăng lỗi để FE biết
+      throw new ErrorWithStatus({
+        message: rejectionReason,
+        status: HTTP_STATUS.BAD_REQUEST
+      })
     }
+
+    // // Kiểm tra trọng lượng có hợp lệ không và chỉ từ chối nếu là quy trình hiến máu
+    // let isRejectedDueToWeight = false
+    // const isDonationProcess = !!resultHealthCheck.donation_process_id || !!resultHealthCheck.donation_registration_id
+
+    // if (finalWeight < 42 && isDonationProcess) {
+    //   payload.status = HealthCheckStatus.Rejected
+    //   isRejectedDueToWeight = true
+    // }
 
     //Kiểm tra xem có donation_type hoặc request_type không và chuyển đổi sang blood_component_ids
     let bloodComponentIdsFromType: ObjectId[] = []
@@ -517,7 +584,6 @@ class HealthCheckService {
           created_at: new Date(),
           updated_at: new Date()
         }))
-
         await databaseService.requestProcessDetails.insertMany(detailsToInsert)
       }
     }
