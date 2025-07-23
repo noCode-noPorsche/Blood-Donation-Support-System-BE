@@ -314,47 +314,19 @@ class HealthCheckService {
       disqualifyingConditions.includes(cond as UnderlyingHealthCondition)
     )
 
-    // Nếu bị bệnh không đủ điều kiện hoặc dưới 42kg, thì reject luôn
+    // Nếu bị bệnh không đủ điều kiện hoặc dưới 42kg, thì auto reject
     const isDonationProcess = !!resultHealthCheck.donation_process_id || !!resultHealthCheck.donation_registration_id
     const shouldReject = (finalWeight < 42 || hasDisqualifyingCondition) && isDonationProcess
-
+    let rejectionReason = ''
     if (shouldReject) {
-      const rejectionReason =
+      rejectionReason =
         finalWeight < 42
           ? HEALTH_CHECK_MESSAGES.THE_MINIUM_WEIGHT_REQUIRED_TO_DONATION_BLOOD_IS_42KG
           : HEALTH_CHECK_MESSAGES.UNABLE_TO_DONATE_DUE_TO_HEALTH_CONDITION
 
-      // Cập nhật healthCheck.status = Rejected
-      await databaseService.healthChecks.findOneAndUpdate(
-        { _id: new ObjectId(id) },
-        {
-          $set: {
-            status: HealthCheckStatus.Rejected,
-            weight: finalWeight,
-            underlying_health_condition: payload.underlying_health_condition,
-            updated_by: new ObjectId(user_id),
-            description: rejectionReason
-          },
-          $currentDate: { updated_at: true }
-        }
-      )
-
-      // Cập nhật donationProcess.status = Rejected nếu là quy trình hiến máu
-      if (isDonationProcess && resultHealthCheck.donation_process_id) {
-        await databaseService.donationProcesses.updateOne(
-          { health_check_id: new ObjectId(id) },
-          {
-            $set: { status: DonationProcessStatus.Rejected },
-            $currentDate: { updated_at: true }
-          }
-        )
-      }
-
-      // Sau khi cập nhật xong, mới quăng lỗi để FE biết
-      throw new ErrorWithStatus({
-        message: rejectionReason,
-        status: HTTP_STATUS.BAD_REQUEST
-      })
+      // Tự động set status về Rejected và description luôn
+      payload.status = HealthCheckStatus.Rejected
+      payload.description = rejectionReason
     }
 
     // // Kiểm tra trọng lượng có hợp lệ không và chỉ từ chối nếu là quy trình hiến máu

@@ -172,11 +172,11 @@ export const HEALTH_CHECK_MESSAGES = {
   DESCRIPTION_LENGTH_MUST_BE_LESS_THAN_500: 'Description length must be less than 500',
   UNDERLYING_CONDITIONS_MUST_BE_AN_ARRAY: 'Underlying health conditions must be an array',
   UNDERLYING_CONDITIONS_INVALID_VALUES: 'Underlying health conditions must contain valid values',
-  THE_MINIUM_WEIGHT_REQUIRED_TO_DONATION_BLOOD_IS_42KG: 'The minimum weight required to donate blood is 42kg',
+  THE_MINIUM_WEIGHT_REQUIRED_TO_DONATION_BLOOD_IS_42KG: 'Cân nặng tối thiểu để hiến máu là 42kg',
   UNABLE_TO_UPDATE_HEALTH_CHECK_NOT_CHECKED_IN: 'Unable to update health check because donor has not checked-in.',
   UNABLE_TO_UPDATE_HEALTH_CHECK_PENDING_REQUEST:
     'Unable to update health check because blood donation request is still pending.',
-  UNABLE_TO_DONATE_DUE_TO_HEALTH_CONDITION: 'Unable to donate due to underlying health conditions.'
+  UNABLE_TO_DONATE_DUE_TO_HEALTH_CONDITION: 'Không thể hiến máu do tình trạng sức khỏe tiềm ẩn.'
 } as const
 
 export const REQUEST_MESSAGES = {
