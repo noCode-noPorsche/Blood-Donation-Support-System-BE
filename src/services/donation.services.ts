@@ -561,6 +561,15 @@ class DonationService {
           }
         },
         { $unwind: { path: '$user_info', preserveNullAndEmptyArrays: true } },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'updated_by',
+            foreignField: '_id',
+            as: 'user_update'
+          }
+        },
+        { $unwind: { path: '$user_update', preserveNullAndEmptyArrays: true } },
         // Join blood_groups để lấy tên nhóm máu
         {
           $lookup: {
@@ -600,7 +609,7 @@ class DonationService {
             donation_type: '$health_check.donation_type',
             blood_group_id: 1,
             blood_group_name: '$blood_group_info.name',
-            updated_by: 1,
+            updated_by: '$user_update.full_name',
             created_at: 1,
             updated_at: 1
           }
@@ -642,6 +651,15 @@ class DonationService {
             preserveNullAndEmptyArrays: true
           }
         },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'updated_by',
+            foreignField: '_id',
+            as: 'user_update'
+          }
+        },
+        { $unwind: { path: '$user_update', preserveNullAndEmptyArrays: true } },
         // Join blood_group để lấy tên nhóm máu
         {
           $lookup: {
@@ -684,7 +702,7 @@ class DonationService {
             status: 1,
             is_separated: 1,
             description: 1,
-            updated_by: 1,
+            updated_by: '$user_update.full_name',
             created_at: 1,
             updated_at: 1
           }
@@ -716,6 +734,15 @@ class DonationService {
             preserveNullAndEmptyArrays: true
           }
         },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'updated_by',
+            foreignField: '_id',
+            as: 'user_update'
+          }
+        },
+        { $unwind: { path: '$user_update', preserveNullAndEmptyArrays: true } },
         // Join blood_group để lấy tên nhóm máu
         {
           $lookup: {
@@ -758,7 +785,7 @@ class DonationService {
             status: 1,
             is_separated: 1,
             description: 1,
-            updated_by: 1,
+            updated_by: '$user_update.full_name',
             created_at: 1,
             updated_at: 1
           }

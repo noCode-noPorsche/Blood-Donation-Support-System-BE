@@ -52,6 +52,15 @@ class HealthCheckService {
           }
         },
         {
+          $lookup: {
+            from: 'users',
+            localField: 'updated_by',
+            foreignField: '_id',
+            as: 'user_update'
+          }
+        },
+        { $unwind: { path: '$user_update', preserveNullAndEmptyArrays: true } },
+        {
           $project: {
             blood_group_name: '$blood_group.name',
             full_name: '$user_info.full_name',
@@ -76,7 +85,7 @@ class HealthCheckService {
             hemoglobin: 1,
             status: 1,
             description: 1,
-            updated_by: 1,
+            updated_by: '$user_update.full_name',
             created_at: 1,
             updated_at: 1
           }
@@ -121,6 +130,15 @@ class HealthCheckService {
           }
         },
         {
+          $lookup: {
+            from: 'users',
+            localField: 'updated_by',
+            foreignField: '_id',
+            as: 'user_update'
+          }
+        },
+        { $unwind: { path: '$user_update', preserveNullAndEmptyArrays: true } },
+        {
           $project: {
             blood_group_name: '$blood_group.name',
             full_name: '$user_info.full_name',
@@ -145,7 +163,7 @@ class HealthCheckService {
             hemoglobin: 1,
             status: 1,
             description: 1,
-            updated_by: 1,
+            updated_by: '$user_update.full_name',
             created_at: 1,
             updated_at: 1
           }
@@ -195,6 +213,15 @@ class HealthCheckService {
           }
         },
         {
+          $lookup: {
+            from: 'users',
+            localField: 'updated_by',
+            foreignField: '_id',
+            as: 'user_update'
+          }
+        },
+        { $unwind: { path: '$user_update', preserveNullAndEmptyArrays: true } },
+        {
           $project: {
             blood_group_name: '$blood_group.name',
             full_name: '$user_info.full_name',
@@ -219,7 +246,7 @@ class HealthCheckService {
             hemoglobin: 1,
             status: 1,
             description: 1,
-            updated_by: 1,
+            updated_by: '$user_update.full_name',
             created_at: 1,
             updated_at: 1
           }

@@ -49,8 +49,9 @@ agenda.define(defineJobs.NotifyUpcomingDonation, async (job: any) => {
         donation_registration_id: donation._id,
         title,
         message: body,
+        created_at: now,
         type: 'upcoming_donation',
-        created_at: now
+        is_read: false
       })
 
       if (user?.fcm_token) {
@@ -158,7 +159,8 @@ agenda.define(defineJobs.ExpireDonationRegistrations, async () => {
         title,
         message: body,
         created_at: now,
-        type: 'expire_donation'
+        type: 'expire_donation',
+        is_read: false
       })
 
       // Gửi thông báo đẩy nếu có FCM token

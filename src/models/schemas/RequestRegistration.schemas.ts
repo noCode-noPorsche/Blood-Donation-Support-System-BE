@@ -12,7 +12,7 @@ interface RequestRegistrationType {
   request_type: RequestType
   image?: string
   receive_date_request: Date
-  update_by: ObjectId
+  updated_by: ObjectId
   created_at: Date
   updated_at: Date
   is_emergency: boolean
@@ -30,7 +30,7 @@ export default class RequestRegistration {
   request_type: RequestType
   image?: string
   receive_date_request: Date
-  update_by: ObjectId
+  updated_by: ObjectId
   created_at: Date
   updated_at: Date
   is_emergency: boolean
@@ -47,7 +47,7 @@ export default class RequestRegistration {
     this.request_type = requestRegistration.request_type || RequestType.WholeBlood
     this.receive_date_request = requestRegistration.receive_date_request || date
     this.image = requestRegistration.image
-    this.update_by = requestRegistration.update_by
+    this.updated_by = requestRegistration.updated_by
     this.created_at = requestRegistration.created_at || date
     this.updated_at = requestRegistration.updated_at || date
     this.is_emergency = requestRegistration.is_emergency || false

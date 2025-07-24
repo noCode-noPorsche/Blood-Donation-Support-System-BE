@@ -246,7 +246,7 @@ class RequestService {
       note: payload.note,
       request_process_id: requestProcessId,
       user_id: new ObjectId(userObjectId),
-      update_by: new ObjectId(user_id),
+      updated_by: new ObjectId(user_id),
       created_at: new Date(),
       updated_at: new Date()
     })
@@ -483,7 +483,15 @@ class RequestService {
             preserveNullAndEmptyArrays: true
           }
         },
-
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'updated_by',
+            foreignField: '_id',
+            as: 'user_update'
+          }
+        },
+        { $unwind: { path: '$user_update', preserveNullAndEmptyArrays: true } },
         // Join blood_group để lấy name
         {
           $lookup: {
@@ -512,7 +520,7 @@ class RequestService {
             blood_component_ids: 1,
             receive_date_request: 1,
             request_type: 1,
-            update_by: 1,
+            update_by: '$user_update',
             created_at: 1,
             updated_at: 1,
             is_emergency: 1,
@@ -550,7 +558,15 @@ class RequestService {
             preserveNullAndEmptyArrays: true
           }
         },
-
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'updated_by',
+            foreignField: '_id',
+            as: 'user_update'
+          }
+        },
+        { $unwind: { path: '$user_update', preserveNullAndEmptyArrays: true } },
         // Join blood_group để lấy name
         {
           $lookup: {
@@ -578,7 +594,7 @@ class RequestService {
             blood_component_ids: 1,
             receive_date_request: 1,
             request_type: 1,
-            update_by: 1,
+            updated_by: '$user_update.full_name',
             created_at: 1,
             updated_at: 1,
             is_emergency: 1,
@@ -621,7 +637,15 @@ class RequestService {
             preserveNullAndEmptyArrays: true
           }
         },
-
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'updated_by',
+            foreignField: '_id',
+            as: 'user_update'
+          }
+        },
+        { $unwind: { path: '$user_update', preserveNullAndEmptyArrays: true } },
         // Join blood_group để lấy name
         {
           $lookup: {
@@ -649,7 +673,7 @@ class RequestService {
             blood_group_id: 1,
             blood_component_ids: 1,
             receive_date_request: 1,
-            update_by: 1,
+            update_by: '$user_update.full_name',
             created_at: 1,
             updated_at: 1,
             is_emergency: 1,
@@ -712,6 +736,15 @@ class RequestService {
           }
         },
         {
+          $lookup: {
+            from: 'users',
+            localField: 'updated_by',
+            foreignField: '_id',
+            as: 'user_update'
+          }
+        },
+        { $unwind: { path: '$user_update', preserveNullAndEmptyArrays: true } },
+        {
           $project: {
             _id: 1,
             user_id: 1,
@@ -723,7 +756,7 @@ class RequestService {
             status: 1,
             is_emergency: 1,
             request_date: 1,
-            updated_by: 1,
+            updated_by: '$user_update.full_name',
             created_at: 1,
             updated_at: 1,
             request_type: 1,
@@ -771,6 +804,15 @@ class RequestService {
           }
         },
         {
+          $lookup: {
+            from: 'users',
+            localField: 'updated_by',
+            foreignField: '_id',
+            as: 'user_update'
+          }
+        },
+        { $unwind: { path: '$user_update', preserveNullAndEmptyArrays: true } },
+        {
           $project: {
             _id: 1,
             user_id: 1,
@@ -782,7 +824,7 @@ class RequestService {
             status: 1,
             is_emergency: 1,
             request_date: 1,
-            updated_by: 1,
+            updated_by: '$user_update.full_name',
             created_at: 1,
             updated_at: 1,
             request_type: 1,
@@ -834,6 +876,15 @@ class RequestService {
           }
         },
         {
+          $lookup: {
+            from: 'users',
+            localField: 'updated_by',
+            foreignField: '_id',
+            as: 'user_update'
+          }
+        },
+        { $unwind: { path: '$user_update', preserveNullAndEmptyArrays: true } },
+        {
           $project: {
             _id: 1,
             user_id: 1,
@@ -845,7 +896,7 @@ class RequestService {
             status: 1,
             is_emergency: 1,
             request_date: 1,
-            updated_by: 1,
+            updated_by: '$user_update.full_name',
             created_at: 1,
             updated_at: 1,
             request_type: 1,
@@ -1022,6 +1073,15 @@ class RequestService {
           }
         },
         {
+          $lookup: {
+            from: 'users',
+            localField: 'updated_by',
+            foreignField: '_id',
+            as: 'user_update'
+          }
+        },
+        { $unwind: { path: '$user_update', preserveNullAndEmptyArrays: true } },
+        {
           $project: {
             _id: 1,
             request_process_id: 1,
@@ -1029,7 +1089,7 @@ class RequestService {
             blood_component_id: 1,
             volume_required: 1,
             status: 1,
-            updated_by: 1,
+            updated_by: '$user_update.full_name',
             created_at: 1,
             updated_at: 1,
             blood_group_name: '$blood_group_info.name',
@@ -1209,6 +1269,15 @@ class RequestService {
           $unwind: { path: '$blood_component_info', preserveNullAndEmptyArrays: true }
         },
         {
+          $lookup: {
+            from: 'users',
+            localField: 'updated_by',
+            foreignField: '_id',
+            as: 'user_update'
+          }
+        },
+        { $unwind: { path: '$user_update', preserveNullAndEmptyArrays: true } },
+        {
           $project: {
             _id: 1,
             request_process_detail_id: 1,
@@ -1218,7 +1287,7 @@ class RequestService {
             blood_unit_id: 1,
             volume: 1,
             status: 1,
-            updated_by: 1,
+            updated_by: '$user_update.full_name',
             created_at: 1,
             updated_at: 1,
             blood_group_name: '$blood_group_info.name',
