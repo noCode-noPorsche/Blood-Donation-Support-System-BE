@@ -1544,12 +1544,12 @@ paths:
     get:
       tags:
         - Dashboards
-      summary: Get Dashboard Overview for Admin or Staff
-      description: Get dashboard Overview for admin or staff
-      operationId: getDashboardOverview
+      summary: Get Dashboard Admin Overview for Admin or Staff
+      description: Get dashboard Admin Overview for admin or staff
+      operationId: getDashboardAdminOverview
       responses:
         default:
-          description: Get dashboard Overview success
+          description: Get dashboard Admin Overview success
           content:
             application/json:
               schema:
@@ -1566,12 +1566,12 @@ paths:
     get:
       tags:
         - Dashboards
-      summary: Get Dashboard Overview for Admin or Staff
-      description: Get dashboard Overview for admin or staff
-      operationId: getDashboardOverview
+      summary: Get Dashboard Warehouse Overview for Admin or Staff
+      description: Get dashboard Warehouse Overview for admin or staff
+      operationId: getDashboardWarehouseOverview
       responses:
         default:
-          description: Get dashboard Overview success
+          description: Get dashboard Warehouse Overview success
           content:
             application/json:
               schema:
