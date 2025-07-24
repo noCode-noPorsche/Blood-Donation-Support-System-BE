@@ -5,7 +5,8 @@ import {
   getAllUserNumberController,
   getBloodStockSummaryController,
   getBloodStorageSummaryController,
-  getDashboardOverviewController
+  getDashboardAdminOverviewController,
+  getDashboardWarehouseOverviewController
 } from '~/controllers/dashboard.controllers'
 import { isAdminValidator, isStaffOrAdminValidator } from '~/middlewares/user.middlewares'
 import { wrapAsync } from '~/utils/handler'
@@ -53,11 +54,19 @@ dashboardRouter.get('/blood-stock-summary', isAdminValidator, wrapAsync(getBlood
 dashboardRouter.get('/blood-storage-summary', isStaffOrAdminValidator, wrapAsync(getBloodStorageSummaryController))
 
 /**
- * Description. Get dashboards overview
- * Path: /overview
+ * Description. Get dashboards overview for admin
+ * Path: /overview-admin
  * Method: GET
  * Header: { Authorization: Bearer <access_token>}
  */
-dashboardRouter.get('/overview', isStaffOrAdminValidator, wrapAsync(getDashboardOverviewController))
+dashboardRouter.get('/overview-admin', isStaffOrAdminValidator, wrapAsync(getDashboardAdminOverviewController))
+
+/**
+ * Description. Get dashboards overview for staff warehouse
+ * Path: /overview-warehouse
+ * Method: GET
+ * Header: { Authorization: Bearer <access_token>}
+ */
+dashboardRouter.get('/overview-warehouse', isStaffOrAdminValidator, wrapAsync(getDashboardWarehouseOverviewController))
 
 export default dashboardRouter

@@ -4,6 +4,7 @@ import { DASHBOARD_MESSAGES } from '~/constants/messages'
 import { ErrorWithStatus } from '~/models/Error'
 import databaseService from './database.services'
 import { BloodUnitStatus, DonationRegistrationStatus, UserRole } from '~/constants/enum'
+import { startOfDay, endOfDay, startOfMonth, endOfMonth } from 'date-fns'
 config()
 
 class DashboardService {
@@ -171,7 +172,8 @@ class DashboardService {
 
     return resultArray
   }
-  async getDashboardOverview() {
+
+  async getDashboardAdminOverview() {
     const now = new Date()
     const today = new Date(now.toISOString().split('T')[0])
 
@@ -462,6 +464,244 @@ class DashboardService {
         by_blood_group_name: defaultGroupCounts,
         by_blood_component_name: defaultComponentCounts,
         expiring_soon: expiringSoon
+      }
+    }
+  }
+
+  async getDashboardWarehouseOverview() {
+    const now = new Date()
+
+    // 1. Tính tổng số lượng đơn vị máu
+    const allBags = await databaseService.bloodUnits.find({ status: BloodUnitStatus.Available }).toArray()
+    const totalUnits = allBags.length
+
+    // 2. Đếm theo nhóm máu
+    const bloodGroups = await databaseService.bloodGroups.find({}).toArray()
+    const bloodGroupMap = new Map(bloodGroups.map((g) => [g._id.toString(), g.name]))
+
+    const byBloodType: Record<string, number> = {}
+    for (const bag of allBags) {
+      const groupName = bloodGroupMap.get(bag.blood_group_id.toString()) || 'Unknown'
+      byBloodType[groupName] = (byBloodType[groupName] || 0) + 1
+    }
+
+    // 3. Đếm theo thành phần máu
+    const bloodComponents = await databaseService.bloodComponents.find({}).toArray()
+    const componentMap = new Map(bloodComponents.map((c) => [c._id.toString(), c.name]))
+
+    const byComponent: Record<string, number> = {}
+    for (const bag of allBags) {
+      const componentName = componentMap.get(bag.blood_component_id.toString()) || 'Unknown'
+      byComponent[componentName] = (byComponent[componentName] || 0) + 1
+    }
+
+    // 4. Túi máu sắp hết hạn (7 ngày)
+    const in7Days = new Date(now)
+    in7Days.setDate(now.getDate() + 7)
+
+    const expiringSoonDocs = await databaseService.bloodUnits
+      .find({
+        status: BloodUnitStatus.Available,
+        expired_at: { $lte: in7Days }
+      })
+      .toArray()
+
+    const expiringSoon = expiringSoonDocs
+      .filter((bag) => bag.expired_at) // loại bỏ những bag không có expired_at
+      .map((bag) => ({
+        blood_bag_id: bag._id.toString(),
+        blood_group_name: bloodGroupMap.get(bag.blood_group_id?.toString()) || 'Unknown',
+        blood_component_name: componentMap.get(bag.blood_component_id?.toString()) || 'Unknown',
+        expired_date: bag.expired_at!.toISOString().split('T')[0],
+        volume: bag.volume,
+        days_left: Math.ceil((bag.expired_at!.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+      }))
+
+    // 5. Thống kê nhập / xuất hôm nay và tháng này
+    const todayRange = {
+      $gte: startOfDay(now),
+      $lte: endOfDay(now)
+    }
+
+    const monthRange = {
+      $gte: startOfMonth(now),
+      $lte: endOfMonth(now)
+    }
+
+    const todayImported = await databaseService.bloodUnits.countDocuments({
+      status: BloodUnitStatus.Available,
+      created_at: todayRange
+    })
+
+    const todayExported = await databaseService.bloodUnits.countDocuments({
+      status: BloodUnitStatus.Used,
+      used_at: todayRange
+    })
+
+    const monthImported = await databaseService.bloodUnits.countDocuments({
+      status: BloodUnitStatus.Available,
+      created_at: monthRange
+    })
+
+    const monthExported = await databaseService.bloodUnits.countDocuments({
+      status: BloodUnitStatus.Used,
+      used_at: monthRange
+    })
+
+    const importExportStatus = {
+      today: {
+        imported: todayImported,
+        exported: todayExported
+      },
+      this_month: {
+        imported: monthImported,
+        exported: monthExported
+      }
+    }
+
+    // 6. Số lượt hiến máu mỗi tháng (donation_process)
+    const donationsPerMonthRaw = await databaseService.donationRegistrations
+      .aggregate([
+        {
+          $match: {
+            status: DonationRegistrationStatus.CheckedIn // lọc các đơn đã check-in
+          }
+        },
+        {
+          $project: {
+            month: { $dateToString: { format: '%Y-%m', date: '$created_at' } }
+          }
+        },
+        {
+          $group: {
+            _id: '$month',
+            donations: { $sum: 1 }
+          }
+        },
+        {
+          $sort: { _id: 1 }
+        }
+      ])
+      .toArray()
+
+    const donationsPerMonth = donationsPerMonthRaw.map((item) => ({
+      month: item._id,
+      donations: item.donations
+    }))
+
+    // 7. Số túi máu đã sử dụng mỗi tháng
+    const bloodUsagePerMonthRaw = await databaseService.bloodUnits
+      .aggregate([
+        {
+          $match: { status: BloodUnitStatus.Used }
+        },
+        {
+          $group: {
+            _id: {
+              $dateToString: { format: '%Y-%m', date: '$used_at' }
+            },
+            unitsUsed: { $sum: 1 }
+          }
+        },
+        { $sort: { _id: 1 } }
+      ])
+      .toArray()
+
+    const bloodUsagePerMonth = bloodUsagePerMonthRaw.map((item) => ({
+      month: item._id,
+      units_used: item.unitsUsed
+    }))
+
+    // 8. Tỷ lệ trạng thái đơn hiến máu
+    const donationProcessRatio = await databaseService.donationRegistrations
+      .aggregate([
+        {
+          $group: {
+            _id: '$status',
+            count: { $sum: 1 }
+          }
+        }
+      ])
+      .toArray()
+
+    // Chuyển về object: { Pending: 10, Approved: 20, ... }
+    const donationRatioObject = donationProcessRatio.reduce(
+      (acc, cur) => {
+        acc[cur._id] = cur.count
+        return acc
+      },
+      {} as Record<string, number>
+    )
+
+    // 9. Biểu đồ nhập/xuất mỗi ngày (trong 7 ngày gần đây)
+    const last7Days = new Date()
+    last7Days.setDate(now.getDate() - 6)
+
+    const bloodImportExportPerDay = await Promise.all(
+      Array.from({ length: 7 }).map((_, index) => {
+        const date = new Date(last7Days)
+        date.setDate(date.getDate() + index)
+
+        const range = {
+          $gte: startOfDay(date),
+          $lte: endOfDay(date)
+        }
+
+        return Promise.all([
+          databaseService.bloodUnits.countDocuments({
+            status: BloodUnitStatus.Available,
+            created_at: range
+          }),
+          databaseService.bloodUnits.countDocuments({
+            status: BloodUnitStatus.Used,
+            used_at: range
+          })
+        ]).then(([imported, exported]) => ({
+          date: date.toISOString().split('T')[0],
+          imported,
+          exported
+        }))
+      })
+    )
+
+    // 10. Biểu đồ số lượng túi sắp hết hạn theo tháng (3 tháng tới)
+    const expiringPerMonthRaw = await databaseService.bloodUnits
+      .aggregate([
+        {
+          $match: {
+            status: BloodUnitStatus.Available,
+            expired_at: { $exists: true }
+          }
+        },
+        {
+          $group: {
+            _id: {
+              $dateToString: { format: '%Y-%m', date: '$expired_at' }
+            },
+            expiring_units: { $sum: 1 }
+          }
+        },
+        { $sort: { _id: 1 } }
+      ])
+      .toArray()
+
+    const expiringPerMonth = expiringPerMonthRaw.map((item) => ({
+      month: item._id,
+      expiring_units: item.expiring_units
+    }))
+
+    return {
+      total_units: totalUnits,
+      by_blood_type: byBloodType,
+      by_component: byComponent,
+      expiring_soon: expiringSoon,
+      import_export_status: importExportStatus,
+      donations_per_month: donationsPerMonth,
+      blood_usage_per_month: bloodUsagePerMonth,
+      donation_process_ratio: donationRatioObject,
+      chart: {
+        blood_import_export_per_day: bloodImportExportPerDay,
+        expiring_per_month: expiringPerMonth
       }
     }
   }

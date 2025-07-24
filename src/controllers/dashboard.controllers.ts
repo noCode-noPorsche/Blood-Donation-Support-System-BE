@@ -42,8 +42,16 @@ export const getBloodStorageSummaryController = async (req: Request, res: Respon
   })
 }
 
-export const getDashboardOverviewController = async (req: Request, res: Response) => {
-  const dashboardOverview = await dashboardService.getDashboardOverview()
+export const getDashboardAdminOverviewController = async (req: Request, res: Response) => {
+  const dashboardOverview = await dashboardService.getDashboardAdminOverview()
+  res.json({
+    message: DASHBOARD_MESSAGES.GET_DASHBOARD_OVERVIEW_SUCCESS,
+    result: dashboardOverview
+  })
+}
+
+export const getDashboardWarehouseOverviewController = async (req: Request, res: Response) => {
+  const dashboardOverview = await dashboardService.getDashboardWarehouseOverview()
   res.json({
     message: DASHBOARD_MESSAGES.GET_DASHBOARD_OVERVIEW_SUCCESS,
     result: dashboardOverview

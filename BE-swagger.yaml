@@ -1540,7 +1540,29 @@ paths:
           description: UnAuthorization
       security:
         - BearerAuth: []
-  /api/dashboards/overview:
+  /api/dashboards/overview-admin:
+    get:
+      tags:
+        - Dashboards
+      summary: Get Dashboard Overview for Admin or Staff
+      description: Get dashboard Overview for admin or staff
+      operationId: getDashboardOverview
+      responses:
+        default:
+          description: Get dashboard Overview success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: array
+
+        '401':
+          description: UnAuthorization
+      security:
+        - BearerAuth: []
+  /api/dashboards/overview-warehouse:
     get:
       tags:
         - Dashboards
