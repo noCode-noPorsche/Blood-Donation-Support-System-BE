@@ -485,6 +485,20 @@ class RequestService {
         },
         {
           $lookup: {
+            from: 'health_checks',
+            localField: 'health_check_id',
+            foreignField: '_id',
+            as: 'health_check_info'
+          }
+        },
+        {
+          $unwind: {
+            path: '$health_check_info',
+            preserveNullAndEmptyArrays: true
+          }
+        },
+        {
+          $lookup: {
             from: 'users',
             localField: 'updated_by',
             foreignField: '_id',
@@ -531,7 +545,8 @@ class RequestService {
             phone: '$user_info.phone',
             citizen_id_number: '$user_info.citizen_id_number',
             // from blood_group
-            blood_group_name: '$blood_group_info.name'
+            blood_group_name: '$blood_group_info.name',
+            health_check_status: '$health_check_info.status'
           }
         }
       ])
@@ -555,6 +570,20 @@ class RequestService {
         {
           $unwind: {
             path: '$user_info',
+            preserveNullAndEmptyArrays: true
+          }
+        },
+        {
+          $lookup: {
+            from: 'health_checks',
+            localField: 'health_check_id',
+            foreignField: '_id',
+            as: 'health_check_info'
+          }
+        },
+        {
+          $unwind: {
+            path: '$health_check_info',
             preserveNullAndEmptyArrays: true
           }
         },
@@ -605,7 +634,8 @@ class RequestService {
             phone: '$user_info.phone',
             citizen_id_number: '$user_info.citizen_id_number',
             // from blood_group
-            blood_group_name: '$blood_group_info.name'
+            blood_group_name: '$blood_group_info.name',
+            health_check_status: '$health_check_info.status'
           }
         }
       ])
@@ -634,6 +664,20 @@ class RequestService {
         {
           $unwind: {
             path: '$user_info',
+            preserveNullAndEmptyArrays: true
+          }
+        },
+        {
+          $lookup: {
+            from: 'health_checks',
+            localField: 'health_check_id',
+            foreignField: '_id',
+            as: 'health_check_info'
+          }
+        },
+        {
+          $unwind: {
+            path: '$health_check_info',
             preserveNullAndEmptyArrays: true
           }
         },
@@ -685,7 +729,8 @@ class RequestService {
             phone: '$user_info.phone',
             citizen_id_number: '$user_info.citizen_id_number',
             // from blood_group
-            blood_group_name: '$blood_group_info.name'
+            blood_group_name: '$blood_group_info.name',
+            health_check_status: '$health_check_info.status'
           }
         }
       ])

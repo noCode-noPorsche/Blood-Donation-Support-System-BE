@@ -1557,7 +1557,6 @@ paths:
                 properties:
                   result:
                     type: array
-
         '401':
           description: UnAuthorization
       security:
