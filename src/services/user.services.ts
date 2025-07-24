@@ -3,7 +3,12 @@ import { ObjectId } from 'mongodb'
 import { TokenType, UserRole } from '~/constants/enum'
 import { HTTP_STATUS } from '~/constants/httpStatus'
 import { ErrorWithStatus } from '~/models/Error'
-import { RegisterReqBody, UpdateMeReqBody } from '~/models/requests/User.requests'
+import {
+  ChangeRoleForAdminReqBody,
+  RegisterForAdminReqBody,
+  RegisterReqBody,
+  UpdateMeReqBody
+} from '~/models/requests/User.requests'
 import RefreshToken from '~/models/schemas/RefreshToken.schemas'
 import User from '~/models/schemas/User.schemas'
 import { hashPassword } from '~/utils/crypto'
@@ -58,7 +63,43 @@ class UsersService {
         coordinates: [payload.longitude || 0, payload.latitude || 0]
       },
       address: payload.address || '',
-      avatar_url: payload.image || '',
+      avatar_url: payload.avatar_url || '',
+      created_at: new Date(),
+      updated_at: new Date(),
+      fcm_token: payload.fcm_token || '',
+      is_active: true
+    })
+
+    const result = await databaseService.users.insertOne(newUser)
+    const user_id = result.insertedId.toString()
+
+    const [access_token, refresh_token] = await this.signAccessAndRefreshToken(user_id, newUser.role)
+    await databaseService.refreshToken.insertOne(
+      new RefreshToken({
+        user_id: new ObjectId(user_id),
+        token: refresh_token
+      })
+    )
+    return {
+      access_token,
+      refresh_token
+    }
+  }
+
+  async registerForAdmin(payload: RegisterForAdminReqBody) {
+    const newUser = new User({
+      ...payload,
+      citizen_id_number: payload.citizen_id_number,
+      date_of_birth: new Date(payload.date_of_birth),
+      password: hashPassword(payload.password),
+      role: payload.role,
+      blood_group_id: payload.blood_group_id ? new ObjectId(payload.blood_group_id) : undefined,
+      location: {
+        type: 'Point',
+        coordinates: [payload.longitude || 0, payload.latitude || 0]
+      },
+      address: payload.address || '',
+      avatar_url: payload.avatar_url || '',
       created_at: new Date(),
       updated_at: new Date(),
       fcm_token: payload.fcm_token || '',
@@ -249,6 +290,22 @@ class UsersService {
 
     return {
       message: USER_MESSAGES.UPDATE_IS_ACTIVE_SUCCESS
+    }
+  }
+
+  async changeRoleForAdmin(user_id: string, payload: ChangeRoleForAdminReqBody) {
+    const _id = new ObjectId(user_id)
+    const user = await databaseService.users.findOne({ _id })
+    if (!user)
+      throw new ErrorWithStatus({
+        message: USER_MESSAGES.USER_NOT_FOUND,
+        status: HTTP_STATUS.NOT_FOUND
+      })
+
+    await databaseService.users.findOneAndUpdate({ _id }, { $set: { role: payload.role } })
+
+    return {
+      message: USER_MESSAGES.CHANGE_ROLE_SUCCESS
     }
   }
 }

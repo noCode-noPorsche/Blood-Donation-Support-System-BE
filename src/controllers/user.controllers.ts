@@ -7,9 +7,12 @@ import { ErrorWithStatus } from '~/models/Error'
 import {
   ChangeIsActiveReqParam,
   ChangePasswordReqBody,
+  ChangeRoleForAdminReqBody,
+  ChangeRoleReqParam,
   GetProfileByCitizenIdNumberReqParam,
   LogoutReqBody,
   RefreshTokenReqBody,
+  RegisterForAdminReqBody,
   RegisterReqBody,
   TokenPayload,
   UpdateMeReqBody
@@ -120,5 +123,26 @@ export const changePasswordController = async (
 export const changeIsActiveController = async (req: Request<ChangeIsActiveReqParam, any, any>, res: Response) => {
   const { user_id } = req.params
   const result = await usersService.changeIsActive(user_id)
+  res.json(result)
+}
+
+export const registerForAdminController = async (
+  req: Request<ParamsDictionary, any, RegisterForAdminReqBody>,
+  res: Response
+) => {
+  const result = await usersService.registerForAdmin(req.body)
+  res.json({
+    message: USER_MESSAGES.REGISTER_SUCCESS,
+    result
+  })
+}
+
+export const changeRoleForAdminController = async (
+  req: Request<ChangeRoleReqParam, any, ChangeRoleForAdminReqBody>,
+  res: Response
+) => {
+  const { user_id } = req.params
+  const { body } = req
+  const result = await usersService.changeRoleForAdmin(user_id, body)
   res.json(result)
 }

@@ -60,7 +60,10 @@ export const USER_MESSAGES = {
   IS_ACTIVE_IS_REQUIRED: 'Is active is required',
   IS_ACTIVE_MUST_BE_BOOLEAN: 'Is active must be boolean',
   UPDATE_IS_ACTIVE_SUCCESS: 'Update is active success',
-  USER_IS_DISABLED: 'Tài khoản của bạn đã bị vô hiệu hóa, vui lòng liên hệ với cơ sở y tế để được kích hoạt lại'
+  USER_IS_DISABLED: 'Tài khoản của bạn đã bị vô hiệu hóa, vui lòng liên hệ với cơ sở y tế để được kích hoạt lại',
+  ROLE_IS_REQUIRED: 'Role is required',
+  ROLE_IS_INVALID: 'Role is invalid',
+  CHANGE_ROLE_SUCCESS: 'Change role success'
 } as const
 
 export const BLOOD_MESSAGES = {

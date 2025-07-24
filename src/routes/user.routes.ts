@@ -2,6 +2,7 @@ import express from 'express'
 import {
   changeIsActiveController,
   changePasswordController,
+  changeRoleForAdminController,
   getAllUserController,
   getMeController,
   getProfileByCitizenIdNumberController,
@@ -9,20 +10,23 @@ import {
   logoutController,
   refreshTokenController,
   registerController,
+  registerForAdminController,
   updateMeController
 } from '~/controllers/user.controllers'
 import { filterMiddleware } from '~/middlewares/common.middlewares'
 import {
   accessTokenValidator,
   changePasswordValidator,
+  changeRoleForAdminValidator,
   isAdminValidator,
   isStaffOrAdminValidator,
   loginValidator,
   refreshTokenValidator,
+  registerForAdminValidator,
   registerValidator,
   updateMeValidator
 } from '~/middlewares/user.middlewares'
-import { UpdateMeReqBody } from '~/models/requests/User.requests'
+import { ChangeRoleForAdminReqBody, RegisterForAdminReqBody, UpdateMeReqBody } from '~/models/requests/User.requests'
 import { wrapAsync } from '~/utils/handler'
 
 const usersRouter = express.Router()
@@ -124,11 +128,37 @@ usersRouter.patch(
 usersRouter.post('/change-password', accessTokenValidator, changePasswordValidator, wrapAsync(changePasswordController))
 
 /**
- * Description. Delete user by update is_active to false
+ * Description. Change user by update is_active to false and true for Admin
  * Path: /is-active/:user_id
  * Header: { Authorization: Bearer <access_token>}
- * Body :
  */
 usersRouter.patch('/is-active/:user_id', isAdminValidator, wrapAsync(changeIsActiveController))
+
+/**
+ * Description. Register a new user for Admin
+ * Path: /register-for-admin
+ * METHOD: POST
+ * Body : { RegisterForAdminReqBody }
+ */
+usersRouter.post(
+  '/register-for-admin',
+  isAdminValidator,
+  registerForAdminValidator,
+  wrapAsync(registerForAdminController)
+)
+
+/**
+ * Description. Change role user for Admin
+ * Path: /role-for-admin/:user_id
+ * METHOD: PATCH
+ * Body : { ChangeRoleForAdminReqBody }
+ */
+usersRouter.patch(
+  '/role-for-admin/:user_id',
+  isAdminValidator,
+  changeRoleForAdminValidator,
+  filterMiddleware<ChangeRoleForAdminReqBody>(['role']),
+  wrapAsync(changeRoleForAdminController)
+)
 
 export default usersRouter

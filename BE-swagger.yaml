@@ -228,7 +228,7 @@ paths:
             format: MongoId
       responses:
         default:
-          description: Change password success
+          description: Change is active success
           content:
             application/json:
               schema:
@@ -271,6 +271,71 @@ paths:
               schema:
                 $ref: '#/components/schemas/User'
 
+        '401':
+          description: UnAuthorization
+      security:
+        - BearerAuth: []
+  /api/users/register-for-admin:
+    post:
+      tags:
+        - Users
+      summary: Register user for admin
+      description: Register user for admin into system
+      operationId: registerUserForAdmin
+      requestBody:
+        description: Information register For Admin
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterForAdminBody'
+        required: true
+      responses:
+        '200':
+          description: Register Successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessAuthentication'
+
+        '422':
+          description: Invalid Input
+        '401':
+          description: UnAuthorization
+      security:
+        - BearerAuth: []
+  /api/users/role-for-admin/{user_id}:
+    patch:
+      tags:
+        - Users
+      summary: Change role user for Admin
+      description: Change role user for Admin
+      operationId: changeRoleForAdmin
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+            format: MongoId
+      requestBody:
+        description: Information to change user role
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                role:
+                  $ref: '#/components/schemas/UserRole'
+              required:
+                - role
+      responses:
+        default:
+          description: Change role success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessAuthentication'
         '401':
           description: UnAuthorization
       security:
@@ -1738,6 +1803,46 @@ components:
         blood_group_id:
           type: string
           example: ''
+    RegisterForAdminBody:
+      type: object
+      properties:
+        citizen_id_number:
+          type: string
+          example: 123456789123
+        phone:
+          type: string
+          example: 0987654321
+        email:
+          type: string
+          example: dustintsan1@gmail.com
+        password:
+          type: string
+          example: Duc@123123
+        confirm_password:
+          type: string
+          example: Duc@123123
+        full_name:
+          type: string
+          example: Duc Nguyen
+        date_of_birth:
+          type: string
+          example: 2025-05-21T17:48:12.171Z
+        gender:
+          $ref: '#/components/schemas/UserGender'
+        weight:
+          type: number
+          example: 0
+        address:
+          type: string
+          example: ''
+        avatar_url:
+          type: string
+          example: ''
+        blood_group_id:
+          type: string
+          example: ''
+        role:
+          $ref: '#/components/schemas/UserRole'
     ChangePasswordReqBody:
       type: object
       properties:

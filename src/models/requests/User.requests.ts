@@ -16,7 +16,7 @@ export interface RegisterReqBody {
   address?: string
   latitude?: number
   longitude?: number
-  image?: string
+  avatar_url?: string
   fcm_token?: string
 }
 
@@ -57,5 +57,32 @@ export interface GetProfileByCitizenIdNumberReqParam extends ParamsDictionary {
 }
 
 export interface ChangeIsActiveReqParam extends ParamsDictionary {
+  user_id: string
+}
+
+export interface RegisterForAdminReqBody {
+  email: string
+  password: string
+  confirm_password: string
+  date_of_birth: string
+  citizen_id_number: string
+  weight: number
+  full_name: string
+  gender: UserGender
+  phone: string
+  blood_group_id?: string
+  address?: string
+  latitude?: number
+  longitude?: number
+  avatar_url?: string
+  fcm_token?: string
+  role: UserRole
+}
+
+export interface ChangeRoleForAdminReqBody {
+  role: UserRole
+}
+
+export interface ChangeRoleReqParam extends ParamsDictionary {
   user_id: string
 }

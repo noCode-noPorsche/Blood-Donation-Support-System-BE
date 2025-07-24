@@ -233,6 +233,101 @@ export const registerValidator = validate(
   )
 )
 
+export const registerForAdminValidator = validate(
+  checkSchema(
+    {
+      full_name: fullNameSchema,
+      phone: phoneSchema,
+      email: {
+        // notEmpty: {
+        //   errorMessage: USER_MESSAGES.EMAIL_IS_REQUIRED
+        // },
+        optional: true,
+        isEmail: {
+          errorMessage: USER_MESSAGES.EMAIL_IS_INVALID
+        },
+        trim: true,
+        custom: {
+          options: async (value) => {
+            const isExistEmail = await usersService.checkEmailExist(value)
+            if (isExistEmail) {
+              throw new Error(USER_MESSAGES.EMAIL_ALREADY_EXISTS)
+            }
+            return true
+          }
+        }
+      },
+      citizen_id_number: {
+        notEmpty: {
+          errorMessage: USER_MESSAGES.CITIZEN_ID_NUMBER_IS_REQUIRED
+        },
+        isLength: {
+          options: { min: 12, max: 12 },
+          errorMessage: USER_MESSAGES.CITIZEN_ID_MUST_BE_EXACTLY_12_DIGITS
+        },
+        matches: {
+          options: [/^\d{12}$/],
+          errorMessage: USER_MESSAGES.CITIZEN_ID_MUST_CONTAIN_ONLY_DIGITS_0_9
+        },
+        trim: true,
+        custom: {
+          options: async (value) => {
+            const isExistCitizen = await usersService.checkCitizenIDNumber(value)
+            if (isExistCitizen) {
+              throw new Error(USER_MESSAGES.CITIZEN_ID_NUMBER_ALREADY_EXIST)
+            }
+            return true
+          }
+        }
+      },
+      role: {
+        notEmpty: {
+          errorMessage: USER_MESSAGES.ROLE_IS_REQUIRED
+        },
+        isIn: {
+          options: [[UserRole.Staff, UserRole.StaffWarehouse, UserRole.Customer]],
+          errorMessage: USER_MESSAGES.ROLE_IS_INVALID
+        }
+      },
+      address: {
+        optional: true,
+        isString: {
+          errorMessage: USER_MESSAGES.ADDRESS_MUST_BE_A_STRING
+        }
+        // isLength: {
+        //   options: {
+        //     min: 1,
+        //     max: 200
+        //   },
+        //   errorMessage: USER_MESSAGES.ADDRESS_LENGTH_MUST_BE_LESS_THAN_200
+        // }
+      },
+      gender: genderSchema,
+      password: passwordSchema,
+      confirm_password: confirmPasswordSchema,
+      date_of_birth: dateOfBirthSchema
+    },
+    ['body']
+  )
+)
+
+export const changeRoleForAdminValidator = validate(
+  checkSchema(
+    {
+      role: {
+        notEmpty: {
+          errorMessage: USER_MESSAGES.ROLE_IS_REQUIRED
+        },
+        isIn: {
+          options: [[UserRole.Staff, UserRole.StaffWarehouse, UserRole.Customer]],
+          errorMessage: USER_MESSAGES.ROLE_IS_INVALID
+        }
+      }
+    },
+    ['body']
+  )
+)
+
 export const accessTokenValidator = validate(
   checkSchema(
     {
