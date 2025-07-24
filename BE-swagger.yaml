@@ -1540,6 +1540,28 @@ paths:
           description: UnAuthorization
       security:
         - BearerAuth: []
+  /api/dashboards/overview:
+    get:
+      tags:
+        - Dashboards
+      summary: Get Dashboard Overview for Admin or Staff
+      description: Get dashboard Overview for admin or staff
+      operationId: getDashboardOverview
+      responses:
+        default:
+          description: Get dashboard Overview success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: array
+
+        '401':
+          description: UnAuthorization
+      security:
+        - BearerAuth: []
   /api/notifications/user:
     get:
       tags:
@@ -2642,7 +2664,7 @@ components:
           example: 1000
         total_units:
           type: integer
-          example: 8  
+          example: 8
     Notification:
       type: object
       properties:

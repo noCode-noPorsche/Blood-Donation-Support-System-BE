@@ -13,6 +13,7 @@ export enum UserGender {
 export enum UserRole {
   Admin = 'Admin',
   Staff = 'Staff',
+  StaffWarehouse = 'Staff Warehouse',
   Customer = 'Customer'
 }
 
