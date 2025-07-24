@@ -61,7 +61,8 @@ class UsersService {
       avatar_url: payload.image || '',
       created_at: new Date(),
       updated_at: new Date(),
-      fcm_token: payload.fcm_token || ''
+      fcm_token: payload.fcm_token || '',
+      is_active: true
     })
 
     const result = await databaseService.users.insertOne(newUser)
@@ -232,6 +233,22 @@ class UsersService {
     )
     return {
       message: USER_MESSAGES.CHANGE_PASSWORD_SUCCESS
+    }
+  }
+
+  async changeIsActive(user_id: string) {
+    const _id = new ObjectId(user_id)
+    const user = await databaseService.users.findOne({ _id })
+    if (!user)
+      throw new ErrorWithStatus({
+        message: USER_MESSAGES.USER_NOT_FOUND,
+        status: HTTP_STATUS.NOT_FOUND
+      })
+
+    await databaseService.users.findOneAndUpdate({ _id }, { $set: { is_active: !user.is_active } })
+
+    return {
+      message: USER_MESSAGES.UPDATE_IS_ACTIVE_SUCCESS
     }
   }
 }

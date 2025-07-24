@@ -25,6 +25,7 @@ interface UserType {
   updated_at?: Date
   forgot_password_token?: string
   fcm_token?: string
+  is_active: boolean
 }
 
 export default class User {
@@ -51,6 +52,7 @@ export default class User {
   updated_at: Date
   forgot_password_token: string
   fcm_token?: string
+  is_active: boolean
   constructor(user: UserType) {
     const date = new Date()
     this._id = user._id
@@ -76,5 +78,6 @@ export default class User {
     this.updated_at = user.updated_at || date
     this.forgot_password_token = user.forgot_password_token || ''
     this.fcm_token = user.fcm_token || ''
+    this.is_active = user.is_active || true
   }
 }

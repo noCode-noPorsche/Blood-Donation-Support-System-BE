@@ -226,7 +226,8 @@ class RequestService {
         number_of_requests: 0,
         password: '',
         forgot_password_token: '',
-        fcm_token: ''
+        fcm_token: '',
+        is_active: true
       })
       const result = await databaseService.users.insertOne(newUser)
       userObjectId = result.insertedId

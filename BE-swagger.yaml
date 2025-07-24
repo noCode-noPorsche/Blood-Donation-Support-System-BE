@@ -212,6 +212,31 @@ paths:
           description: UnAuthorization
       security:
         - BearerAuth: []
+  /api/users/is-active/{user_id}:
+    patch:
+      tags:
+        - Users
+      summary: Change is active user for Admin
+      description: Change is active user for Admin
+      operationId: changeIsActive
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+            format: MongoId
+      responses:
+        default:
+          description: Change password success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessAuthentication'
+        '401':
+          description: UnAuthorization
+      security:
+        - BearerAuth: []
   /api/users/{citizen_id_number}:
     get:
       tags:

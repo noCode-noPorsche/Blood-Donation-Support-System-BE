@@ -56,7 +56,11 @@ export const USER_MESSAGES = {
   GET_ALL_USERS_SUCCESS: 'Get all users success',
   ADDRESS_LENGTH_MUST_BE_LESS_THAN_200: 'Address length must be less than 200',
   ADDRESS_MUST_BE_A_STRING: 'Address must be a string',
-  FULL_NAME_IS_REQUIRED: 'Full name is required'
+  FULL_NAME_IS_REQUIRED: 'Full name is required',
+  IS_ACTIVE_IS_REQUIRED: 'Is active is required',
+  IS_ACTIVE_MUST_BE_BOOLEAN: 'Is active must be boolean',
+  UPDATE_IS_ACTIVE_SUCCESS: 'Update is active success',
+  USER_IS_DISABLED: 'Tài khoản của bạn đã bị vô hiệu hóa, vui lòng liên hệ với cơ sở y tế để được kích hoạt lại'
 } as const
 
 export const BLOOD_MESSAGES = {

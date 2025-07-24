@@ -1,6 +1,6 @@
 import express from 'express'
-import { filterMiddleware } from '~/middlewares/common.middlewares'
 import {
+  changeIsActiveController,
   changePasswordController,
   getAllUserController,
   getMeController,
@@ -11,9 +11,11 @@ import {
   registerController,
   updateMeController
 } from '~/controllers/user.controllers'
+import { filterMiddleware } from '~/middlewares/common.middlewares'
 import {
   accessTokenValidator,
   changePasswordValidator,
+  isAdminValidator,
   isStaffOrAdminValidator,
   loginValidator,
   refreshTokenValidator,
@@ -120,5 +122,13 @@ usersRouter.patch(
  * Body : UserSchema
  */
 usersRouter.post('/change-password', accessTokenValidator, changePasswordValidator, wrapAsync(changePasswordController))
+
+/**
+ * Description. Delete user by update is_active to false
+ * Path: /is-active/:user_id
+ * Header: { Authorization: Bearer <access_token>}
+ * Body :
+ */
+usersRouter.patch('/is-active/:user_id', isAdminValidator, wrapAsync(changeIsActiveController))
 
 export default usersRouter

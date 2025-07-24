@@ -55,3 +55,7 @@ export interface ChangePasswordReqBody {
 export interface GetProfileByCitizenIdNumberReqParam extends ParamsDictionary {
   citizen_id_number: string
 }
+
+export interface ChangeIsActiveReqParam extends ParamsDictionary {
+  user_id: string
+}

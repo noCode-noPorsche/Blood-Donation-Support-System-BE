@@ -1,8 +1,11 @@
 import { NextFunction, Request, Response } from 'express'
 import { ParamsDictionary } from 'express-serve-static-core'
 import { ObjectId } from 'mongodb'
+import { HTTP_STATUS } from '~/constants/httpStatus'
 import { USER_MESSAGES } from '~/constants/messages'
+import { ErrorWithStatus } from '~/models/Error'
 import {
+  ChangeIsActiveReqParam,
   ChangePasswordReqBody,
   GetProfileByCitizenIdNumberReqParam,
   LogoutReqBody,
@@ -18,6 +21,15 @@ export const loginController = async (req: Request, res: Response) => {
   const user = req.user as User
   const user_id = user._id as ObjectId
   const { fcm_token } = req.body
+
+  // Chặn login nếu user đã bị vô hiệu hoá
+  if (!user.is_active) {
+    throw new ErrorWithStatus({
+      message: USER_MESSAGES.USER_IS_DISABLED,
+      status: HTTP_STATUS.FORBIDDEN
+    })
+  }
+
   const result = await usersService.login(user_id.toString(), fcm_token)
   res.json({
     message: USER_MESSAGES.LOGIN_SUCCESS,
@@ -102,5 +114,11 @@ export const changePasswordController = async (
   const { user_id } = req.decode_authorization as TokenPayload
   const { password } = req.body
   const result = await usersService.changePassword(user_id, password)
+  res.json(result)
+}
+
+export const changeIsActiveController = async (req: Request<ChangeIsActiveReqParam, any, any>, res: Response) => {
+  const { user_id } = req.params
+  const result = await usersService.changeIsActive(user_id)
   res.json(result)
 }

@@ -254,14 +254,34 @@ export const accessTokenValidator = validate(
                 token: access_token,
                 secretOrPublicKey: process.env.JWT_SECRET_ACCESS_TOKEN as string
               })
+
+              const user_id = decode_authorization.user_id
+              const user = await databaseService.users.findOne({
+                _id: new ObjectId(user_id)
+              })
+
+              if (!user) {
+                throw new ErrorWithStatus({
+                  message: USER_MESSAGES.USER_NOT_FOUND,
+                  status: HTTP_STATUS.UNAUTHORIZED
+                })
+              }
+
+              if (!user.is_active) {
+                throw new ErrorWithStatus({
+                  message: USER_MESSAGES.USER_IS_DISABLED,
+                  status: HTTP_STATUS.FORBIDDEN
+                })
+              }
+
               ;(req as Request).decode_authorization = decode_authorization
+              return true
             } catch (error) {
               throw new ErrorWithStatus({
                 message: capitalize((error as JsonWebTokenError).message),
                 status: HTTP_STATUS.UNAUTHORIZED
               })
             }
-            return true
           }
         }
       }
@@ -405,6 +425,23 @@ export const changePasswordValidator = validate(
   )
 )
 
+// export const changeIsActiveValidator = validate(
+//   checkSchema(
+//     {
+//       is_active: {
+//         notEmpty: {
+//           errorMessage: USER_MESSAGES.IS_ACTIVE_IS_REQUIRED
+//         },
+//         isBoolean: {
+//           errorMessage: USER_MESSAGES.IS_ACTIVE_MUST_BE_BOOLEAN
+//         },
+//         toBoolean: true
+//       }
+//     },
+//     ['body']
+//   )
+// )
+
 export const isAdminValidator = validate(
   checkSchema(
     {
@@ -464,25 +501,47 @@ export const isStaffValidator = validate(
                 status: HTTP_STATUS.UNAUTHORIZED
               })
             }
+
             try {
               const decode_authorization = await verifyToken({
                 token: access_token,
                 secretOrPublicKey: process.env.JWT_SECRET_ACCESS_TOKEN as string
               })
-              ;(req as Request).decode_authorization = decode_authorization
-              if (decode_authorization.role !== UserRole.Staff) {
+
+              const user_id = decode_authorization.user_id
+              const user = await databaseService.users.findOne({
+                _id: new ObjectId(user_id)
+              })
+
+              if (!user) {
+                throw new ErrorWithStatus({
+                  message: USER_MESSAGES.USER_NOT_FOUND,
+                  status: HTTP_STATUS.UNAUTHORIZED
+                })
+              }
+
+              if (!user.is_active) {
+                throw new ErrorWithStatus({
+                  message: USER_MESSAGES.USER_IS_DISABLED,
+                  status: HTTP_STATUS.FORBIDDEN
+                })
+              }
+
+              if (user.role !== UserRole.Staff) {
                 throw new ErrorWithStatus({
                   message: USER_MESSAGES.USER_NOT_AUTHORIZED,
                   status: HTTP_STATUS.FORBIDDEN
                 })
               }
+
+              ;(req as Request).decode_authorization = decode_authorization
+              return true
             } catch (error) {
               throw new ErrorWithStatus({
                 message: capitalize((error as JsonWebTokenError).message),
                 status: HTTP_STATUS.UNAUTHORIZED
               })
             }
-            return true
           }
         }
       }
@@ -512,20 +571,39 @@ export const isStaffOrAdminValidator = validate(
                 token: access_token,
                 secretOrPublicKey: process.env.JWT_SECRET_ACCESS_TOKEN as string
               })
-              ;(req as Request).decode_authorization = decode_authorization
-              if (decode_authorization.role !== UserRole.Staff && decode_authorization.role !== UserRole.Admin) {
+
+              const user_id = decode_authorization.user_id
+              const user = await databaseService.users.findOne({ _id: new ObjectId(user_id) })
+
+              if (!user) {
+                throw new ErrorWithStatus({
+                  message: USER_MESSAGES.USER_NOT_FOUND,
+                  status: HTTP_STATUS.UNAUTHORIZED
+                })
+              }
+
+              if (!user.is_active) {
+                throw new ErrorWithStatus({
+                  message: USER_MESSAGES.USER_IS_DISABLED,
+                  status: HTTP_STATUS.FORBIDDEN
+                })
+              }
+
+              if (user.role !== UserRole.Staff && user.role !== UserRole.Admin) {
                 throw new ErrorWithStatus({
                   message: USER_MESSAGES.USER_NOT_AUTHORIZED,
                   status: HTTP_STATUS.FORBIDDEN
                 })
               }
+
+              ;(req as Request).decode_authorization = decode_authorization
+              return true
             } catch (error) {
               throw new ErrorWithStatus({
                 message: capitalize((error as JsonWebTokenError).message),
                 status: HTTP_STATUS.UNAUTHORIZED
               })
             }
-            return true
           }
         }
       }
