@@ -241,7 +241,9 @@ export const DASHBOARD_MESSAGES = {
   GET_ALL_USER_NUMBER_SUCCESS: 'Get all user number success',
   GET_ALL_USER_NUMBER_FAILED: 'Get all user number failed',
   GET_BLOOD_STOCK_SUMMARY_SUCCESS: 'Get blood stock summary success',
-  GET_BLOOD_STOCK_SUMMARY_FAILED: 'Get blood stock summary failed'
+  GET_BLOOD_STOCK_SUMMARY_FAILED: 'Get blood stock summary failed',
+  GET_BLOOD_STORAGE_SUMMARY_SUCCESS: 'Get blood storage summary success',
+  GET_BLOOD_STORAGE_SUMMARY_FAILED: 'Get blood storage summary failed'
 } as const
 
 export const NOTIFICATION_MESSAGES = {

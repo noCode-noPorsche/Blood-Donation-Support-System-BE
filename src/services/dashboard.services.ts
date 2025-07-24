@@ -98,6 +98,78 @@ class DashboardService {
 
     return resultObj
   }
+
+  async getBloodStorageSummary() {
+    const resultArray = await databaseService.bloodUnits
+      .aggregate([
+        {
+          $match: {
+            status: 'Available'
+          }
+        },
+        {
+          $lookup: {
+            from: 'blood_components',
+            localField: 'blood_component_id',
+            foreignField: '_id',
+            as: 'component_info'
+          }
+        },
+        {
+          $unwind: '$component_info'
+        },
+        {
+          $lookup: {
+            from: 'blood_groups',
+            localField: 'blood_group_id', // ✅ Sửa ở đây
+            foreignField: '_id',
+            as: 'blood_group_info'
+          }
+        },
+        {
+          $unwind: '$blood_group_info'
+        },
+        {
+          $group: {
+            _id: {
+              blood_component_id: '$blood_component_id',
+              blood_group_id: '$blood_group_id'
+            },
+            blood_component_name: { $first: '$component_info.name' },
+            blood_group_name: { $first: '$blood_group_info.name' },
+            total_units: { $sum: 1 },
+            total_volume: { $sum: '$volume' }
+          }
+        },
+        {
+          $project: {
+            _id: 0,
+            blood_component_id: '$_id.blood_component_id',
+            blood_group_id: '$_id.blood_group_id',
+            blood_component_name: 1,
+            blood_group_name: 1,
+            total_units: 1,
+            total_volume: 1
+          }
+        },
+        {
+          $sort: {
+            blood_component_name: 1,
+            blood_group_name: 1
+          }
+        }
+      ])
+      .toArray()
+
+    if (resultArray.length === 0) {
+      throw new ErrorWithStatus({
+        message: DASHBOARD_MESSAGES.GET_BLOOD_STORAGE_SUMMARY_FAILED,
+        status: HTTP_STATUS.NOT_FOUND
+      })
+    }
+
+    return resultArray
+  }
 }
 
 const dashboardService = new DashboardService()

@@ -1,10 +1,10 @@
 import express from 'express'
-import { getAllBlogsController, getBlogByIdController } from '~/controllers/blog.controllers'
 import {
   getAllDonationNumberController,
   getAllRequestNumberController,
   getAllUserNumberController,
-  getBloodStockSummaryController
+  getBloodStockSummaryController,
+  getBloodStorageSummaryController
 } from '~/controllers/dashboard.controllers'
 import { isAdminValidator, isStaffOrAdminValidator } from '~/middlewares/user.middlewares'
 import { wrapAsync } from '~/utils/handler'
@@ -49,6 +49,6 @@ dashboardRouter.get('/blood-stock-summary', isAdminValidator, wrapAsync(getBlood
  * Method: GET
  * Header: { Authorization: Bearer <access_token>}
  */
-dashboardRouter.get('/blood-storage-summary', isStaffOrAdminValidator, wrapAsync(getBloodStockSummaryController))
+dashboardRouter.get('/blood-storage-summary', isStaffOrAdminValidator, wrapAsync(getBloodStorageSummaryController))
 
 export default dashboardRouter

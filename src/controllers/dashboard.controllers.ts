@@ -33,3 +33,11 @@ export const getBloodStockSummaryController = async (req: Request, res: Response
     result: bloodStockSummary
   })
 }
+
+export const getBloodStorageSummaryController = async (req: Request, res: Response) => {
+  const bloodStorageSummary = await dashboardService.getBloodStorageSummary()
+  res.json({
+    message: DASHBOARD_MESSAGES.GET_BLOOD_STORAGE_SUMMARY_SUCCESS,
+    result: bloodStorageSummary
+  })
+}

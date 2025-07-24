@@ -1517,6 +1517,29 @@ paths:
           description: UnAuthorization
       security:
         - BearerAuth: []
+  /api/dashboards/blood-storage-summary:
+    get:
+      tags:
+        - Dashboards
+      summary: Get Dashboard Blood Storage Summary for Admin or Staff
+      description: Get dashboard blood storage summary for admin or staff
+      operationId: getDashboardBloodStorageSummary
+      responses:
+        default:
+          description: Get dashboard blood storage summary success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  blood_storage_summary:
+                    type: array
+                    $ref: '#/components/schemas/BloodStorageSummary'
+
+        '401':
+          description: UnAuthorization
+      security:
+        - BearerAuth: []
   /api/notifications/user:
     get:
       tags:
@@ -2605,6 +2628,21 @@ components:
         total_units:
           type: integer
           example: 8
+    BloodStorageSummary:
+      type: object
+      properties:
+        blood_component_name:
+          type: string
+          example: 'Plasma'
+        blood_group_name:
+          type: string
+          example: 'B+'
+        total_volume:
+          type: number
+          example: 1000
+        total_units:
+          type: integer
+          example: 8  
     Notification:
       type: object
       properties:
