@@ -1,4 +1,3 @@
-// src/jobs/agenda.ts
 import { Agenda } from 'agenda'
 import { config } from 'dotenv'
 config()

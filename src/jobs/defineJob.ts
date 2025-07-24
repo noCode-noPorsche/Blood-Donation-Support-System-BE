@@ -1,4 +1,3 @@
-// src/jobs/defineJobs.ts
 import { sendPushNotification } from '~/utils/notification'
 import agenda from './agenda'
 import databaseService from '~/services/database.services'

@@ -6,7 +6,7 @@ import {
   getAllUserNumberController,
   getBloodStockSummaryController
 } from '~/controllers/dashboard.controllers'
-import { isAdminValidator } from '~/middlewares/user.middlewares'
+import { isAdminValidator, isStaffOrAdminValidator } from '~/middlewares/user.middlewares'
 import { wrapAsync } from '~/utils/handler'
 
 const dashboardRouter = express.Router()
@@ -42,5 +42,13 @@ dashboardRouter.get('/number-user', isAdminValidator, wrapAsync(getAllUserNumber
  * Header: { Authorization: Bearer <access_token>}
  */
 dashboardRouter.get('/blood-stock-summary', isAdminValidator, wrapAsync(getBloodStockSummaryController))
+
+/**
+ * Description. Get blood storage summary
+ * Path: /blood-storage-summary
+ * Method: GET
+ * Header: { Authorization: Bearer <access_token>}
+ */
+dashboardRouter.get('/blood-storage-summary', isStaffOrAdminValidator, wrapAsync(getBloodStockSummaryController))
 
 export default dashboardRouter
