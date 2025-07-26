@@ -26,7 +26,7 @@ import {
   registerValidator,
   updateMeValidator
 } from '~/middlewares/user.middlewares'
-import { ChangeRoleForAdminReqBody, RegisterForAdminReqBody, UpdateMeReqBody } from '~/models/requests/User.requests'
+import { ChangeRoleForAdminReqBody, UpdateMeReqBody } from '~/models/requests/User.requests'
 import { wrapAsync } from '~/utils/handler'
 
 const usersRouter = express.Router()

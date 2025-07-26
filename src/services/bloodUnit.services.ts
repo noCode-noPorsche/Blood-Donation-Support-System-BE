@@ -207,7 +207,7 @@ class BloodUnitService {
   async getAllBloodUnits() {
     const bloodUnitResults = await databaseService.bloodUnits
       .aggregate([
-        // 1. Join blood_groups để lấy tên nhóm máu
+        // Join blood_groups để lấy tên nhóm máu
         {
           $lookup: {
             from: 'blood_groups',
@@ -223,7 +223,7 @@ class BloodUnitService {
           }
         },
 
-        // 2. Join blood_components để lấy tên thành phần máu
+        // Join blood_components để lấy tên thành phần máu
         {
           $lookup: {
             from: 'blood_components',
@@ -239,7 +239,22 @@ class BloodUnitService {
           }
         },
 
-        // 3. Project kết quả trả về
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'updated_by',
+            foreignField: '_id',
+            as: 'updated_by_info'
+          }
+        },
+        {
+          $unwind: {
+            path: '$updated_by_info',
+            preserveNullAndEmptyArrays: true
+          }
+        },
+
+        // Project kết quả trả về
         {
           $project: {
             _id: 1,
@@ -250,7 +265,7 @@ class BloodUnitService {
             status: 1,
             expired_at: 1,
             volume: 1,
-            update_by: 1,
+            update_by: '$updated_by_info.full_name',
             updated_by: 1,
             created_at: 1,
             updated_at: 1,

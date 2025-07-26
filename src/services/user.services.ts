@@ -194,15 +194,54 @@ class UsersService {
     return user
   }
 
-  async getAllUser() {
-    const user = await databaseService.users.find({}, { projection: { password: 0 } }).toArray()
-    if (!user) {
+  async getAllUsers() {
+    const users = await databaseService.users
+      .aggregate([
+        {
+          $lookup: {
+            from: 'blood_groups',
+            localField: 'blood_group_id',
+            foreignField: '_id',
+            as: 'blood_group'
+          }
+        },
+        {
+          $unwind: {
+            path: '$blood_group',
+            preserveNullAndEmptyArrays: true
+          }
+        },
+        {
+          $project: {
+            password: 0,
+            forgot_password_token: 0,
+            blood_group_id: 0
+            // 'blood_group._id': 0,
+            // 'blood_group.created_at': 0,
+            // 'blood_group.updated_at': 0
+          }
+        },
+        {
+          $addFields: {
+            blood_group_name: '$blood_group.name'
+          }
+        },
+        {
+          $project: {
+            blood_group: 0 // loại bỏ object blood_group, chỉ giữ blood_group_name
+          }
+        }
+      ])
+      .toArray()
+
+    if (!users) {
       throw new ErrorWithStatus({
         message: USER_MESSAGES.USER_NOT_FOUND,
         status: HTTP_STATUS.NOT_FOUND
       })
     }
-    return user
+
+    return users
   }
 
   async getMe(user_id: string) {

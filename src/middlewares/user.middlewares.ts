@@ -458,13 +458,6 @@ export const updateMeValidator = validate(
         isString: {
           errorMessage: USER_MESSAGES.AVATAR_MUST_BE_A_STRING
         },
-        isLength: {
-          options: {
-            min: 1,
-            max: 200
-          },
-          errorMessage: USER_MESSAGES.AVATAR_LENGTH_MUST_BE_LESS_THAN_200
-        },
         isURL: {
           errorMessage: USER_MESSAGES.AVATAR_MUST_BE_A_URL
         },

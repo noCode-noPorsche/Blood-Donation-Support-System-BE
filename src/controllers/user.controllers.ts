@@ -81,7 +81,7 @@ export const getMeController = async (req: Request, res: Response) => {
 }
 
 export const getAllUserController = async (req: Request, res: Response) => {
-  const result = await usersService.getAllUser()
+  const result = await usersService.getAllUsers()
   res.json({
     message: USER_MESSAGES.GET_PROFILE_SUCCESS,
     result
