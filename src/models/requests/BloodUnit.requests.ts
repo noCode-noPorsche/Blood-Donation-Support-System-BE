@@ -27,6 +27,6 @@ export interface UpdateStatusBloodUnitsReqBody {
   status: BloodUnitStatus
 }
 
-export interface UpdateStatusBloodUnitsIdReqPảrams extends ParamsDictionary {
+export interface UpdateStatusBloodUnitsIdReqParams extends ParamsDictionary {
   id: string
 }

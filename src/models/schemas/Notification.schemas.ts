@@ -4,6 +4,7 @@ interface NotificationType {
   _id?: ObjectId
   receiver_id: ObjectId
   donation_registration_id?: ObjectId
+  blood_unit_id?: ObjectId
   title: string
   message: string
   created_at?: Date
@@ -15,6 +16,8 @@ export default class Notification {
   _id?: ObjectId
   receiver_id: ObjectId
   donation_registration_id?: ObjectId
+  blood_unit_id?: ObjectId
+
   title: string
   message: string
   created_at?: Date
@@ -25,6 +28,7 @@ export default class Notification {
     this._id = notification._id
     this.receiver_id = notification.receiver_id
     this.donation_registration_id = notification.donation_registration_id
+    this.blood_unit_id = notification.blood_unit_id
     this.title = notification.title
     this.message = notification.message
     this.created_at = notification.created_at || date

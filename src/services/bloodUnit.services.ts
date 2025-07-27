@@ -8,6 +8,7 @@ import { UpdateBloodUnitsReqBody, UpdateStatusBloodUnitsReqBody } from '~/models
 import { bloodGroupMap, getExpirationDateByComponent, isCompatibleDonor } from '~/utils/utils'
 import databaseService from './database.services'
 import bloodService from './blood.services'
+import { UserRole } from '../constants/enum'
 config()
 
 class BloodUnitService {
@@ -395,6 +396,35 @@ class BloodUnitService {
         $currentDate: { updated_at: true }
       },
       { returnDocument: 'after' }
+    )
+
+    // Lấy thông tin người cập nhật
+    const updatedByUser = await databaseService.users.findOne({ _id: new ObjectId(user_id) })
+
+    // Lấy danh sách tất cả Admin và StaffWarehouse
+    const notifyUsers = await databaseService.users
+      .find({ role: { $in: [UserRole.Admin, UserRole.StaffWarehouse] } })
+      .toArray()
+
+    const now = new Date()
+
+    // Tạo nội dung thông báo
+    const title = `Trạng thái túi máu đã được cập nhật`
+    const message = `Túi máu có ID ${id} đã được cập nhật thành trạng thái bị hư bởi ${updatedByUser?.full_name || 'người dùng không xác định'}.`
+
+    // Gửi thông báo đến từng người
+    await Promise.all(
+      notifyUsers.map((user) =>
+        databaseService.notifications.insertOne({
+          receiver_id: user._id,
+          blood_unit_id: bloodUnit._id,
+          title,
+          message,
+          type: '',
+          created_at: now,
+          is_read: false
+        })
+      )
     )
 
     return result
