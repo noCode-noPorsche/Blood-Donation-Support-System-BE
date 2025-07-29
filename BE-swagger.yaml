@@ -39,6 +39,8 @@ tags:
     description: Operations about notifications
   - name: Locations
     description: Operations about locations
+  - name: Questions
+    description: Operations about locations
 paths:
   /api/users/login:
     post:
@@ -1759,6 +1761,108 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/User'
+        '401':
+          description: UnAuthorization
+      security:
+        - BearerAuth: []
+  /api/questions:
+    get:
+      tags:
+        - Questions
+      summary: Get All Question
+      description: Get All Question
+      operationId: getAllQuestion
+      responses:
+        default:
+          description: Get all question success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  blood_stock_summary:
+                    type: array
+                    $ref: '#/components/schemas/BloodStockSummary'
+    post:
+      tags:
+        - Questions
+      summary: Create question for Admin
+      description: Create question for Admin
+      operationId: createQuestionForAdmin
+      requestBody:             
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "Bạn có đang bị cảm sốt trong 7 ngày qua?"
+      responses:
+        '200':
+          description: Create question success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Create question success"
+                  result:
+                    type: object
+                    properties:
+                      _id:
+                        type: string
+                      name:
+                        type: string
+                      created_at:
+                        type: string
+                      updated_at:
+                        type: string
+                      updated_by:
+                        type: string
+        '401':
+          description: UnAuthorization
+      security:
+      - BearerAuth: []
+  /api/questions/{id}:
+    delete:
+      tags:
+        - Questions
+      summary: Delete question by ID
+      description: Delete a question by its ID
+      operationId: deleteQuestionById
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: The ID of the question to delete
+        schema:
+          type: string
+          example: 66cfcf1234567890abcdef12
+      responses:
+        '200':
+          description: Delete question success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Question deleted successfully
+        '404':
+          description: Question not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Question not found
         '401':
           description: UnAuthorization
       security:

@@ -1,5 +1,6 @@
 import { config } from 'dotenv'
 import { Collection, Db, MongoClient } from 'mongodb'
+import Answer from '~/models/schemas/Answer.schemas'
 import Blog from '~/models/schemas/Blog.schemas'
 import BloodComponent from '~/models/schemas/BloodComponent.schemas'
 import BloodGroup from '~/models/schemas/BloodGroup.schemas'
@@ -8,6 +9,7 @@ import DonationRequestProcess from '~/models/schemas/DonationProcess.schemas'
 import DonationRegistration from '~/models/schemas/DonationRegistration.schemas'
 import HealthCheck from '~/models/schemas/HealthCheck'
 import Notification from '~/models/schemas/Notification.schemas'
+import Question from '~/models/schemas/Question.schemas'
 import RefreshToken from '~/models/schemas/RefreshToken.schemas'
 import RequestProcess from '~/models/schemas/RequestProcess.schemas'
 import RequestProcessBlood from '~/models/schemas/RequestProcessBlood.schemas'
@@ -76,6 +78,12 @@ class DatabaseService {
   }
   get notifications(): Collection<Notification> {
     return this.db.collection(process.env.DB_NOTIFICATIONS_COLLECTION as string)
+  }
+  get questions(): Collection<Question> {
+    return this.db.collection(process.env.DB_QUESTIONS_COLLECTION as string)
+  }
+  get answers(): Collection<Answer> {
+    return this.db.collection(process.env.DB_ANSWERS_COLLECTION as string)
   }
 }
 

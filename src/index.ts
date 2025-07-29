@@ -18,6 +18,7 @@ import dashboardRouter from './routes/dashboard.routes'
 import notificationRouter from './routes/notification.routes'
 import locationRouter from './routes/location.routes'
 import { scheduleJobs } from './jobs/defineJob'
+import questionRouter from './routes/question.routes'
 
 async function startServer() {
   const file = fs.readFileSync(path.resolve('BE-swagger.yaml'), 'utf8')
@@ -68,6 +69,7 @@ async function startServer() {
   app.use('/api/notifications', notificationRouter)
   app.use('/api/dashboards', dashboardRouter)
   app.use('/api/locations', locationRouter)
+  app.use('/api/questions', questionRouter)
   app.use(defaultErrorHandler)
 
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))

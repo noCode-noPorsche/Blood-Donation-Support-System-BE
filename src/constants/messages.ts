@@ -276,3 +276,10 @@ export const LOCATION_MESSAGES = {
   BLOOD_GROUP_NAME_MUST_BE_A_STRING: 'Blood group name must be a string',
   BLOOD_GROUP_NAME_LENGTH_MUST_BE_LESS_THAN_50: 'Blood group name length must be less than 50'
 } as const
+
+export const QUESTION_MESSAGES = {
+  CREATE_QUESTION_SUCCESS: 'Create question success',
+  QUESTION_NOT_FOUND: 'Question not found',
+  DELETE_QUESTION_SUCCESS: 'Delete question success',
+  GET_ALL_QUESTION_SUCCESS: 'Get all question success'
+} as const
