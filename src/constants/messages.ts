@@ -131,7 +131,8 @@ export const DONATION_MESSAGES = {
   GET_STATUS_DONATION_HEALTH_PROCESS_SUCCESS: 'Get status donation health process success',
   DONATION_TYPE_IS_REQUIRED: 'Donation type is required',
   DONATION_TYPE_IS_INVALID: 'Donation type is invalid',
-  VOLUME_COLLECTED_MUST_BE_A_NUMBER_BETWEEN_250_AND_450: 'Volume collected must be a number between 0 and 450'
+  VOLUME_COLLECTED_MUST_BE_A_NUMBER_BETWEEN_250_AND_450: 'Volume collected must be a number between 0 and 450',
+  DONATION_REGISTRATION_REJECTED_CANNOT_UPDATE: 'Donation registration rejected cannot update'
 } as const
 
 export const HEALTH_CHECK_MESSAGES = {

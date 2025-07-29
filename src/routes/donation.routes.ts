@@ -79,7 +79,12 @@ donationRouter.post(
   '/donation-registrations',
   accessTokenValidator,
   createDonationValidator,
-  filterMiddleware<CreateDonationRegistrationReqBody>(['blood_group_id', 'start_date_donation', 'donation_type']),
+  filterMiddleware<CreateDonationRegistrationReqBody>([
+    'blood_group_id',
+    'start_date_donation',
+    'donation_type',
+    'answers'
+  ]),
   wrapAsync(createDonationRegistrationController)
 )
 

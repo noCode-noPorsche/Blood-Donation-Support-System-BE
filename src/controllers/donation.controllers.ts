@@ -85,7 +85,7 @@ export const getDonationRegistrationByIdController = async (
   res: Response
 ) => {
   const { id } = req.params
-  const donationRegistrationById = await donationService.getDonationRegistrationId(id)
+  const donationRegistrationById = await donationService.getDonationRegistrationById(id)
 
   res.json({
     message: DONATION_MESSAGES.GET_DONATION_REGISTRATIONS_SUCCESS,

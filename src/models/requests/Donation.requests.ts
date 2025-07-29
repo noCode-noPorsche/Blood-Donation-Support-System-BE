@@ -4,6 +4,10 @@ export interface CreateDonationRegistrationReqBody {
   blood_group_id?: string
   donation_type: DonationType
   start_date_donation: string
+  answers: {
+    question_id: string
+    answer: boolean
+  }[]
 }
 
 export interface UpdateDonationRegistrationIdReqParams extends ParamsDictionary {
