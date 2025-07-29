@@ -677,7 +677,11 @@ export const isStaffOrAdminValidator = validate(
                 })
               }
 
-              if (user.role !== UserRole.Staff && user.role !== UserRole.Admin) {
+              if (
+                user.role !== UserRole.Staff &&
+                user.role !== UserRole.Admin &&
+                user.role !== UserRole.StaffWarehouse
+              ) {
                 throw new ErrorWithStatus({
                   message: USER_MESSAGES.USER_NOT_AUTHORIZED,
                   status: HTTP_STATUS.FORBIDDEN
