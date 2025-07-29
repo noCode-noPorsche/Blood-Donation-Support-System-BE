@@ -281,7 +281,14 @@ class UsersService {
   }
 
   async updateMe(user_id: string, payload: UpdateMeReqBody) {
-    const user = await databaseService.users.findOneAndUpdate(
+    const user = await databaseService.users.findOne({ _id: new ObjectId(user_id) })
+    if (!user) {
+      throw new ErrorWithStatus({
+        message: USER_MESSAGES.USER_NOT_FOUND,
+        status: HTTP_STATUS.NOT_FOUND
+      })
+    }
+    const updatedUser = await databaseService.users.findOneAndUpdate(
       { _id: new ObjectId(user_id) },
       {
         $set: {
@@ -292,7 +299,9 @@ class UsersService {
             coordinates: [payload.longitude || 0, payload.latitude || 0]
           },
           address: payload.address || '',
-          blood_group_id: payload.blood_group_id ? new ObjectId(payload.blood_group_id) : null // hoặc undefined nếu bạn muốn bỏ qua
+          blood_group_id: payload.blood_group_id
+            ? new ObjectId(payload.blood_group_id)
+            : user?.blood_group_id || undefined
         },
         $currentDate: {
           updated_at: true
@@ -303,7 +312,7 @@ class UsersService {
         projection: { password: 0, forgot_password_token: 0 }
       }
     )
-    return user
+    return updatedUser
   }
 
   async changePassword(user_id: string, password: string) {

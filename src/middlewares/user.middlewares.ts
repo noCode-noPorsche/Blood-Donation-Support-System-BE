@@ -434,7 +434,7 @@ export const updateMeValidator = validate(
       date_of_birth: { ...dateOfBirthSchema, optional: true, notEmpty: undefined },
       gender: { ...genderSchema, optional: true, notEmpty: undefined },
       weight: {
-        notEmpty: undefined,
+        optional: true,
         isNumeric: {
           errorMessage: USER_MESSAGES.WEIGHT_MUST_BE_A_NUMBER
         },
@@ -442,19 +442,16 @@ export const updateMeValidator = validate(
           options: { min: 1, max: 500 },
           errorMessage: USER_MESSAGES.WEIGHT_MUST_BE_AN_INTEGER_BETWEEN_1_AND_500
         },
-        optional: true,
         toFloat: true
       },
       blood_group: {
-        notEmpty: undefined,
+        optional: true,
         isString: {
           errorMessage: USER_MESSAGES.BLOOD_GROUP_MUST_BE_A_STRING
-        },
-        optional: true
+        }
       },
       avatar_url: {
         optional: true,
-        notEmpty: undefined,
         isString: {
           errorMessage: USER_MESSAGES.AVATAR_MUST_BE_A_STRING
         },
