@@ -1831,8 +1831,8 @@ paths:
     delete:
       tags:
         - Questions
-      summary: Delete question by ID
-      description: Delete a question by its ID
+      summary: Delete question by ID for Admin
+      description: Delete a question by its ID for Admin
       operationId: deleteQuestionById
       parameters:
         - name: id

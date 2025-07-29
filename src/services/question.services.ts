@@ -15,7 +15,8 @@ class QuestionService {
       name: payload.name,
       created_at: now,
       updated_at: now,
-      updated_by: new ObjectId(user_id)
+      updated_by: new ObjectId(user_id),
+      is_delete: false
     })
 
     await databaseService.questions.insertOne(question)
@@ -24,11 +25,17 @@ class QuestionService {
   }
 
   async deleteQuestion(questionId: string) {
-    const result = await databaseService.questions.deleteOne({
-      _id: new ObjectId(questionId)
-    })
+    const result = await databaseService.questions.updateOne(
+      { _id: new ObjectId(questionId) },
+      {
+        $set: {
+          is_delete: true,
+          updated_at: new Date()
+        }
+      }
+    )
 
-    if (result.deletedCount === 0) {
+    if (result.matchedCount === 0) {
       throw new ErrorWithStatus({
         status: HTTP_STATUS.NOT_FOUND,
         message: QUESTION_MESSAGES.QUESTION_NOT_FOUND
@@ -37,9 +44,15 @@ class QuestionService {
 
     return { message: QUESTION_MESSAGES.DELETE_QUESTION_SUCCESS }
   }
+
   async getAllQuestion() {
     const result = await databaseService.questions
       .aggregate([
+        {
+          $match: {
+            is_delete: { $ne: true } // chỉ lấy câu hỏi chưa bị xóa
+          }
+        },
         {
           $lookup: {
             from: 'users',
