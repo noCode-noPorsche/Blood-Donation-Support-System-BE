@@ -1188,13 +1188,165 @@ class RequestService {
 
     const updateRequestProcessDetail = []
     let isPartial = false
-
+    const componentToUnitsMap: Record<string, any[]> = {}
     // Xóa các mapping cũ trước khi tạo lại
     await databaseService.requestProcessBloods.deleteMany({ request_process_id: requestProcessId })
 
+    // 1 Kiểm tra trước cho tất cả thành phần
     for (const item of payload) {
       if (!item.blood_component_id) continue
 
+      const componentId = new ObjectId(item.blood_component_id)
+
+      const detailToUpdate = existingDetails.find(
+        (detail) => detail.blood_component_id.toString() === componentId.toString()
+      )
+
+      // if (!detailToUpdate) {
+      //   throw new ErrorWithStatus({
+      //     message: `Không tìm thấy chi tiết cho blood_component_id: ${item.blood_component_id}`,
+      //     status: HTTP_STATUS.NOT_FOUND
+      //   })
+      // }
+
+      // Cập nhật lại chi tiết yêu cầu
+      // const result = await databaseService.requestProcessDetails.findOneAndUpdate(
+      //   { _id: detailToUpdate._id },
+      //   {
+      //     $set: {
+      //       blood_component_id: componentId,
+      //       volume_required: item.volume_required,
+      //       status: item.status || detailToUpdate.status,
+      //       updated_by: new ObjectId(user_id)
+      //     },
+      //     $currentDate: { updated_at: true }
+      //   },
+      //   {
+      //     returnDocument: 'after'
+      //   }
+      // )
+
+      // if (result) {
+      //   updateRequestProcessDetail.push(result)
+      // request process blood
+      // await databaseService.requestProcessBloods.deleteMany({
+      //   request_process_id: new ObjectId(id)
+      // })
+
+      // if (!resultRequestProcess?.blood_group_id) {
+      //   throw new ErrorWithStatus({
+      //     message: 'Request process is missing blood_group_id',
+      //     status: HTTP_STATUS.BAD_REQUEST
+      //   })
+      // }
+
+      // Lấy tất cả túi máu còn dùng được cho đúng component
+      const allAvailableUnits = await databaseService.bloodUnits
+        .find({
+          status: BloodUnitStatus.Available,
+          volume: { $gte: item.volume_required },
+          expired_at: { $gt: new Date() },
+          blood_component_id: componentId
+        })
+        .toArray()
+
+      // Lọc nhóm máu tương thích
+      const compatibleUnits = []
+      for (const unit of allAvailableUnits) {
+        const bloodComponentType = await databaseService.bloodComponents.findOne({
+          _id: new ObjectId(unit.blood_component_id)
+        })
+        const isCompatible = await isCompatibleBloodUnit(
+          resultRequestProcess?.blood_group_id.toString(),
+          unit.blood_group_id.toString(),
+          bloodComponentType?.name as BloodComponentEnum // RBC | Plasma | Platelets
+        )
+        if (isCompatible) {
+          compatibleUnits.push(unit)
+        }
+      }
+
+      // Nếu 1 thành phần không có túi máu nào → mark partial
+      if (compatibleUnits.length === 0) {
+        isPartial = true
+      }
+
+      componentToUnitsMap[componentId.toString()] = compatibleUnits
+    }
+    // // Nếu không có túi máu phù hợp → mark detail là Partial
+    // if (compatibleUnits.length === 0) {
+    //   isPartial = true
+    //   await databaseService.requestProcessDetails.updateOne(
+    //     { _id: detailToUpdate._id },
+    //     { $set: { status: RequestProcessDetailStatus.Partial } }
+    //   )
+    //   continue
+    // }
+
+    // Nếu có → thêm vào request_process_blood
+    // for (const unit of compatibleUnits) {
+    //   const newMapping: RequestProcessBlood = {
+    //     request_process_detail_id: result._id,
+    //     request_process_id: requestProcessId,
+    //     blood_unit_id: unit._id,
+    //     blood_component_id: unit.blood_component_id,
+    //     blood_group_id: unit.blood_group_id,
+    //     volume: unit.volume ?? 0,
+    //     status: RequestProcessBloodStatus.Pending,
+    //     created_at: new Date(),
+    //     updated_at: new Date(),
+    //     updated_by: new ObjectId(user_id)
+    //   }
+    //   await databaseService.requestProcessBloods.insertOne(newMapping)
+    // }
+
+    // Nếu có ít nhất 1 thành phần thiếu → mark process là Partial
+    // if (isPartial) {
+    //   await databaseService.requestProcesses.updateOne(
+    //     { _id: requestProcessId },
+    //     { $set: { status: RequestProcessStatus.Partial } }
+    //   )
+    // }
+
+    // const insertedBloodMappings: RequestProcessBlood[] = []
+    // // 3. Với từng thành phần cần thiết, lọc túi máu tương ứng
+    // for (const componentId of resultRequestProcess?.blood_component_ids || []) {
+    //   const matchingUnits = compatibleUnits.filter(
+    //     (unit) => unit.blood_component_id.toString() === componentId.toString()
+    //   )
+
+    //   for (const unit of matchingUnits) {
+    //     const newMapping: RequestProcessBlood = {
+    //       request_process_detail_id: result._id,
+    //       request_process_id: new ObjectId(id),
+    //       blood_unit_id: unit._id,
+    //       blood_component_id: unit.blood_component_id,
+    //       blood_group_id: unit.blood_group_id,
+    //       volume: unit.volume ?? 0,
+    //       status: RequestProcessBloodStatus.Pending,
+    //       created_at: new Date(),
+    //       updated_at: new Date(),
+    //       updated_by: new ObjectId(user_id)
+    //     }
+    //     const resultTest = await databaseService.requestProcessBloods.insertOne(newMapping)
+    //     insertedBloodMappings.push(newMapping)
+    //     if (resultTest) {
+    //       console.log('insertedBloodMappings', insertedBloodMappings)
+    //     }
+    //   }
+    // }
+
+    // 2 Nếu thiếu bất kỳ thành phần nào → không insert gì
+    if (isPartial) {
+      await databaseService.requestProcesses.updateOne(
+        { _id: requestProcessId },
+        { $set: { status: RequestProcessStatus.Partial } }
+      )
+      return [] // Dừng lại, không insert túi máu
+    }
+
+    // 3 Nếu đủ tất cả → tiến hành update detail + insert vào request_process_blood
+    for (const item of payload) {
       const componentId = new ObjectId(item.blood_component_id)
 
       const detailToUpdate = existingDetails.find(
@@ -1208,7 +1360,6 @@ class RequestService {
         })
       }
 
-      // Cập nhật lại chi tiết yêu cầu
       const result = await databaseService.requestProcessDetails.findOneAndUpdate(
         { _id: detailToUpdate._id },
         {
@@ -1220,62 +1371,14 @@ class RequestService {
           },
           $currentDate: { updated_at: true }
         },
-        {
-          returnDocument: 'after'
-        }
+        { returnDocument: 'after' }
       )
 
       if (result) {
         updateRequestProcessDetail.push(result)
-        // request process blood
-        // await databaseService.requestProcessBloods.deleteMany({
-        //   request_process_id: new ObjectId(id)
-        // })
 
-        if (!resultRequestProcess?.blood_group_id) {
-          throw new ErrorWithStatus({
-            message: 'Request process is missing blood_group_id',
-            status: HTTP_STATUS.BAD_REQUEST
-          })
-        }
+        const compatibleUnits = componentToUnitsMap[componentId.toString()] || []
 
-        // Lấy tất cả túi máu còn dùng được cho đúng component
-        const allAvailableUnits = await databaseService.bloodUnits
-          .find({
-            status: BloodUnitStatus.Available,
-            volume: { $gte: item.volume_required },
-            expired_at: { $gt: new Date() },
-            blood_component_id: componentId
-          })
-          .toArray()
-
-        // Lọc nhóm máu tương thích
-        const compatibleUnits = []
-        for (const unit of allAvailableUnits) {
-          const bloodComponentType = await databaseService.bloodComponents.findOne({
-            _id: new ObjectId(unit.blood_component_id)
-          })
-          const isCompatible = await isCompatibleBloodUnit(
-            resultRequestProcess?.blood_group_id.toString(),
-            unit.blood_group_id.toString(),
-            bloodComponentType?.name as BloodComponentEnum // RBC | Plasma | Platelets
-          )
-          if (isCompatible) {
-            compatibleUnits.push(unit)
-          }
-        }
-
-        // Nếu không có túi máu phù hợp → mark detail là Partial
-        if (compatibleUnits.length === 0) {
-          isPartial = true
-          await databaseService.requestProcessDetails.updateOne(
-            { _id: detailToUpdate._id },
-            { $set: { status: RequestProcessDetailStatus.Partial } }
-          )
-          continue
-        }
-
-        // Nếu có → thêm vào request_process_blood
         for (const unit of compatibleUnits) {
           const newMapping: RequestProcessBlood = {
             request_process_detail_id: result._id,
@@ -1291,45 +1394,8 @@ class RequestService {
           }
           await databaseService.requestProcessBloods.insertOne(newMapping)
         }
-
-        // Nếu có ít nhất 1 thành phần thiếu → mark process là Partial
-        if (isPartial) {
-          await databaseService.requestProcesses.updateOne(
-            { _id: requestProcessId },
-            { $set: { status: RequestProcessStatus.Partial } }
-          )
-        }
-
-        // const insertedBloodMappings: RequestProcessBlood[] = []
-        // // 3. Với từng thành phần cần thiết, lọc túi máu tương ứng
-        // for (const componentId of resultRequestProcess?.blood_component_ids || []) {
-        //   const matchingUnits = compatibleUnits.filter(
-        //     (unit) => unit.blood_component_id.toString() === componentId.toString()
-        //   )
-
-        //   for (const unit of matchingUnits) {
-        //     const newMapping: RequestProcessBlood = {
-        //       request_process_detail_id: result._id,
-        //       request_process_id: new ObjectId(id),
-        //       blood_unit_id: unit._id,
-        //       blood_component_id: unit.blood_component_id,
-        //       blood_group_id: unit.blood_group_id,
-        //       volume: unit.volume ?? 0,
-        //       status: RequestProcessBloodStatus.Pending,
-        //       created_at: new Date(),
-        //       updated_at: new Date(),
-        //       updated_by: new ObjectId(user_id)
-        //     }
-        //     const resultTest = await databaseService.requestProcessBloods.insertOne(newMapping)
-        //     insertedBloodMappings.push(newMapping)
-        //     if (resultTest) {
-        //       console.log('insertedBloodMappings', insertedBloodMappings)
-        //     }
-        //   }
-        // }
       }
     }
-
     return updateRequestProcessDetail
   }
 
