@@ -4,6 +4,7 @@ import Answer from '~/models/schemas/Answer.schemas'
 import Blog from '~/models/schemas/Blog.schemas'
 import BloodComponent from '~/models/schemas/BloodComponent.schemas'
 import BloodGroup from '~/models/schemas/BloodGroup.schemas'
+import BloodInventoryThreshold from '~/models/schemas/BloodInventoryThresholds.schemas'
 import BloodUnit from '~/models/schemas/BloodUnit.schemas'
 import DonationRequestProcess from '~/models/schemas/DonationProcess.schemas'
 import DonationRegistration from '~/models/schemas/DonationRegistration.schemas'
@@ -84,6 +85,9 @@ class DatabaseService {
   }
   get answers(): Collection<Answer> {
     return this.db.collection(process.env.DB_ANSWERS_COLLECTION as string)
+  }
+  get bloodInventoryThreshold(): Collection<BloodInventoryThreshold> {
+    return this.db.collection(process.env.DB_BLOOD_INVENTORY_THRESHOLDS_COLLECTION as string)
   }
 }
 

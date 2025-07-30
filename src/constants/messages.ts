@@ -92,7 +92,10 @@ export const BLOOD_MESSAGES = {
   BLOOD_UNIT_STATUS_MUST_BE_A_STRING: 'Blood unit status status must be a string',
   BLOOD_UNIT_STATUS_MUST_BE_ONE_OF_THE_FOLLOWING_VALUES: 'Blood unit status must be one of the followings values',
   UPDATE_BLOOD_UNITS_STATUS_SUCCESS: 'Update blood units status success',
-  BLOOD_UNIT_NOT_FOUND: 'Blood unit not found'
+  BLOOD_UNIT_NOT_FOUND: 'Blood unit not found',
+  GET_BLOOD_INVENTORY_THRESHOLD_SUCCESS: 'Get blood inventory threshold success',
+  UPDATE_BLOOD_INVENTORY_THRESHOLD_SUCCESS: 'Update blood inventory threshold success',
+  BLOOD_INVENTORY_THRESHOLD_NOT_FOUND: 'Blood inventory threshold not found'
 } as const
 
 export const DONATION_MESSAGES = {

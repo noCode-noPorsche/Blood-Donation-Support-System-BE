@@ -19,6 +19,7 @@ import notificationRouter from './routes/notification.routes'
 import locationRouter from './routes/location.routes'
 import { scheduleJobs } from './jobs/defineJob'
 import questionRouter from './routes/question.routes'
+import bloodInventoryThreshold from './routes/bloodInventoryThreshold.routes'
 
 async function startServer() {
   const file = fs.readFileSync(path.resolve('BE-swagger.yaml'), 'utf8')
@@ -70,6 +71,7 @@ async function startServer() {
   app.use('/api/dashboards', dashboardRouter)
   app.use('/api/locations', locationRouter)
   app.use('/api/questions', questionRouter)
+  app.use('/api/blood-inventory-thresholds', bloodInventoryThreshold)
   app.use(defaultErrorHandler)
 
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))

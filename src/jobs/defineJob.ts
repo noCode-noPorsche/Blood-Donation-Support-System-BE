@@ -6,15 +6,18 @@ import {
   DonationProcessStatus,
   DonationRegistrationStatus,
   DonationType,
+  HealthCheckStatus,
   UserRole
 } from '~/constants/enum'
 import { ObjectId } from 'mongodb'
+import { BloodComponentVN } from '~/utils/utils'
 
 const defineJobs = {
   NotifyUpcomingDonation: 'notify upcoming donation',
   ExpireBloodUnits: 'expire blood units',
   ExpireDonationRegistrations: 'expire donation registrations',
-  NotifyNextDonationReminder: 'notify next donation reminder'
+  NotifyNextDonationReminder: 'notify next donation reminder',
+  UpdateBloodInventoryThreshold: 'update blood inventory threshold'
 }
 
 // Job gửi thông báo trước ngày hiến máu
@@ -27,7 +30,8 @@ agenda.define(defineJobs.NotifyUpcomingDonation, async (job: any) => {
 
   const donations = await databaseService.donationRegistrations
     .find({
-      start_date_donation: { $gte: start, $lte: end }
+      start_date_donation: { $gte: start, $lte: end },
+      status: DonationRegistrationStatus.Approved
     })
     .toArray()
 
@@ -187,6 +191,24 @@ agenda.define(defineJobs.ExpireDonationRegistrations, async () => {
         }
       }
     )
+    await databaseService.healthChecks.updateOne(
+      { _id: donation.health_check_id },
+      {
+        $set: {
+          status: HealthCheckStatus.Rejected,
+          updated_at: now
+        }
+      }
+    )
+    await databaseService.donationProcesses.updateOne(
+      { _id: donation.donation_process_id },
+      {
+        $set: {
+          status: DonationProcessStatus.Rejected,
+          updated_at: now
+        }
+      }
+    )
   }
 })
 
@@ -275,6 +297,108 @@ agenda.define(defineJobs.NotifyNextDonationReminder, async () => {
   }
 })
 
+// Job tự động cập nhật tồn kho máu và gửi thông báo nếu dưới ngưỡng
+agenda.define(defineJobs.UpdateBloodInventoryThreshold, async () => {
+  const bloodGroups = await databaseService.bloodGroups.find().toArray()
+  const bloodComponents = await databaseService.bloodComponents.find().toArray()
+  const existingThresholds = await databaseService.bloodInventoryThreshold.find().toArray()
+
+  // Lấy danh sách admin để gửi thông báo
+  const admins = await databaseService.users.find({ role: UserRole.Admin }).toArray()
+
+  for (const group of bloodGroups) {
+    for (const component of bloodComponents) {
+      // Lấy tồn kho túi máu
+      const bloodUnits = await databaseService.bloodUnits
+        .find({
+          blood_group_id: group._id,
+          blood_component_id: component._id,
+          status: BloodUnitStatus.Available
+        })
+        .toArray()
+
+      const totalUnits = bloodUnits.length
+      const totalVolume = bloodUnits.reduce((sum, unit) => sum + (unit.volume || 0), 0)
+
+      // Kiểm tra threshold hiện có
+      let threshold = existingThresholds.find(
+        (t) =>
+          t.blood_group_id.toString() === group._id.toString() &&
+          t.blood_component_id.toString() === component._id.toString()
+      )
+
+      if (!threshold) {
+        // Nếu chưa có threshold thì tạo mới
+        threshold = {
+          _id: new ObjectId(),
+          blood_group_id: group._id,
+          blood_component_id: component._id,
+          threshold_unit: totalUnits,
+          threshold_volume_ml: totalVolume,
+          threshold_unit_stable: 0,
+          created_at: new Date(),
+          updated_at: new Date(),
+          updated_by: new ObjectId(), // Có thể thay bằng ID admin
+          is_stable: true
+        }
+        await databaseService.bloodInventoryThreshold.insertOne(threshold)
+      } else {
+        // Cập nhật threshold từ kho máu
+        const isStable = totalUnits > (threshold.threshold_unit_stable || 0)
+
+        await databaseService.bloodInventoryThreshold.updateOne(
+          { _id: threshold._id },
+          {
+            $set: {
+              threshold_unit: totalUnits,
+              threshold_volume_ml: totalVolume,
+              is_stable: isStable,
+              updated_at: new Date()
+            }
+          }
+        )
+
+        threshold.threshold_unit = totalUnits
+        threshold.threshold_volume_ml = totalVolume
+        threshold.is_stable = isStable
+      }
+      // Nếu dưới ngưỡng an toàn => gửi thông báo cho admin
+      if (threshold.threshold_unit_stable > 0 && totalUnits <= threshold.threshold_unit_stable) {
+        const componentNameVN = BloodComponentVN[component.name]
+        const title = `Cảnh báo kho máu thấp`
+        const body = `Nhóm máu ${group.name} - Thành phần ${componentNameVN} đang dưới ngưỡng an toàn (${totalUnits}/${threshold.threshold_unit_stable} túi).`
+
+        for (const admin of admins) {
+          const alreadyNotified = await databaseService.notifications.findOne({
+            receiver_id: admin._id,
+            type: 'low_blood_inventory'
+          })
+
+          if (!alreadyNotified) {
+            await databaseService.notifications.insertOne({
+              receiver_id: admin._id,
+              title,
+              message: body,
+              created_at: new Date(),
+              type: 'low_blood_inventory',
+              is_read: false
+            })
+
+            // Gửi push notification
+            if (admin.fcm_token) {
+              await sendPushNotification({
+                fcmToken: admin.fcm_token,
+                title,
+                body
+              })
+            }
+          }
+        }
+      }
+    }
+  }
+})
+
 // Hàm gọi để schedule các job
 export async function scheduleJobs() {
   await agenda.start()
@@ -282,5 +406,6 @@ export async function scheduleJobs() {
   await agenda.every('*/2 * * * *', defineJobs.ExpireBloodUnits) // Chạy mỗi 5 phút
   await agenda.every('*/5 * * * *', defineJobs.ExpireDonationRegistrations) // Chạy mỗi 5 phút
   await agenda.every('*/5 * * * *', defineJobs.NotifyNextDonationReminder) // Chạy mỗi 5 phút
-  // await agenda.now(defineJobs.ExpireBloodUnits)
+  await agenda.every('*/1 * * * *', defineJobs.UpdateBloodInventoryThreshold) // Chạy mỗi 5 phút
+  // await agenda.now(defineJobs.UpdateBloodInventoryThreshold)
 }

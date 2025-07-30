@@ -15,7 +15,7 @@ export const createBlogController = async (req: Request<ParamsDictionary, any, C
   const { user_id } = req.decode_authorization as TokenPayload
   const { body } = req
   const blog = await blogServices.createBlog({ user_id, payload: body })
-  res.status(201).json({
+  res.json({
     message: BLOG_MESSAGES.CREATE_BLOG_SUCCESS,
     result: blog
   })

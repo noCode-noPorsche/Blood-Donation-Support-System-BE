@@ -13,6 +13,8 @@ tags:
     description: Operations about blood
   - name: Blood Units
     description: Operations about blood units
+  - name: Blood Inventory Thresholds
+    description: Operations about blood inventory thresholds
   - name: Donation Registrations
     description: Operations about donation registrations
   - name: Donation Processes
@@ -1420,8 +1422,8 @@ paths:
     post:
       tags:
         - Blogs
-      summary: Create Blog (only admin)
-      description: Create a new blog (only admin)
+      summary: Create Blog for Admin
+      description: Create a new blog for Admin
       operationId: createBlog
       requestBody:
         description: Information create blog
@@ -1445,8 +1447,8 @@ paths:
     get:
       tags:
         - Blogs
-      summary: Get Blog by ID
-      description: Get blog by id
+      summary: Get Blog by Id
+      description: Get blog by Id
       operationId: getBlogById
       parameters:
         - in: path
@@ -1469,8 +1471,8 @@ paths:
     patch:
       tags:
         - Blogs
-      summary: Update Blog (only admin)
-      description: Update blog (only admin)
+      summary: Update Blog by Id for Admin
+      description: Update blog by Id for Admin
       operationId: updateBlog
       parameters:
         - in: path
@@ -1500,9 +1502,9 @@ paths:
     delete:
       tags:
         - Blogs
-      summary: Delete Blog (only admin)
-      description: Delete blog (only admin)
-      operationId: deleteBlog
+      summary: Delete Blog By Id for Admin
+      description: Delete blog Id for Admin
+      operationId: deleteBlogById
       parameters:
         - in: path
           name: id
@@ -1831,8 +1833,8 @@ paths:
     delete:
       tags:
         - Questions
-      summary: Delete question by ID for Admin
-      description: Delete a question by its ID for Admin
+      summary: Delete question by Id for Admin
+      description: Delete a question by its Id for Admin
       operationId: deleteQuestionById
       parameters:
         - name: id
@@ -1863,6 +1865,63 @@ paths:
                   message:
                     type: string
                     example: Question not found
+        '401':
+          description: UnAuthorization
+      security:
+        - BearerAuth: []
+  /api/blood-inventory-thresholds:
+    get:
+      tags:
+        - Blood Inventory Thresholds
+      summary: Get all blood inventory thresholds for Admin
+      description: Get all blood inventory thresholds for Admin
+      operationId: getAllBloodInventoryThresholds
+      responses:
+        200:
+          description: Get Blood Inventory Thresholds Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BloodInventoryThresholdResponse'
+        '401':
+          description: UnAuthorization
+      security:
+        - BearerAuth: []
+  /api/blood-inventory-thresholds/{id}:
+    patch:
+      tags:
+        - Blood Inventory Thresholds
+      summary: Update blood inventory threshold by Id for Admin
+      description: Update blood inventory threshold by Id for Admin
+      operationId: updateBloodInventoryThresholdById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: MongoId
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                threshold_unit_stable:
+                  type: number
+                  example: 10
+              required:
+                - threshold_unit_stable
+      responses:
+        200:
+          description: Update Blood Inventory Threshold Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BloodInventoryThresholdResponse'
         '401':
           description: UnAuthorization
       security:
@@ -2967,6 +3026,45 @@ components:
         radiusKm:
           type: number
           example: 50
+    BloodInventoryThresholdResponse:
+      type: object
+      properties:
+        _id:
+          type: string
+          format: MongoId
+          example: 66a91f2e1234567890abcdef
+        blood_group_id:
+          type: string
+          format: MongoId
+          example: 682f6a3fdb3fb589d23e7654
+        blood_group_name:
+          type: string
+          example: 'A+'
+        blood_component_id:
+          type: string
+          format: MongoId
+          example: 682f6a3fdb3fb589d23e7655
+        blood_component_name:
+          type: string
+          example: 'Máu toàn phần'
+        threshold_unit:
+          type: number
+          example: 20
+        threshold_volume_ml:
+          type: number
+          example: 10000
+        threshold_unit_stable:
+          type: number
+          example: 10
+        total_units:
+          type: number
+          example: 15
+        total_volume_ml:
+          type: number
+          example: 7500
+        is_stable:
+          type: boolean
+          example: true
   securitySchemes:
     BearerAuth:
       type: http

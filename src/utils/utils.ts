@@ -94,3 +94,11 @@ export function filterPointsWithinRadius(
     isPointWithinRadius({ latitude: point.latitude, longitude: point.longitude }, origin, radiusMeters)
   )
 }
+
+export const BloodComponentVN: Record<BloodComponentEnum, string> = {
+  [BloodComponentEnum.WholeBlood]: 'Máu toàn phần',
+  [BloodComponentEnum.RedBloodCells]: 'Hồng cầu',
+  [BloodComponentEnum.WhiteBloodCells]: 'Bạch cầu',
+  [BloodComponentEnum.Platelets]: 'Tiểu cầu',
+  [BloodComponentEnum.Plasma]: 'Huyết tương'
+}
