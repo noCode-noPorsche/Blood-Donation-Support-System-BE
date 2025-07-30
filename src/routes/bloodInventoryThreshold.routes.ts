@@ -4,7 +4,7 @@ import {
   updateBloodInventoryThresholdByIdController
 } from '~/controllers/bloodInventoryThreshold.controllers'
 import { filterMiddleware } from '~/middlewares/common.middlewares'
-import { isAdminValidator } from '~/middlewares/user.middlewares'
+import { isStaffOrAdminValidator } from '~/middlewares/user.middlewares'
 import { UpdateBloodInventoryThresholdReqBody } from '~/models/requests/BloodInventoryThreshold.requests'
 import { wrapAsync } from '~/utils/handler'
 
@@ -16,7 +16,7 @@ const bloodInventoryThreshold = express.Router()
  * Method: GET
  * Header: { Authorization: Bearer <access_token>}
  */
-bloodInventoryThreshold.get('/', isAdminValidator, wrapAsync(getAllBloodInventoryThresholdController))
+bloodInventoryThreshold.get('/', isStaffOrAdminValidator, wrapAsync(getAllBloodInventoryThresholdController))
 
 /**
  * Description. Update blood inventory threshold by id for Admin
@@ -27,7 +27,7 @@ bloodInventoryThreshold.get('/', isAdminValidator, wrapAsync(getAllBloodInventor
  */
 bloodInventoryThreshold.patch(
   '/:id',
-  isAdminValidator,
+  isStaffOrAdminValidator,
   filterMiddleware<UpdateBloodInventoryThresholdReqBody>(['threshold_unit_stable']),
   wrapAsync(updateBloodInventoryThresholdByIdController)
 )
