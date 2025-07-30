@@ -293,6 +293,15 @@ class DonationService {
           }
         },
         { $unwind: { path: '$user', preserveNullAndEmptyArrays: true } },
+        {
+          $lookup: {
+            from: 'donation_processes',
+            localField: 'donation_process_id',
+            foreignField: '_id',
+            as: 'donation_process'
+          }
+        },
+        { $unwind: { path: '$donation_process', preserveNullAndEmptyArrays: true } },
 
         // Join answers
         {
@@ -351,7 +360,8 @@ class DonationService {
                 question: '$question.name',
                 answer: '$answers.answers.answer'
               }
-            }
+            },
+            donation_process_status: { $first: '$donation_process.status' }
           }
         }
       ])
@@ -386,6 +396,15 @@ class DonationService {
           }
         },
         { $unwind: { path: '$user', preserveNullAndEmptyArrays: true } },
+        {
+          $lookup: {
+            from: 'donation_processes',
+            localField: 'donation_process_id',
+            foreignField: '_id',
+            as: 'donation_process'
+          }
+        },
+        { $unwind: { path: '$donation_process', preserveNullAndEmptyArrays: true } },
 
         // Join answers
         {
@@ -432,7 +451,8 @@ class DonationService {
                 question: '$question.name',
                 answer: '$answers.answers.answer'
               }
-            }
+            },
+            donation_process_status: { $first: '$donation_process.status' }
           }
         }
       ])
@@ -474,6 +494,15 @@ class DonationService {
           }
         },
         { $unwind: { path: '$user', preserveNullAndEmptyArrays: true } },
+        {
+          $lookup: {
+            from: 'donation_processes',
+            localField: 'donation_process_id',
+            foreignField: '_id',
+            as: 'donation_process'
+          }
+        },
+        { $unwind: { path: '$donation_process', preserveNullAndEmptyArrays: true } },
 
         // Join answers
         {
@@ -520,7 +549,8 @@ class DonationService {
                 question: '$question.name',
                 answer: '$answers.answers.answer'
               }
-            }
+            },
+            donation_process_status: { $first: '$donation_process.status' }
           }
         }
       ])
