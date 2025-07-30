@@ -12,7 +12,7 @@ import {
   UnderlyingHealthCondition
 } from '~/constants/enum'
 import { HTTP_STATUS } from '~/constants/httpStatus'
-import { HEALTH_CHECK_MESSAGES, REQUEST_MESSAGES, USER_MESSAGES } from '~/constants/messages'
+import { HEALTH_CHECK_MESSAGES, USER_MESSAGES } from '~/constants/messages'
 import { ErrorWithStatus } from '~/models/Error'
 import { UpdateHealthCheckReqBody } from '~/models/requests/HealthCheck.requests'
 import { calculateDonationVolume, convertTypeToComponentMap } from '~/utils/utils'

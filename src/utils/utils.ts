@@ -69,6 +69,64 @@ export const bloodGroupMap: Record<string, string[]> = {
   'O-': ['O-']
 }
 
+export const isCompatibleBloodUnit = async (
+  receiverGroupId: string,
+  donorGroupId: string,
+  componentType: BloodComponentEnum
+): Promise<boolean> => {
+  const receiverName = await bloodService.getBloodGroupNameById(receiverGroupId) // VD: "A+"
+  const donorName = await bloodService.getBloodGroupNameById(donorGroupId) // VD: "O-"
+
+  if (!receiverName) throw new Error(`Blood group not found for receiverGroupId: ${receiverGroupId}`)
+  if (!donorName) throw new Error(`Blood group not found for donorGroupId: ${donorGroupId}`)
+
+  // RBC Map
+  const rbcMap: Record<string, string[]> = {
+    'A+': ['A+', 'A-', 'O+', 'O-'],
+    'A-': ['A-', 'O-'],
+    'B+': ['B+', 'B-', 'O+', 'O-'],
+    'B-': ['B-', 'O-'],
+    'AB+': ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'],
+    'AB-': ['A-', 'B-', 'AB-', 'O-'],
+    'O+': ['O+', 'O-'],
+    'O-': ['O-']
+  }
+
+  // Plasma Map (đảo ngược ABO, bỏ Rh)
+  const plasmaMap: Record<string, string[]> = {
+    O: ['O'],
+    A: ['A', 'AB'],
+    B: ['B', 'AB'],
+    AB: ['AB']
+  }
+
+  // Platelets Map (ưu tiên cùng ABO, có thể relax nếu khẩn cấp)
+  const plateletsMap: Record<string, string[]> = {
+    A: ['A'],
+    B: ['B'],
+    AB: ['AB'],
+    O: ['O']
+  }
+
+  if (componentType === BloodComponentEnum.RedBloodCells) {
+    return rbcMap[receiverName]?.includes(donorName) ?? false
+  }
+
+  if (componentType === BloodComponentEnum.Plasma) {
+    const receiverAbo = receiverName.replace(/[+-]/, '') // "A+" -> "A"
+    const donorAbo = donorName.replace(/[+-]/, '') // "O-" -> "O"
+    return plasmaMap[receiverAbo]?.includes(donorAbo) ?? false
+  }
+
+  if (componentType === BloodComponentEnum.Platelets) {
+    const receiverAbo = receiverName.replace(/[+-]/, '')
+    const donorAbo = donorName.replace(/[+-]/, '')
+    return plateletsMap[receiverAbo]?.includes(donorAbo) ?? false
+  }
+
+  return false
+}
+
 export const convertTypeToComponentMap: Record<DonationType, BloodComponentEnum[]> = {
   [DonationType.WholeBlood]: [
     BloodComponentEnum.Platelets,

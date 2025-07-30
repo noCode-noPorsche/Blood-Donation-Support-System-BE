@@ -5,10 +5,10 @@ import { HTTP_STATUS } from '~/constants/httpStatus'
 import { BLOOD_MESSAGES, DONATION_MESSAGES } from '~/constants/messages'
 import { ErrorWithStatus } from '~/models/Error'
 import { UpdateBloodUnitsReqBody, UpdateStatusBloodUnitsReqBody } from '~/models/requests/BloodUnit.requests'
-import { bloodGroupMap, getExpirationDateByComponent, isCompatibleDonor } from '~/utils/utils'
-import databaseService from './database.services'
-import bloodService from './blood.services'
+import { bloodGroupMap, getExpirationDateByComponent } from '~/utils/utils'
 import { UserRole } from '../constants/enum'
+import bloodService from './blood.services'
+import databaseService from './database.services'
 config()
 
 class BloodUnitService {

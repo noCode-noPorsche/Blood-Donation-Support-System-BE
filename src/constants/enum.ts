@@ -110,18 +110,21 @@ export enum RequestType {
 export enum RequestProcessStatus {
   Pending = 'Pending',
   Approved = 'Approved',
-  Rejected = 'Rejected'
+  Rejected = 'Rejected',
+  Partial = 'Partial'
 }
 
 export enum RequestProcessBloodStatus {
   Pending = 'Pending',
   Selected = 'Selected',
   Canceled = 'Canceled',
-  Done = 'Done'
+  Done = 'Done',
+  Partial = 'Partial'
 }
 
 export enum RequestProcessDetailStatus {
   Pending = 'Pending',
   Matched = 'Matched',
-  Canceled = 'Canceled'
+  Canceled = 'Canceled',
+  Partial = 'Partial'
 }
