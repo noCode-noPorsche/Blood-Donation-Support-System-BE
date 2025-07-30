@@ -79,7 +79,7 @@ class LocationService {
       // Gửi thông báo tới từng người dùng (giả sử có hàm sendNotification)
       for (const user of nearbyUsers) {
         const title = 'Yêu cầu hỗ trợ hiến máu'
-        const body = `Người cần máu phù hợp đang ở gần bạn. Vui lòng kiểm tra ứng dụng để biết chi tiết.`
+        const body = `Người cần máu nhóm ${blood_group_name} đang ở cơ sở y tế gần bạn. Bạn có thể mở ứng dụng để lên đặt lịch hiến ngay và di chuyển tới cơ sở y tế được hỗ trợ.`
         // Lưu thông báo vào DB
         const notification = new Notification({
           receiver_id: user._id,
