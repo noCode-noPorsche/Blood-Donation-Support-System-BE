@@ -52,7 +52,7 @@ export interface ChangePasswordReqBody {
   confirm_password: string
 }
 
-export interface GetProfileByCitizenIdNumberReqParam {
+export interface GetProfileByCitizenIdNumberReqParam extends ParamsDictionary {
   citizen_id_number: string
 }
 
