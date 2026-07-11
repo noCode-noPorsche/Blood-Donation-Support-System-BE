@@ -36,7 +36,10 @@ export const loginController = async (req: Request, res: Response) => {
   const result = await usersService.login(user_id.toString(), fcm_token)
   res.json({
     message: USER_MESSAGES.LOGIN_SUCCESS,
-    result
+    data: {
+      access_token: result.access_token,
+      refresh_token: result.refresh_token
+    }
   })
 }
 
