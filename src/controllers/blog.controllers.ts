@@ -14,28 +14,21 @@ import blogServices from '~/services/blog.services'
 export const createBlogController = async (req: Request<ParamsDictionary, any, CreateBlogReqBody>, res: Response) => {
   const { user_id } = req.decode_authorization as TokenPayload
   const { body } = req
-  const blog = await blogServices.createBlog({ user_id, payload: body })
-  res.json({
-    message: BLOG_MESSAGES.CREATE_BLOG_SUCCESS,
-    result: blog
-  })
+
+  const result = await blogServices.createBlog({ user_id, payload: body })
+  res.sendSuccess?.(BLOG_MESSAGES.CREATE_BLOG_SUCCESS, { result })
 }
 
-export const getAllBlogsController = async (req: Request, res: Response) => {
-  const blogs = await blogServices.getAllBlogs()
-  res.json({
-    message: BLOG_MESSAGES.GET_ALL_BLOGS_SUCCESS,
-    result: blogs
-  })
+export const getAllBlogsController = async (_req: Request, res: Response) => {
+  const result = await blogServices.getAllBlogs()
+  res.sendSuccess?.(BLOG_MESSAGES.GET_ALL_BLOGS_SUCCESS, { result })
 }
 
 export const getBlogByIdController = async (req: Request<GetBlogByIdReqParams>, res: Response) => {
   const { id } = req.params
-  const blog = await blogServices.getBlogById(id)
-  res.json({
-    message: BLOG_MESSAGES.GET_BLOG_SUCCESS,
-    result: blog
-  })
+
+  const result = await blogServices.getBlogById(id)
+  res.sendSuccess?.(BLOG_MESSAGES.GET_BLOG_SUCCESS, { result })
 }
 
 export const updateBlogByIdController = async (
@@ -45,17 +38,14 @@ export const updateBlogByIdController = async (
   const { user_id } = req.decode_authorization as TokenPayload
   const { id } = req.params
   const { body } = req
-  const blog = await blogServices.updateBlogById({ id, payload: body, user_id })
-  res.json({
-    message: BLOG_MESSAGES.UPDATE_BLOG_SUCCESS,
-    result: blog
-  })
+
+  const result = await blogServices.updateBlogById({ id, payload: body, user_id })
+  res.sendSuccess?.(BLOG_MESSAGES.UPDATE_BLOG_SUCCESS, { result })
 }
 
 export const deleteBlogByIdController = async (req: Request<DeleteBlogByIdReqParams>, res: Response) => {
   const { id } = req.params
-  await blogServices.deleteBlogById(id)
-  res.json({
-    message: BLOG_MESSAGES.DELETE_BLOG_SUCCESS
-  })
+
+  const result = await blogServices.deleteBlogById(id)
+  res.sendSuccess?.(result.message)
 }

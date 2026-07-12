@@ -61,8 +61,10 @@ class BlogService {
         status: HTTP_STATUS.NOT_FOUND
       })
     }
-    const deleteBlog = await databaseService.blogs.deleteOne({ _id: new ObjectId(id) })
-    return deleteBlog
+    await databaseService.blogs.deleteOne({ _id: new ObjectId(id) })
+    return {
+      message: BLOG_MESSAGES.DELETE_BLOG_SUCCESS
+    }
   }
 }
 

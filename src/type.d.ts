@@ -8,4 +8,8 @@ declare module 'express' {
     decode_authorization?: TokenPayload
     decode_refresh_token?: TokenPayload
   }
+  interface Response {
+    // Định nghĩa hàm sendSuccess để tự động gợi ý message và data dạng Generic <T>
+    sendSuccess?<T = unknown>(message: string, data?: T): this
+  }
 }

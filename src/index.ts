@@ -1,25 +1,27 @@
-import express from 'express'
-import { defaultErrorHandler } from './middlewares/error.middlewares'
-import databaseService from './services/database.services'
-import usersRouter from './routes/user.routes'
-import bloodRouter from './routes/blood.routes'
 import cors from 'cors'
-import YAML from 'yaml'
+import express from 'express'
 import fs from 'fs'
 import path from 'path'
-import swaggerUi from 'swagger-ui-express'
 import swaggerJsdoc from 'swagger-jsdoc'
-import donationRouter from './routes/donation.routes'
-import blogRouter from './routes/blog.routes'
-import healthCheckRouter from './routes/healthCheck.routes'
-import bloodUnitRouter from './routes/bloodUnit.routes'
-import requestsRouter from './routes/request.routes'
-import dashboardRouter from './routes/dashboard.routes'
-import notificationRouter from './routes/notification.routes'
-import locationRouter from './routes/location.routes'
+import swaggerUi from 'swagger-ui-express'
+import YAML from 'yaml'
+import envConfig from '~/config'
+import { defaultResponseHandler } from '~/middlewares/response.middleware'
 import { scheduleJobs } from './jobs/defineJob'
-import questionRouter from './routes/question.routes'
+import { defaultErrorHandler } from './middlewares/error.middlewares'
+import blogRouter from './routes/blog.routes'
+import bloodRouter from './routes/blood.routes'
 import bloodInventoryThreshold from './routes/bloodInventoryThreshold.routes'
+import bloodUnitRouter from './routes/bloodUnit.routes'
+import dashboardRouter from './routes/dashboard.routes'
+import donationRouter from './routes/donation.routes'
+import healthCheckRouter from './routes/healthCheck.routes'
+import locationRouter from './routes/location.routes'
+import notificationRouter from './routes/notification.routes'
+import questionRouter from './routes/question.routes'
+import requestsRouter from './routes/request.routes'
+import usersRouter from './routes/user.routes'
+import databaseService from './services/database.services'
 
 async function startServer() {
   const file = fs.readFileSync(path.resolve('BE-swagger.yaml'), 'utf8')
@@ -59,7 +61,7 @@ async function startServer() {
       message: 'Dustin'
     })
   })
-
+  app.use(defaultResponseHandler)
   app.use('/api/users', usersRouter)
   app.use('/api/bloods', bloodRouter)
   app.use('/api/blood-units', bloodUnitRouter)
@@ -76,9 +78,8 @@ async function startServer() {
 
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 
-  const PORT = 8080
-  app.listen(PORT, () => {
-    console.log(`Server is running on PORT ${PORT}`)
+  app.listen(envConfig.PORT, () => {
+    console.log(`Server is running on PORT ${envConfig.PORT}`)
   })
 }
 

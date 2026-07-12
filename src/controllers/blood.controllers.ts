@@ -5,11 +5,8 @@ import { CreateBloodComponentReqBody, CreateBloodGroupReqBody } from '~/models/r
 import bloodService from '~/services/blood.services'
 
 export const getBloodGroupsController = async (req: Request, res: Response) => {
-  const bloodGroups = await bloodService.getBloodGroups()
-  res.json({
-    message: BLOOD_MESSAGES.GET_BLOOD_GROUPS_SUCCESS,
-    result: bloodGroups
-  })
+  const result = await bloodService.getBloodGroups()
+  res.sendSuccess?.(BLOOD_MESSAGES.GET_BLOOD_GROUPS_SUCCESS, { result })
 }
 
 export const createBloodGroupController = async (
@@ -17,16 +14,14 @@ export const createBloodGroupController = async (
   res: Response
 ) => {
   const { name } = req.body
-  const bloodGroup = await bloodService.createBloodGroup(name)
-  res.json(bloodGroup)
+
+  const result = await bloodService.createBloodGroup(name)
+  res.sendSuccess?.(BLOOD_MESSAGES.CREATE_BLOOD_GROUP_SUCCESS, { result })
 }
 
 export const getBloodComponentsController = async (req: Request, res: Response) => {
-  const bloodComponents = await bloodService.getBloodComponents()
-  res.json({
-    message: BLOOD_MESSAGES.GET_BLOOD_COMPONENTS_SUCCESS,
-    result: bloodComponents
-  })
+  const result = await bloodService.getBloodComponents()
+  res.sendSuccess?.(BLOOD_MESSAGES.GET_BLOOD_COMPONENTS_SUCCESS, { result })
 }
 
 export const createBloodComponentController = async (
@@ -34,6 +29,7 @@ export const createBloodComponentController = async (
   res: Response
 ) => {
   const { name } = req.body
-  const bloodComponent = await bloodService.createBloodComponent(name)
-  res.json(bloodComponent)
+
+  const result = await bloodService.createBloodComponent(name)
+  res.sendSuccess?.(BLOOD_MESSAGES.CREATE_BLOOD_COMPONENT_SUCCESS, { result })
 }

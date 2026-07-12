@@ -27,10 +27,8 @@ class BloodService {
   }
 
   async createBloodGroup(name: BloodGroupEnum) {
-    await databaseService.bloodGroups.insertOne(new BloodGroup({ name }))
-    return {
-      message: BLOOD_MESSAGES.CREATE_BLOOD_GROUP_SUCCESS
-    }
+    const bloodGroups = await databaseService.bloodGroups.insertOne(new BloodGroup({ name }))
+    return bloodGroups
   }
 
   async getBloodComponents() {
@@ -39,21 +37,19 @@ class BloodService {
   }
 
   async getBloodComponentNameById(id: string) {
-    const bloodComponentResult = await databaseService.bloodComponents.findOne({ _id: new ObjectId(id) })
-    if (!bloodComponentResult) {
+    const bloodComponent = await databaseService.bloodComponents.findOne({ _id: new ObjectId(id) })
+    if (!bloodComponent) {
       throw new ErrorWithStatus({
         message: BLOOD_MESSAGES.BLOOD_COMPONENT_NOT_FOUND,
         status: HTTP_STATUS.NOT_FOUND
       })
     }
-    return bloodComponentResult.name
+    return bloodComponent.name
   }
 
   async createBloodComponent(name: BloodComponentEnum) {
-    await databaseService.bloodComponents.insertOne(new BloodComponent({ name }))
-    return {
-      message: BLOOD_MESSAGES.CREATE_BLOOD_COMPONENT_SUCCESS
-    }
+    const bloodComponent = await databaseService.bloodComponents.insertOne(new BloodComponent({ name }))
+    return bloodComponent
   }
 
   async isBloodGroupExist(name: BloodGroupEnum) {

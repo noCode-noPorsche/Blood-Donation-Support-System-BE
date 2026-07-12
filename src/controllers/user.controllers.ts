@@ -34,12 +34,9 @@ export const loginController = async (req: Request, res: Response) => {
   }
 
   const result = await usersService.login(user_id.toString(), fcm_token)
-  res.json({
-    message: USER_MESSAGES.LOGIN_SUCCESS,
-    data: {
-      access_token: result.access_token,
-      refresh_token: result.refresh_token
-    }
+  res.sendSuccess?.(USER_MESSAGES.LOGIN_SUCCESS, {
+    access_token: result.access_token,
+    refresh_token: result.refresh_token
   })
 }
 
@@ -49,16 +46,16 @@ export const registerController = async (
   next: NextFunction
 ) => {
   const result = await usersService.register(req.body)
-  res.json({
-    message: USER_MESSAGES.REGISTER_SUCCESS,
-    result
+  res.sendSuccess?.(USER_MESSAGES.REGISTER_SUCCESS, {
+    access_token: result.access_token,
+    refresh_token: result.refresh_token
   })
 }
 
 export const logoutController = async (req: Request<ParamsDictionary, any, LogoutReqBody>, res: Response) => {
   const { refresh_token } = req.body
   const result = await usersService.logout(refresh_token)
-  res.json(result)
+  res.sendSuccess?.(result.message)
 }
 
 export const refreshTokenController = async (
@@ -67,28 +64,33 @@ export const refreshTokenController = async (
 ) => {
   const { refresh_token } = req.body
   const { user_id, role } = req.decode_refresh_token as TokenPayload
+
   const result = await usersService.refreshToken({ user_id, role, refresh_token })
-  res.json({
-    message: USER_MESSAGES.REFRESH_TOKEN_SUCCESS,
-    result
+  res.sendSuccess?.(USER_MESSAGES.REFRESH_TOKEN_SUCCESS, {
+    access_token: result.access_token,
+    refresh_token: result.refresh_token
   })
 }
 
 export const getMeController = async (req: Request, res: Response) => {
   const { user_id } = req.decode_authorization as TokenPayload
   const result = await usersService.getMe(user_id)
-  res.json({
-    message: USER_MESSAGES.GET_PROFILE_SUCCESS,
-    result
+  // res.json({
+  //   message: USER_MESSAGES.GET_PROFILE_SUCCESS,
+  //   result
+  // })
+  res.sendSuccess?.(USER_MESSAGES.GET_PROFILE_SUCCESS, {
+    user: result
   })
 }
 
 export const getAllUserController = async (req: Request, res: Response) => {
   const result = await usersService.getAllUsers()
-  res.json({
-    message: USER_MESSAGES.GET_PROFILE_SUCCESS,
-    result
-  })
+  // res.json({
+  //   message: USER_MESSAGES.GET_PROFILE_SUCCESS,
+  //   result
+  // })
+  res.sendSuccess?.(USER_MESSAGES.GET_PROFILE_SUCCESS, { result })
 }
 
 export const getProfileByCitizenIdNumberController = async (
@@ -97,20 +99,22 @@ export const getProfileByCitizenIdNumberController = async (
 ) => {
   const { citizen_id_number } = req.params
   const result = await usersService.getProfileByCitizenIdNumber(citizen_id_number)
-  res.json({
-    message: USER_MESSAGES.GET_PROFILE_SUCCESS,
-    result
-  })
+  // res.json({
+  //   message: USER_MESSAGES.GET_PROFILE_SUCCESS,
+  //   result
+  // })
+  res.sendSuccess?.(USER_MESSAGES.GET_PROFILE_SUCCESS, { result })
 }
 
 export const updateMeController = async (req: Request<ParamsDictionary, any, UpdateMeReqBody>, res: Response) => {
   const { user_id } = req.decode_authorization as TokenPayload
   const { body } = req
   const result = await usersService.updateMe(user_id, body)
-  res.json({
-    message: USER_MESSAGES.UPDATE_PROFILE_SUCCESS,
-    result
-  })
+  // res.json({
+  //   message: USER_MESSAGES.UPDATE_PROFILE_SUCCESS,
+  //   result
+  // })
+  res.sendSuccess?.(USER_MESSAGES.UPDATE_PROFILE_SUCCESS, { result })
 }
 
 export const changePasswordController = async (
@@ -119,14 +123,16 @@ export const changePasswordController = async (
 ) => {
   const { user_id } = req.decode_authorization as TokenPayload
   const { password } = req.body
+
   const result = await usersService.changePassword(user_id, password)
-  res.json(result)
+  res.sendSuccess?.(result.message)
 }
 
 export const changeIsActiveController = async (req: Request<ChangeIsActiveReqParam, any, any>, res: Response) => {
   const { user_id } = req.params
+
   const result = await usersService.changeIsActive(user_id)
-  res.json(result)
+  res.sendSuccess?.(result.message)
 }
 
 export const registerForAdminController = async (
@@ -134,8 +140,11 @@ export const registerForAdminController = async (
   res: Response
 ) => {
   const result = await usersService.registerForAdmin(req.body)
-  res.json({
-    message: USER_MESSAGES.REGISTER_SUCCESS,
+  // res.json({
+  //   message: USER_MESSAGES.REGISTER_SUCCESS,
+  //   result
+  // })
+  res.sendSuccess?.(USER_MESSAGES.REGISTER_SUCCESS, {
     result
   })
 }
@@ -146,6 +155,7 @@ export const changeRoleForAdminController = async (
 ) => {
   const { user_id } = req.params
   const { body } = req
+
   const result = await usersService.changeRoleForAdmin(user_id, body)
-  res.json(result)
+  res.sendSuccess?.(result.message)
 }

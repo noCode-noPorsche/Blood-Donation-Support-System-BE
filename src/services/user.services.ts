@@ -245,39 +245,64 @@ class UsersService {
   }
 
   async getMe(user_id: string) {
-    const users = await databaseService.users
-      .aggregate([
-        {
-          $match: {
-            _id: new ObjectId(user_id)
-          }
-        },
-        {
-          $lookup: {
-            from: 'blood_groups',
-            localField: 'blood_group_id',
-            foreignField: '_id',
-            as: 'blood_group'
-          }
-        },
-        {
-          $unwind: {
-            path: '$blood_group',
-            preserveNullAndEmptyArrays: true
-          }
-        },
-        {
-          $project: {
-            password: 0,
-            forgot_password_token: 0,
-            'blood_group._id': 0,
-            'blood_group.created_at': 0,
-            'blood_group.updated_at': 0
-          }
-        }
-      ])
-      .toArray()
-    return users[0]
+    // const users = await databaseService.users
+    //   .aggregate([
+    //     {
+    //       $match: {
+    //         _id: new ObjectId(user_id)
+    //       }
+    //     },
+    //     {
+    //       $lookup: {
+    //         from: 'blood_groups',
+    //         localField: 'blood_group_id',
+    //         foreignField: '_id',
+    //         as: 'blood_group'
+    //       }
+    //     },
+    //     {
+    //       $unwind: {
+    //         path: '$blood_group',
+    //         preserveNullAndEmptyArrays: true
+    //       }
+    //     },
+    //     {
+    //       $project: {
+    //         password: 0,
+    //         forgot_password_token: 0,
+    //         'blood_group._id': 0,
+    //         'blood_group.created_at': 0,
+    //         'blood_group.updated_at': 0
+    //       }
+    //     }
+    //   ])
+    //   .toArray()
+    // return users[0]
+    // 1. Tìm user trước, loại bỏ password
+    const user = await databaseService.users.findOne(
+      { _id: new ObjectId(user_id) },
+      { projection: { password: 0, forgot_password_token: 0 } }
+    )
+
+    if (!user) return null
+
+    let bloodGroupName = ''
+    if (user.blood_group_id) {
+      // Tìm nhanh nhóm máu, dùng projection để CHỈ LẤY ĐÚNG trường 'name' giúp DB giảm tải việc đọc đĩa
+      const bloodGroupInfo = await databaseService.bloodGroups.findOne(
+        { _id: new ObjectId(user.blood_group_id) },
+        { projection: { name: 1 } }
+      )
+      bloodGroupName = bloodGroupInfo?.name || ''
+    }
+
+    // Bóc tách bằng JS (tốc độ CPU tính bằng nano-giây, không lo ảnh hưởng performance)
+    const { blood_group_id, ...restUser } = user
+
+    return {
+      ...restUser,
+      blood_group: bloodGroupName
+    }
   }
 
   async updateMe(user_id: string, payload: UpdateMeReqBody) {
