@@ -28,7 +28,6 @@ import RequestRegistration from '~/models/schemas/RequestRegistration.schemas'
 import User from '~/models/schemas/User.schemas'
 import { convertTypeToComponentMap, isCompatibleBloodUnit, isCompatibleDonor } from '~/utils/utils'
 import databaseService from './database.services'
-import { create } from 'lodash'
 config()
 
 class RequestService {
