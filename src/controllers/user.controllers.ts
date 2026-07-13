@@ -36,7 +36,8 @@ export const loginController = async (req: Request, res: Response) => {
   const result = await usersService.login(user_id.toString(), fcm_token)
   res.sendSuccess?.(USER_MESSAGES.LOGIN_SUCCESS, {
     access_token: result.access_token,
-    refresh_token: result.refresh_token
+    refresh_token: result.refresh_token,
+    user: result.user
   })
 }
 
@@ -75,10 +76,6 @@ export const refreshTokenController = async (
 export const getMeController = async (req: Request, res: Response) => {
   const { user_id } = req.decode_authorization as TokenPayload
   const result = await usersService.getMe(user_id)
-  // res.json({
-  //   message: USER_MESSAGES.GET_PROFILE_SUCCESS,
-  //   result
-  // })
   res.sendSuccess?.(USER_MESSAGES.GET_PROFILE_SUCCESS, {
     user: result
   })
@@ -86,10 +83,6 @@ export const getMeController = async (req: Request, res: Response) => {
 
 export const getAllUserController = async (req: Request, res: Response) => {
   const result = await usersService.getAllUsers()
-  // res.json({
-  //   message: USER_MESSAGES.GET_PROFILE_SUCCESS,
-  //   result
-  // })
   res.sendSuccess?.(USER_MESSAGES.GET_PROFILE_SUCCESS, { result })
 }
 
@@ -98,22 +91,16 @@ export const getProfileByCitizenIdNumberController = async (
   res: Response
 ) => {
   const { citizen_id_number } = req.params
+
   const result = await usersService.getProfileByCitizenIdNumber(citizen_id_number)
-  // res.json({
-  //   message: USER_MESSAGES.GET_PROFILE_SUCCESS,
-  //   result
-  // })
   res.sendSuccess?.(USER_MESSAGES.GET_PROFILE_SUCCESS, { result })
 }
 
 export const updateMeController = async (req: Request<ParamsDictionary, any, UpdateMeReqBody>, res: Response) => {
   const { user_id } = req.decode_authorization as TokenPayload
   const { body } = req
+
   const result = await usersService.updateMe(user_id, body)
-  // res.json({
-  //   message: USER_MESSAGES.UPDATE_PROFILE_SUCCESS,
-  //   result
-  // })
   res.sendSuccess?.(USER_MESSAGES.UPDATE_PROFILE_SUCCESS, { result })
 }
 
@@ -140,10 +127,6 @@ export const registerForAdminController = async (
   res: Response
 ) => {
   const result = await usersService.registerForAdmin(req.body)
-  // res.json({
-  //   message: USER_MESSAGES.REGISTER_SUCCESS,
-  //   result
-  // })
   res.sendSuccess?.(USER_MESSAGES.REGISTER_SUCCESS, {
     result
   })

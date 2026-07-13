@@ -19,12 +19,9 @@ import donationService from '~/services/donation.services'
 //Donation - Health - Process
 export const getAllDonationHealthProcessByUserIdController = async (req: Request, res: Response) => {
   const { user_id } = req.decode_authorization as TokenPayload
-  const donationHealthProcess = await donationService.getAllDonationHealthProcessByUserId(user_id)
 
-  res.json({
-    message: DONATION_MESSAGES.GET_ALL_DONATION_REGISTRATIONS_SUCCESS,
-    result: donationHealthProcess
-  })
+  const result = await donationService.getAllDonationHealthProcessByUserId(user_id)
+  res.sendSuccess?.(DONATION_MESSAGES.GET_ALL_DONATION_REGISTRATIONS_SUCCESS, { result })
 }
 
 export const getDonationHealthProcessByDonationIdController = async (
@@ -32,12 +29,9 @@ export const getDonationHealthProcessByDonationIdController = async (
   res: Response
 ) => {
   const { id } = req.params
-  const donationHealthProcess = await donationService.getDonationHealthProcessByDonationId(id)
 
-  res.json({
-    message: DONATION_MESSAGES.GET_ALL_DONATION_REGISTRATIONS_SUCCESS,
-    result: donationHealthProcess
-  })
+  const result = await donationService.getDonationHealthProcessByDonationId(id)
+  res.sendSuccess?.(DONATION_MESSAGES.GET_ALL_DONATION_REGISTRATIONS_SUCCESS, { result })
 }
 
 export const getStatusDonationHealthProcessByDonationIdController = async (
@@ -45,12 +39,9 @@ export const getStatusDonationHealthProcessByDonationIdController = async (
   res: Response
 ) => {
   const { id } = req.params
-  const donationHealthProcessStatus = await donationService.getStatusDonationHealthProcessByDonationId(id)
 
-  res.json({
-    message: DONATION_MESSAGES.GET_STATUS_DONATION_HEALTH_PROCESS_SUCCESS,
-    result: donationHealthProcessStatus
-  })
+  const result = await donationService.getStatusDonationHealthProcessByDonationId(id)
+  res.sendSuccess?.(DONATION_MESSAGES.GET_STATUS_DONATION_HEALTH_PROCESS_SUCCESS, { result })
 }
 
 //Donation Registration
@@ -60,24 +51,17 @@ export const createDonationRegistrationController = async (
 ) => {
   const { user_id } = req.decode_authorization as TokenPayload
   const { body } = req
-  const results = await donationService.createDonationRegistration({
+
+  const result = await donationService.createDonationRegistration({
     user_id,
     payload: body
   })
-
-  res.json({
-    message: DONATION_MESSAGES.CREATE_DONATION_REGISTRATION_SUCCESS,
-    result: results
-  })
+  res.sendSuccess?.(DONATION_MESSAGES.CREATE_DONATION_REGISTRATION_SUCCESS, { result })
 }
 
 export const getAllDonationRegistrationsController = async (req: Request, res: Response) => {
-  const donationRegistration = await donationService.getAllDonationRegistration()
-
-  res.json({
-    message: DONATION_MESSAGES.GET_ALL_DONATION_REGISTRATIONS_SUCCESS,
-    result: donationRegistration
-  })
+  const result = await donationService.getAllDonationRegistration()
+  res.sendSuccess?.(DONATION_MESSAGES.GET_ALL_DONATION_REGISTRATIONS_SUCCESS, { result })
 }
 
 export const getDonationRegistrationByIdController = async (
@@ -85,22 +69,16 @@ export const getDonationRegistrationByIdController = async (
   res: Response
 ) => {
   const { id } = req.params
-  const donationRegistrationById = await donationService.getDonationRegistrationById(id)
 
-  res.json({
-    message: DONATION_MESSAGES.GET_DONATION_REGISTRATIONS_SUCCESS,
-    result: donationRegistrationById
-  })
+  const result = await donationService.getDonationRegistrationById(id)
+  res.sendSuccess?.(DONATION_MESSAGES.GET_DONATION_REGISTRATIONS_SUCCESS, { result })
 }
 
 export const getDonationRegistrationByUserIdController = async (req: Request, res: Response) => {
   const { user_id } = req.decode_authorization as TokenPayload
-  const donationRegistrationByUserId = await donationService.getDonationRegistrationByUserId(user_id)
 
-  res.json({
-    message: DONATION_MESSAGES.GET_DONATION_REGISTRATIONS_SUCCESS,
-    result: donationRegistrationByUserId
-  })
+  const result = await donationService.getDonationRegistrationByUserId(user_id)
+  res.sendSuccess?.(DONATION_MESSAGES.GET_DONATION_REGISTRATIONS_SUCCESS, { result })
 }
 
 export const updateDonationRegistrationController = async (
@@ -109,15 +87,12 @@ export const updateDonationRegistrationController = async (
 ) => {
   const { id } = req.params
   const { body } = req
-  const updatedRegistration = await donationService.updateDonationRegistration({
+
+  const result = await donationService.updateDonationRegistration({
     id,
     payload: body
   })
-
-  res.json({
-    message: DONATION_MESSAGES.UPDATE_DONATION_REGISTRATION_SUCCESS,
-    result: updatedRegistration
-  })
+  res.sendSuccess?.(DONATION_MESSAGES.UPDATE_DONATION_REGISTRATION_SUCCESS, { result })
 }
 
 //Donation Process
@@ -138,12 +113,8 @@ export const getAllDonationProcessesController = async (req: Request, res: Respo
     filter.status = status
   }
 
-  const donationRequestsProcess = await donationService.getAllDonationProcesses(filter)
-
-  res.json({
-    message: DONATION_MESSAGES.GET_ALL_DONATION_REQUEST_PROCESS_SUCCESS,
-    result: donationRequestsProcess
-  })
+  const result = await donationService.getAllDonationProcesses(filter)
+  res.sendSuccess?.(DONATION_MESSAGES.GET_ALL_DONATION_REQUEST_PROCESS_SUCCESS, { result })
 }
 
 export const updateDonationProcessController = async (
@@ -153,26 +124,20 @@ export const updateDonationProcessController = async (
   const { id } = req.params
   const { user_id } = req.decode_authorization as TokenPayload
   const { body } = req
-  const updatedProcess = await donationService.updateDonationProcess({
+
+  const result = await donationService.updateDonationProcess({
     id,
     payload: body,
     user_id
   })
-
-  res.json({
-    message: DONATION_MESSAGES.UPDATE_DONATION_REQUEST_PROCESS_SUCCESS,
-    result: updatedProcess
-  })
+  res.sendSuccess?.(DONATION_MESSAGES.UPDATE_DONATION_REQUEST_PROCESS_SUCCESS, { result })
 }
 
 export const getDonationProcessByUserIdController = async (req: Request, res: Response) => {
   const { user_id } = req.decode_authorization as TokenPayload
-  const donationProcess = await donationService.getDonationProcessByUserId(user_id)
 
-  res.json({
-    message: DONATION_MESSAGES.GET_DONATION_REQUEST_PROCESS_SUCCESS,
-    result: donationProcess
-  })
+  const result = await donationService.getDonationProcessByUserId(user_id)
+  res.sendSuccess?.(DONATION_MESSAGES.GET_DONATION_REQUEST_PROCESS_SUCCESS, { result })
 }
 
 export const getDonationProcessesByIdController = async (
@@ -180,10 +145,7 @@ export const getDonationProcessesByIdController = async (
   res: Response
 ) => {
   const { id } = req.params
-  const donationProcess = await donationService.getDonationProcessById(id)
 
-  res.json({
-    message: DONATION_MESSAGES.GET_DONATION_REQUEST_PROCESS_SUCCESS,
-    result: donationProcess
-  })
+  const result = await donationService.getDonationProcessById(id)
+  res.sendSuccess?.(DONATION_MESSAGES.GET_DONATION_REQUEST_PROCESS_SUCCESS, { result })
 }

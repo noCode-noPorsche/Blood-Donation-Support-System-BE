@@ -1649,7 +1649,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  result:
+                  data:
                     type: array
         '401':
           description: UnAuthorization
@@ -1670,7 +1670,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  result:
+                  data:
                     type: array
 
         '401':
@@ -1812,7 +1812,7 @@ paths:
                   message:
                     type: string
                     example: 'Create question success'
-                  result:
+                  data:
                     type: object
                     properties:
                       _id:
@@ -2057,21 +2057,6 @@ components:
         refresh_token:
           type: string
           example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjgyZjdiZTM1N2FlNzVhMGI5NmI3YWM1IiwidG9rZW5fdHlwZSI6MCwicm9sZSI6IlN0YWZmIiwiaWF0IjoxNzQ3OTQ0ODk0LCJleHAiOjE3NDc5NDU3OTR9.WpOyu0HlgqU2fg7ElIakw-JVM5TWIUaVb-syRrgovOI
-    SuccessAuthentication:
-      type: object
-      properties:
-        message:
-          type: string
-          example: success
-        result:
-          type: object
-          properties:
-            access_token:
-              type: string
-              example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjgyZjdiZTM1N2FlNzVhMGI5NmI3YWM1IiwidG9rZW5fdHlwZSI6MCwicm9sZSI6IlN0YWZmIiwiaWF0IjoxNzQ3OTQ0ODk0LCJleHAiOjE3NDc5NDU3OTR9.WpOyu0HlgqU2fg7ElIakw-JVM5TWIUaVb-syRrgovOI
-            refresh_token:
-              type: string
-              example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjgyZjdiZTM1N2FlNzVhMGI5NmI3YWM1IiwidG9rZW5fdHlwZSI6MCwicm9sZSI6IlN0YWZmIiwiaWF0IjoxNzQ3OTQ0ODk0LCJleHAiOjE3NDc5NDU3OTR9.WpOyu0HlgqU2fg7ElIakw-JVM5TWIUaVb-syRrgovOI
     User:
       type: object
       properties:
@@ -2123,6 +2108,24 @@ components:
           type: string
           format: date-time
           example: 2025-05-22T18:17:35.277Z
+    SuccessAuthentication:
+      type: object
+      properties:
+        message:
+          type: string
+          example: success
+        data:
+          type: object
+          properties:
+            user:
+              $ref: '#/components/schemas/User'
+            access_token:
+              type: string
+              example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjgyZjdiZTM1N2FlNzVhMGI5NmI3YWM1IiwidG9rZW5fdHlwZSI6MCwicm9sZSI6IlN0YWZmIiwiaWF0IjoxNzQ3OTQ0ODk0LCJleHAiOjE3NDc5NDU3OTR9.WpOyu0HlgqU2fg7ElIakw-JVM5TWIUaVb-syRrgovOI
+            refresh_token:
+              type: string
+              example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjgyZjdiZTM1N2FlNzVhMGI5NmI3YWM1IiwidG9rZW5fdHlwZSI6MCwicm9sZSI6IlN0YWZmIiwiaWF0IjoxNzQ3OTQ0ODk0LCJleHAiOjE3NDc5NDU3OTR9.WpOyu0HlgqU2fg7ElIakw-JVM5TWIUaVb-syRrgovOI
+
     UserGender:
       type: string
       enum: [Other, Male, Female]

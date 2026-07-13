@@ -15,9 +15,5 @@ export const findCompatibleDonorsNearby = async (
     radiusKm,
     blood_group_name: blood_group_name as BloodGroupEnum
   })
-
-  res.json({
-    message: LOCATION_MESSAGES.FIND_COMPATIBLE_DONORS_NEARBY_SUCCESS,
-    result
-  })
+  res.sendSuccess?.(LOCATION_MESSAGES.FIND_COMPATIBLE_DONORS_NEARBY_SUCCESS, { result })
 }

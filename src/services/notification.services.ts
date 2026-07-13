@@ -38,12 +38,6 @@ class NotificationService {
       { receiver_id: new ObjectId(userId), is_read: false },
       { $set: { is_read: true } }
     )
-    // if (result.modifiedCount === 0) {
-    //   throw new ErrorWithStatus({
-    //     message: NOTIFICATION_MESSAGES.MARK_NOTIFICATION_AS_READ_FAILED,
-    //     status: HTTP_STATUS.NOT_FOUND
-    //   })
-    // }
     return notifications
   }
 }
