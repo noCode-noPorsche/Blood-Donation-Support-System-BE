@@ -12,7 +12,10 @@ interface DonationRegistrationType {
   donation_type: DonationType
   created_at: Date
   updated_at: Date
+  updated_by: ObjectId
   start_date_donation: Date
+  token: string
+  checked_in_by: ObjectId | null
 }
 
 export default class DonationRegistration {
@@ -26,7 +29,10 @@ export default class DonationRegistration {
   donation_type: DonationType
   created_at: Date
   updated_at: Date
+  updated_by: ObjectId
   start_date_donation: Date
+  token: string
+  checked_in_by: ObjectId | null
   constructor(donationRegistration: DonationRegistrationType) {
     const date = new Date()
     this._id = donationRegistration._id || new ObjectId()
@@ -39,6 +45,9 @@ export default class DonationRegistration {
     this.donation_type = donationRegistration.donation_type || DonationType.WholeBlood
     this.created_at = donationRegistration.created_at || date
     this.updated_at = donationRegistration.updated_at || date
+    this.updated_by = donationRegistration.updated_by
     this.start_date_donation = donationRegistration.start_date_donation || date
+    this.token = donationRegistration.token
+    this.checked_in_by = donationRegistration.checked_in_by || null
   }
 }

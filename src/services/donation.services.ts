@@ -1,8 +1,15 @@
 import { config } from 'dotenv'
 import { ObjectId } from 'mongodb'
-import { BloodUnitStatus, DonationProcessStatus, DonationRegistrationStatus, HealthCheckStatus } from '~/constants/enum'
+import {
+  BloodUnitStatus,
+  DonationProcessStatus,
+  DonationRegistrationStatus,
+  HealthCheckStatus,
+  UserGender,
+  UserRole
+} from '~/constants/enum'
 import { HTTP_STATUS } from '~/constants/httpStatus'
-import { DONATION_MESSAGES, NOTIFICATION_MESSAGES } from '~/constants/messages'
+import { DONATION_MESSAGES, NOTIFICATION_MESSAGES, USER_MESSAGES } from '~/constants/messages'
 import { ErrorWithStatus } from '~/models/Error'
 import {
   CreateDonationRegistrationReqBody,
@@ -18,10 +25,13 @@ import { sendPushNotification } from '~/utils/notification'
 import { convertTypeToComponentMap } from '~/utils/utils'
 import databaseService from './database.services'
 import Answer from '~/models/schemas/Answer.schemas'
+import { randomId } from '~/utils/helper'
+import { hashPassword } from '~/utils/crypto'
+import User from '~/models/schemas/User.schemas'
 config()
 
 class DonationService {
-  //Donation - Health - Process
+  // -- DONATION - HEALTH - PROCESS --
   async getAllDonationHealthProcessByUserId(user_id: string) {
     const userObjectId = new ObjectId(user_id)
 
@@ -152,7 +162,8 @@ class DonationService {
     return combined
   }
 
-  //Donation Registration
+  // -- DONATION REGISTRATION --
+  // Tạo Donation Registration
   async createDonationRegistration({
     user_id,
     payload
@@ -162,19 +173,103 @@ class DonationService {
   }) {
     const donationProcessId = new ObjectId()
     const healthCheckId = new ObjectId()
+    const token = randomId()
 
-    const resultUser = await databaseService.users.findOne({ _id: new ObjectId(user_id) })
+    // Lấy thông tin người đang thực hiện thao tác tạo
+    const actorUser = await databaseService.users.findOne({ _id: new ObjectId(user_id) })
 
-    //Kiểm tra blood_group_id
+    // Xác định ai là người được đăng ký hiến máu (Bệnh nhân)
+    let donatorUser: User
+
+    if (actorUser?.role === UserRole.Admin || actorUser?.role === UserRole.Staff) {
+      // Nếu STAFF/ADMIN đang thực hiện:
+
+      // Staff/Admin bắt buộc phải truyền CCCD của bệnh nhân
+      if (!payload.citizen_id_number) {
+        throw new ErrorWithStatus({
+          message: 'Số CCCD là bắt buộc khi Admin/Staff tạo đơn đăng ký hiến máu cho bệnh nhân!',
+          status: HTTP_STATUS.BAD_REQUEST
+        })
+      }
+
+      // Chặn không cho Admin/Staff tự điền CCCD của mình để tự đăng ký
+      if (payload.citizen_id_number === actorUser.citizen_id_number) {
+        throw new ErrorWithStatus({
+          message: 'Admin hoặc Staff không thể tự đăng ký lịch hiến máu cho chính mình!',
+          status: HTTP_STATUS.BAD_REQUEST
+        })
+      }
+
+      // Tìm kiếm bệnh nhân dựa trên citizen_id_number đã có tài khoản chưa
+      const donatorUserExist = await databaseService.users.findOne({ citizen_id_number: payload.citizen_id_number })
+
+      // Nếu chưa có tài khoản thì tự động đăng ký user mới
+      if (!donatorUserExist) {
+        if (!payload.phone || !payload.full_name) {
+          throw new ErrorWithStatus({
+            message: 'Số điện thoại và tên là bắt buộc khi tạo tài khoản mới!',
+            status: HTTP_STATUS.BAD_REQUEST
+          })
+        }
+
+        const defaultPassword = hashPassword('Bi@18102003') // Hash mật khẩu mặc định
+        const date = new Date()
+        const newUser = new User({
+          citizen_id_number: payload.citizen_id_number,
+          full_name: payload.full_name,
+          phone: payload.phone,
+          password: defaultPassword,
+          role: UserRole.Customer,
+          blood_group_id: payload.blood_group_id ? new ObjectId(payload.blood_group_id) : null,
+          created_at: date,
+          updated_at: date,
+          location: {
+            type: 'Point',
+            coordinates: [0, 0]
+          },
+          gender: (payload.gender ?? UserGender.Other) as UserGender,
+          address: '',
+          number_of_donations: 0,
+          number_of_requests: 0,
+          forgot_password_token: '',
+          fcm_token: '',
+          is_active: true,
+          weight: 0,
+          avatar_url: '',
+          date_of_birth: new Date(payload.date_of_birth as string),
+          email: ''
+        })
+
+        const result = await databaseService.users.insertOne(newUser)
+        donatorUser = { ...newUser, _id: result.insertedId }
+      } else {
+        // Nếu đã có tài khoản sẵn trong hệ thống
+        donatorUser = donatorUserExist
+      }
+    } else {
+      // Nếu Customer đang tự thực hiện:
+      donatorUser = actorUser as User
+    }
+
+    if (!donatorUser) {
+      throw new ErrorWithStatus({
+        message: USER_MESSAGES.USER_NOT_FOUND,
+        status: HTTP_STATUS.NOT_FOUND
+      })
+    }
+
+    // Kiểm tra blood_group_id có gửi về hay ko hoặc lấy từ user
     const isValidBloodGroupId = ObjectId.isValid(payload.blood_group_id as string)
-    const bloodGroupId = isValidBloodGroupId ? new ObjectId(payload.blood_group_id) : resultUser?.blood_group_id || null
+    const bloodGroupId = isValidBloodGroupId
+      ? new ObjectId(payload.blood_group_id)
+      : donatorUser?.blood_group_id || null
 
-    //Từ donation_type ra name và tìm id theo name và gán vào 1 mảng
+    // Từ donation_type ra name và tìm id theo name và gán vào 1 mảng
     const componentNames = convertTypeToComponentMap[payload.donation_type]
     const componentDocs = await databaseService.bloodComponents.find({ name: { $in: componentNames } }).toArray()
     const componentIds = componentDocs.map((comp) => comp._id)
 
-    // // Lấy tất cả câu hỏi từ DB
+    // Lấy tất cả câu hỏi từ DB
     // const questions = await databaseService.questions.find().toArray()
 
     // Lọc câu trả lời từ payload
@@ -186,10 +281,10 @@ class DonationService {
     // Kiểm tra có câu trả lời TRUE hay không
     const hasRejectedAnswer = answers.some((ans) => ans.answer === true)
 
-    //Tạo mới Donation Registration
+    // Tạo mới Donation Registration
     const newDonationRegistration = new DonationRegistration({
       ...payload,
-      user_id: new ObjectId(user_id),
+      user_id: donatorUser._id as ObjectId,
       donation_process_id: donationProcessId,
       health_check_id: healthCheckId,
       blood_group_id: bloodGroupId,
@@ -198,7 +293,10 @@ class DonationService {
       status: hasRejectedAnswer ? DonationRegistrationStatus.Rejected : DonationRegistrationStatus.Approved,
       start_date_donation: new Date(payload.start_date_donation),
       created_at: new Date(),
-      updated_at: new Date()
+      updated_at: new Date(),
+      token,
+      checked_in_by: null,
+      updated_by: actorUser?._id as ObjectId
     })
     const resultRegistration = await databaseService.donationRegistrations.insertOne(newDonationRegistration)
 
@@ -212,7 +310,7 @@ class DonationService {
     })
     await databaseService.answers.insertOne(newAnswer)
 
-    //Đồng thời tạo mới Health Check
+    // Đồng thời tạo mới Health Check
     const newHealthCheck = new HealthCheck({
       _id: healthCheckId,
       user_id: new ObjectId(user_id),
@@ -236,9 +334,9 @@ class DonationService {
       created_at: new Date(),
       updated_at: new Date()
     })
-    const resultHealthCheck = await databaseService.healthChecks.insertOne(newHealthCheck)
+    await databaseService.healthChecks.insertOne(newHealthCheck)
 
-    //Đồng thời tạo mới Donation Processes
+    // Đồng thời tạo mới Donation Processes
     const newDonationProcess = new DonationProcess({
       _id: donationProcessId,
       user_id: new ObjectId(user_id),
@@ -254,7 +352,7 @@ class DonationService {
       created_at: new Date(),
       updated_at: new Date()
     })
-    const resultProcess = await databaseService.donationProcesses.insertOne(newDonationProcess)
+    await databaseService.donationProcesses.insertOne(newDonationProcess)
 
     // Nếu có câu trả lời true -> quăng lỗi sau khi tạo dữ liệu
     if (hasRejectedAnswer) {
@@ -264,14 +362,33 @@ class DonationService {
       })
     }
 
-    return {
-      donationRegistration: resultRegistration,
-      donationProcess: resultProcess,
-      healthCheck: resultHealthCheck
+    // Lưu thông báo vào DB
+    const titleSuccess = NOTIFICATION_MESSAGES.REGISTER_DONATION_SUCCESS
+    const messageSuccess = NOTIFICATION_MESSAGES.REGISTER_DONATION_SUCCESS_BODY
+
+    const titleFail = NOTIFICATION_MESSAGES.REGISTER_DONATION_FAIL
+    const messageFail = NOTIFICATION_MESSAGES.REGISTER_DONATION_FAIL_BODY
+
+    const notification = new Notification({
+      receiver_id: donatorUser?._id as ObjectId,
+      donation_registration_id: resultRegistration.insertedId,
+      title: hasRejectedAnswer ? titleFail : titleSuccess,
+      message: hasRejectedAnswer ? messageFail : messageSuccess
+    })
+    await databaseService.notifications.insertOne(notification)
+    // Gửi push notification
+    if (donatorUser?.fcm_token) {
+      await sendPushNotification({
+        fcmToken: donatorUser.fcm_token,
+        title: hasRejectedAnswer ? titleFail : titleSuccess,
+        body: hasRejectedAnswer ? messageFail : messageSuccess
+      })
     }
+    return
   }
 
-  async getAllDonationRegistration() {
+  // Lấy danh sách Donation Registration
+  async getAllDonationRegistration({ limit, page }: { limit: number; page: number }) {
     const donationRegistration = await databaseService.donationRegistrations
       .aggregate([
         // Join blood group
@@ -284,6 +401,7 @@ class DonationService {
           }
         },
         { $unwind: { path: '$blood_group', preserveNullAndEmptyArrays: true } },
+        // Join user
         {
           $lookup: {
             from: 'users',
@@ -293,6 +411,7 @@ class DonationService {
           }
         },
         { $unwind: { path: '$user', preserveNullAndEmptyArrays: true } },
+        // Join donation process
         {
           $lookup: {
             from: 'donation_processes',
@@ -354,7 +473,7 @@ class DonationService {
             full_name: { $first: '$user.full_name' },
             citizen_id_number: { $first: '$user.citizen_id_number' },
             phone: { $first: '$user.phone' },
-            blood_group_name: { $first: '$blood_group.name' },
+            blood_group: { $first: '$blood_group.name' },
             answers: {
               $push: {
                 question: '$question.name',
@@ -363,13 +482,32 @@ class DonationService {
             },
             donation_process_status: { $first: '$donation_process.status' }
           }
+        },
+        {
+          $sort: { created_at: -1 }
+        },
+        {
+          $skip: limit * (page - 1) // Công thức phân trang
+        },
+        {
+          $limit: limit
         }
       ])
       .toArray()
 
-    return donationRegistration
+    const totalItems = await databaseService.donationRegistrations.countDocuments()
+    const totalPages = Math.ceil(totalItems / limit)
+
+    return {
+      totalItems,
+      limit,
+      page,
+      totalPages,
+      items: donationRegistration
+    }
   }
 
+  // Lấy Donation Registration By Id
   async getDonationRegistrationById(id: string) {
     const donationRegistration = await databaseService.donationRegistrations
       .aggregate([
@@ -445,7 +583,7 @@ class DonationService {
             full_name: { $first: '$user.full_name' },
             citizen_id_number: { $first: '$user.citizen_id_number' },
             phone: { $first: '$user.phone' },
-            blood_group_name: { $first: '$blood_group.name' },
+            blood_group: { $first: '$blood_group.name' },
             answers: {
               $push: {
                 question: '$question.name',
@@ -468,6 +606,7 @@ class DonationService {
     return donationRegistration[0]
   }
 
+  // Lấy danh sách Donation Registration By User Id
   async getDonationRegistrationByUserId(user_id: string) {
     const donationRegistration = await databaseService.donationRegistrations
       .aggregate([
@@ -559,10 +698,20 @@ class DonationService {
     return donationRegistration
   }
 
-  async updateDonationRegistration({ id, payload }: { id: string; payload: UpdateDonationRegistrationReqBody }) {
-    const existsDonationRegistration = await databaseService.donationRegistrations.findOne({ _id: new ObjectId(id) })
+  // Cập nhật Donation Registration By Id
+  async updateDonationRegistration({
+    id,
+    payload,
+    user_id
+  }: {
+    id: string
+    payload: UpdateDonationRegistrationReqBody
+    user_id: string
+  }) {
+    const donationRegistration = await databaseService.donationRegistrations.findOne({ _id: new ObjectId(id) })
+    const user = await databaseService.users.findOne({ _id: new ObjectId(user_id) })
 
-    if (!existsDonationRegistration) {
+    if (!donationRegistration) {
       throw new ErrorWithStatus({
         message: DONATION_MESSAGES.DONATION_REGISTRATION_NOT_FOUND,
         status: HTTP_STATUS.NOT_FOUND
@@ -570,21 +719,48 @@ class DonationService {
     }
 
     // Nếu status hiện tại là Rejected => không cho phép cập nhật
-    if (existsDonationRegistration.status === DonationRegistrationStatus.Rejected) {
+    if (donationRegistration.status === DonationRegistrationStatus.Rejected) {
       throw new ErrorWithStatus({
         message: DONATION_MESSAGES.DONATION_REGISTRATION_REJECTED_CANNOT_UPDATE,
         status: HTTP_STATUS.BAD_REQUEST
       })
     }
 
+    // Nếu status hiện tại là Checked In => không cho phép cập nhật
+    if (donationRegistration.status === DonationRegistrationStatus.CheckedIn) {
+      throw new ErrorWithStatus({
+        message: DONATION_MESSAGES.DONATION_REGISTRATION_CHECKED_IN_CANNOT_UPDATE,
+        status: HTTP_STATUS.BAD_REQUEST
+      })
+    }
+
+    // Kiểm tra token mã QR
+    if (payload.status === DonationRegistrationStatus.CheckedIn) {
+      if (user?.role === UserRole.Customer) {
+        throw new ErrorWithStatus({
+          message: 'Bạn không thể tự thực hiện hành động Check-in này.',
+          status: HTTP_STATUS.FORBIDDEN
+        })
+      }
+
+      // Kiểm tra token truyền lên từ mã QR có trùng khớp với token trong DB không
+      if (!payload.token || payload.token !== donationRegistration.token) {
+        throw new ErrorWithStatus({
+          message: 'Mã QR Check-in không hợp lệ!',
+          status: HTTP_STATUS.BAD_REQUEST
+        })
+      }
+    }
+
     const isValidBloodGroupId = ObjectId.isValid(payload.blood_group_id as string)
     const bloodGroupId = isValidBloodGroupId
       ? new ObjectId(payload.blood_group_id)
-      : existsDonationRegistration.blood_group_id
+      : donationRegistration.blood_group_id
 
     const updateFields: Record<string, any> = {
-      status: payload.status || existsDonationRegistration.status,
-      blood_group_id: bloodGroupId
+      status: payload.status || donationRegistration.status,
+      blood_group_id: bloodGroupId,
+      checked_in_by: payload.status === DonationRegistrationStatus.CheckedIn ? user_id : null
     }
 
     if (bloodGroupId) {
@@ -592,7 +768,7 @@ class DonationService {
 
       // Cập nhật luôn blood_group_id của user
       await databaseService.users.updateOne(
-        { _id: existsDonationRegistration.user_id },
+        { _id: donationRegistration.user_id },
         {
           $set: {
             blood_group_id: bloodGroupId
@@ -601,7 +777,7 @@ class DonationService {
         }
       )
 
-      //Cập nhật blood_group_id trong health checks
+      // Cập nhật blood_group_id trong Health Checks
       await databaseService.healthChecks.updateOne(
         { donation_registration_id: new ObjectId(id) },
         {
@@ -610,7 +786,7 @@ class DonationService {
         }
       )
 
-      //Cập nhật blood_group_id trong donation processes
+      // Cập nhật blood_group_id trong Donation Processes
       await databaseService.donationProcesses.updateOne(
         { donation_registration_id: new ObjectId(id) },
         {
@@ -619,9 +795,10 @@ class DonationService {
         }
       )
     }
+
     if (payload.start_date_donation) {
       updateFields.start_date_donation = new Date(payload.start_date_donation)
-      //Cập nhật start_date_donation trong donation processes
+      // Cập nhật donation_date trong Donation Processes
       await databaseService.donationProcesses.updateOne(
         { donation_registration_id: new ObjectId(id) },
         {
@@ -633,10 +810,10 @@ class DonationService {
 
     // Nếu có thay đổi loại hiến
     let componentIds: ObjectId[] = []
-    if ('donation_type' in payload && payload.donation_type) {
+    if (payload.donation_type) {
       updateFields.donation_type = payload.donation_type
 
-      //Map loại hiến sang các thành phần máu
+      // Map loại hiến sang các thành phần máu
       const componentNames = convertTypeToComponentMap[payload.donation_type]
       const componentDocs = await databaseService.bloodComponents.find({ name: { $in: componentNames } }).toArray()
 
@@ -644,7 +821,7 @@ class DonationService {
       updateFields.blood_component_ids = componentIds
     }
 
-    // Cập nhật donation registrations
+    // Cập nhật Donation Registrations
     const result = await databaseService.donationRegistrations.findOneAndUpdate(
       { _id: new ObjectId(id) },
       {
@@ -653,7 +830,7 @@ class DonationService {
       },
       { returnDocument: 'after' }
     )
-    // Nếu có thay đổi loại hiến, cập nhật luôn bảng healthChecks
+    // Nếu có thay đổi loại hiến, cập nhật luôn bảng Health Checks
     if (payload.donation_type && componentIds.length > 0) {
       await databaseService.healthChecks.updateOne(
         { donation_registration_id: new ObjectId(id) },
@@ -667,22 +844,17 @@ class DonationService {
       )
     }
 
-    // Gửi thông báo nếu status chuyển sang "checked-in" và trước đó chưa phải checked-in
-    if (
-      payload.status === DonationRegistrationStatus.CheckedIn &&
-      existsDonationRegistration.status !== DonationRegistrationStatus.CheckedIn
-    ) {
-      const user = await databaseService.users.findOne({ _id: existsDonationRegistration.user_id })
-
+    // Gửi thông báo nếu status chuyển sang "Checked In"
+    if (payload.status === DonationRegistrationStatus.CheckedIn) {
       // Lưu thông báo vào DB
       const title = NOTIFICATION_MESSAGES.CHECKED_IN_DONATION_SUCCESS
-      const body = NOTIFICATION_MESSAGES.CHECKED_IN_DONATION_BODY
+      const message = NOTIFICATION_MESSAGES.CHECKED_IN_DONATION_BODY
 
       const notification = new Notification({
         receiver_id: user?._id as ObjectId,
         donation_registration_id: new ObjectId(id),
         title,
-        message: body
+        message
       })
       await databaseService.notifications.insertOne(notification)
       // Gửi push notification
@@ -690,14 +862,14 @@ class DonationService {
         await sendPushNotification({
           fcmToken: user.fcm_token,
           title,
-          body
+          body: message
         })
       }
     }
     return result
   }
 
-  //Donation Process
+  // -- DONATION PROCESS --
   async getAllDonationProcesses(filter: Record<string, any> = {}) {
     const matchStage = Object.keys(filter).length > 0 ? [{ $match: filter }] : []
 

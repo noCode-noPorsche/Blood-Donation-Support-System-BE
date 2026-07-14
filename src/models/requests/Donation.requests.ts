@@ -1,5 +1,6 @@
-import { ParamsDictionary } from 'express-serve-static-core'
+import { ParamsDictionary, Query } from 'express-serve-static-core'
 import { DonationProcessStatus, DonationRegistrationStatus, DonationType } from '~/constants/enum'
+import { Pagination } from '~/models/requests/Pagination.requests'
 export interface CreateDonationRegistrationReqBody {
   blood_group_id?: string
   donation_type: DonationType
@@ -8,6 +9,11 @@ export interface CreateDonationRegistrationReqBody {
     question_id: string
     answer: boolean
   }[]
+  citizen_id_number?: string
+  full_name?: string
+  phone?: string
+  gender?: string
+  date_of_birth?: string
 }
 
 export interface UpdateDonationRegistrationIdReqParams extends ParamsDictionary {
@@ -19,6 +25,7 @@ export interface UpdateDonationRegistrationReqBody {
   start_date_donation?: string
   status: DonationRegistrationStatus
   donation_type?: DonationType
+  token?: string
 }
 
 export interface GetDonationRegistrationIdReqParams extends ParamsDictionary {
@@ -46,4 +53,8 @@ export interface GetDonationHealthProcessByDonationIdReqParams extends ParamsDic
 
 export interface GetStatusDonationHealthProcessByDonationIdReqParams extends ParamsDictionary {
   id: string
+}
+
+export interface GetAllDonationRegistrationQuery extends Query, Pagination {
+  donation_type: string
 }

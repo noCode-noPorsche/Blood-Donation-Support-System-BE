@@ -1,5 +1,6 @@
 import { config } from 'dotenv'
 import { Collection, Db, MongoClient } from 'mongodb'
+import envConfig from '~/config'
 import Answer from '~/models/schemas/Answer.schemas'
 import Blog from '~/models/schemas/Blog.schemas'
 import BloodComponent from '~/models/schemas/BloodComponent.schemas'
@@ -39,55 +40,55 @@ class DatabaseService {
   }
 
   get users(): Collection<User> {
-    return this.db.collection(process.env.DB_USERS_COLLECTION as string)
+    return this.db.collection(envConfig.DB_USERS_COLLECTION as string)
   }
   get refreshToken(): Collection<RefreshToken> {
-    return this.db.collection(process.env.DB_REFRESH_TOKENS_COLLECTION as string)
+    return this.db.collection(envConfig.DB_REFRESH_TOKENS_COLLECTION as string)
   }
   get bloodGroups(): Collection<BloodGroup> {
-    return this.db.collection(process.env.DB_BLOOD_GROUPS_COLLECTION as string)
+    return this.db.collection(envConfig.DB_BLOOD_GROUPS_COLLECTION as string)
   }
   get bloodComponents(): Collection<BloodComponent> {
-    return this.db.collection(process.env.DB_BLOOD_COMPONENTS_COLLECTION as string)
+    return this.db.collection(envConfig.DB_BLOOD_COMPONENTS_COLLECTION as string)
   }
   get bloodUnits(): Collection<BloodUnit> {
-    return this.db.collection(process.env.DB_BLOOD_UNITS_COLLECTION as string)
+    return this.db.collection(envConfig.DB_BLOOD_UNITS_COLLECTION as string)
   }
   get donationRegistrations(): Collection<DonationRegistration> {
-    return this.db.collection(process.env.DB_DONATION_REGISTRATIONS_COLLECTION as string)
+    return this.db.collection(envConfig.DB_DONATION_REGISTRATIONS_COLLECTION as string)
   }
   get donationProcesses(): Collection<DonationRequestProcess> {
-    return this.db.collection(process.env.DB_DONATION_PROCESSES_COLLECTION as string)
+    return this.db.collection(envConfig.DB_DONATION_PROCESSES_COLLECTION as string)
   }
   get healthChecks(): Collection<HealthCheck> {
-    return this.db.collection(process.env.DB_HEALTH_CHECKS_COLLECTION as string)
+    return this.db.collection(envConfig.DB_HEALTH_CHECKS_COLLECTION as string)
   }
   get requestRegistrations(): Collection<RequestRegistration> {
-    return this.db.collection(process.env.DB_REQUEST_REGISTRATIONS_COLLECTION as string)
+    return this.db.collection(envConfig.DB_REQUEST_REGISTRATIONS_COLLECTION as string)
   }
   get requestProcesses(): Collection<RequestProcess> {
-    return this.db.collection(process.env.DB_REQUEST_PROCESSES_COLLECTION as string)
+    return this.db.collection(envConfig.DB_REQUEST_PROCESSES_COLLECTION as string)
   }
   get requestProcessDetails(): Collection<RequestProcessDetail> {
-    return this.db.collection(process.env.DB_REQUEST_PROCESS_DETAILS_COLLECTION as string)
+    return this.db.collection(envConfig.DB_REQUEST_PROCESS_DETAILS_COLLECTION as string)
   }
   get requestProcessBloods(): Collection<RequestProcessBlood> {
-    return this.db.collection(process.env.DB_REQUEST_PROCESS_BLOODS_COLLECTION as string)
+    return this.db.collection(envConfig.DB_REQUEST_PROCESS_BLOODS_COLLECTION as string)
   }
   get blogs(): Collection<Blog> {
-    return this.db.collection(process.env.DB_BLOGS_COLLECTION as string)
+    return this.db.collection(envConfig.DB_BLOGS_COLLECTION as string)
   }
   get notifications(): Collection<Notification> {
-    return this.db.collection(process.env.DB_NOTIFICATIONS_COLLECTION as string)
+    return this.db.collection(envConfig.DB_NOTIFICATIONS_COLLECTION as string)
   }
   get questions(): Collection<Question> {
-    return this.db.collection(process.env.DB_QUESTIONS_COLLECTION as string)
+    return this.db.collection(envConfig.DB_QUESTIONS_COLLECTION as string)
   }
   get answers(): Collection<Answer> {
-    return this.db.collection(process.env.DB_ANSWERS_COLLECTION as string)
+    return this.db.collection(envConfig.DB_ANSWERS_COLLECTION as string)
   }
   get bloodInventoryThreshold(): Collection<BloodInventoryThreshold> {
-    return this.db.collection(process.env.DB_BLOOD_INVENTORY_THRESHOLDS_COLLECTION as string)
+    return this.db.collection(envConfig.DB_BLOOD_INVENTORY_THRESHOLDS_COLLECTION as string)
   }
 }
 

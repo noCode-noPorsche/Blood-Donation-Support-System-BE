@@ -1,9 +1,9 @@
 import { checkSchema, ParamSchema } from 'express-validator'
-import { DonationProcessStatus, DonationRegistrationStatus, DonationType } from '~/constants/enum'
-import { HTTP_STATUS } from '~/constants/httpStatus'
-import { BLOOD_MESSAGES, DONATION_MESSAGES } from '~/constants/messages'
-import { ErrorWithStatus } from '~/models/Error'
+import { DonationProcessStatus, DonationRegistrationStatus, DonationType, UserGender, UserRole } from '~/constants/enum'
+import { BLOOD_MESSAGES, DONATION_MESSAGES, USER_MESSAGES } from '~/constants/messages'
+import { TokenPayload } from '~/models/requests/User.requests'
 import bloodService from '~/services/blood.services'
+import usersService from '~/services/user.services'
 import { validate } from '~/utils/validation'
 
 const bloodGroupSchema: ParamSchema = {
@@ -45,6 +45,17 @@ export const createDonationValidator = validate(
         isISO8601: {
           options: { strict: true },
           errorMessage: DONATION_MESSAGES.START_DATE_DONATION_IS_INVALID
+        },
+        custom: {
+          options: (value) => {
+            const inputDate = new Date(value)
+            const now = new Date()
+
+            if (inputDate < now) {
+              throw new Error(DONATION_MESSAGES.START_DATE_DONATION_CANNOT_BE_IN_PAST)
+            }
+            return true
+          }
         }
       },
       donation_type: {
@@ -54,6 +65,88 @@ export const createDonationValidator = validate(
         isIn: {
           options: [Object.values(DonationType)],
           errorMessage: DONATION_MESSAGES.DONATION_TYPE_IS_INVALID
+        }
+      },
+      phone: {
+        isString: {
+          errorMessage: USER_MESSAGES.PHONE_MUST_BE_A_STRING
+        },
+        isLength: {
+          options: {
+            min: 10,
+            max: 12
+          },
+          errorMessage: USER_MESSAGES.PHONE_IS_WRONG_FORMAT
+        },
+        custom: {
+          options: async (value) => {
+            const isExistPhone = await usersService.checkPhoneExist(value)
+            if (isExistPhone) {
+              throw new Error(USER_MESSAGES.PHONE_ALREADY_EXISTS)
+            }
+            return true
+          }
+        }
+      },
+      gender: {
+        isIn: {
+          options: [Object.values(UserGender)],
+          errorMessage: USER_MESSAGES.GENDER_MUST_BE_ONE_OF_THE_FOLLOWING_VALUES
+        },
+        optional: true
+      },
+      citizen_id_number: {
+        notEmpty: {
+          errorMessage: USER_MESSAGES.CITIZEN_ID_NUMBER_IS_REQUIRED
+        },
+        isLength: {
+          options: { min: 12, max: 12 },
+          errorMessage: USER_MESSAGES.CITIZEN_ID_MUST_BE_EXACTLY_12_DIGITS
+        },
+        matches: {
+          options: [/^\d{12}$/],
+          errorMessage: USER_MESSAGES.CITIZEN_ID_MUST_CONTAIN_ONLY_DIGITS_0_9
+        },
+        trim: true,
+        custom: {
+          options: async (value) => {
+            const isExistCitizen = await usersService.checkCitizenIDNumber(value)
+            if (isExistCitizen) {
+              throw new Error(USER_MESSAGES.CITIZEN_ID_NUMBER_ALREADY_EXIST)
+            }
+            return true
+          }
+        }
+      },
+      full_name: {
+        isString: {
+          errorMessage: USER_MESSAGES.NAME_MUST_BE_A_STRING
+        },
+        isLength: {
+          options: {
+            min: 1,
+            max: 50
+          },
+          errorMessage: USER_MESSAGES.NAME_LENGTH_MUST_BE_FROM_1_TO_50
+        },
+        trim: true
+      },
+      date_of_birth: {
+        optional: true,
+        isISO8601: {
+          options: { strict: true },
+          errorMessage: DONATION_MESSAGES.START_DATE_DONATION_IS_INVALID
+        },
+        custom: {
+          options: (value) => {
+            const inputDate = new Date(value)
+            const now = new Date()
+
+            if (inputDate > now) {
+              throw new Error(USER_MESSAGES.DATE_OF_BIRTH_CANNOT_IN_THE_FUTURE)
+            }
+            return true
+          }
         }
       }
     },
@@ -90,10 +183,7 @@ export const updateDonationRegistrationValidator = validate(
           options: async (value: string) => {
             const isBloodGroupExist = await bloodService.isBloodGroupIdExist(value)
             if (!isBloodGroupExist) {
-              throw new ErrorWithStatus({
-                message: BLOOD_MESSAGES.BLOOD_GROUP_NOT_FOUND,
-                status: HTTP_STATUS.BAD_REQUEST
-              })
+              throw new Error(BLOOD_MESSAGES.BLOOD_GROUP_NOT_FOUND)
             }
           }
         }
@@ -104,6 +194,17 @@ export const updateDonationRegistrationValidator = validate(
         isISO8601: {
           options: { strict: true },
           errorMessage: DONATION_MESSAGES.START_DATE_DONATION_IS_INVALID
+        },
+        custom: {
+          options: (value) => {
+            const inputDate = new Date(value)
+            const now = new Date()
+
+            if (inputDate < now) {
+              throw new Error(DONATION_MESSAGES.START_DATE_DONATION_CANNOT_BE_IN_PAST)
+            }
+            return true
+          }
         }
       },
       status: {
@@ -117,6 +218,17 @@ export const updateDonationRegistrationValidator = validate(
         isIn: {
           options: [Object.values(DonationRegistrationStatus)],
           errorMessage: DONATION_MESSAGES.STATUS_IS_INVALID
+        },
+        custom: {
+          options: (value: string, { req }) => {
+            const { role } = req.decode_authorization as TokenPayload
+
+            if (value === DonationRegistrationStatus.CheckedIn && role === UserRole.Customer) {
+              throw new Error(DONATION_MESSAGES.CUSTOMER_CANNOT_CHECK_IN)
+            }
+
+            return true
+          }
         }
       },
       donation_type: {

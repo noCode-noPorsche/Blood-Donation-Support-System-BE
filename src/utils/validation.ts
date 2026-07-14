@@ -4,7 +4,7 @@ import { RunnableValidationChains } from 'express-validator/lib/middlewares/sche
 import { HTTP_STATUS } from '~/constants/httpStatus'
 import { EntityError, ErrorWithStatus } from '~/models/Error'
 
-// can be reused by many routes
+// Can be reused by many routes
 export const validate = (validation: RunnableValidationChains<ValidationChain>) => {
   return async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     await validation.run(req)

@@ -63,7 +63,8 @@ export const USER_MESSAGES = {
   USER_IS_DISABLED: 'Tài khoản của bạn đã bị vô hiệu hóa, vui lòng liên hệ với cơ sở y tế để được kích hoạt lại',
   ROLE_IS_REQUIRED: 'Role is required',
   ROLE_IS_INVALID: 'Role is invalid',
-  CHANGE_ROLE_SUCCESS: 'Change role success'
+  CHANGE_ROLE_SUCCESS: 'Change role success',
+  DATE_OF_BIRTH_CANNOT_IN_THE_FUTURE: 'Date of birth cannot in the future'
 } as const
 
 export const BLOOD_MESSAGES = {
@@ -135,7 +136,10 @@ export const DONATION_MESSAGES = {
   DONATION_TYPE_IS_REQUIRED: 'Donation type is required',
   DONATION_TYPE_IS_INVALID: 'Donation type is invalid',
   VOLUME_COLLECTED_MUST_BE_A_NUMBER_BETWEEN_250_AND_450: 'Volume collected must be a number between 0 and 450',
-  DONATION_REGISTRATION_REJECTED_CANNOT_UPDATE: 'Donation registration rejected cannot update'
+  DONATION_REGISTRATION_REJECTED_CANNOT_UPDATE: 'Donation registration rejected cannot update',
+  DONATION_REGISTRATION_CHECKED_IN_CANNOT_UPDATE: 'Donation registration checked in cannot update',
+  START_DATE_DONATION_CANNOT_BE_IN_PAST: 'Start date donation cannot be in past',
+  CUSTOMER_CANNOT_CHECK_IN: 'Customer cannot update status Checked In'
 } as const
 
 export const HEALTH_CHECK_MESSAGES = {
@@ -260,7 +264,11 @@ export const DASHBOARD_MESSAGES = {
 } as const
 
 export const NOTIFICATION_MESSAGES = {
-  CHECKED_IN_DONATION_SUCCESS: 'Đã checked in hiến máu thành công!',
+  REGISTER_DONATION_SUCCESS: 'Bạn đã đăng ký lịch hiến máu thành công!',
+  REGISTER_DONATION_SUCCESS_BODY: 'Bạn vui lòng tới hiến máu đúng hạn.',
+  REGISTER_DONATION_FAIL: 'Bạn đã đăng ký lịch hiến máu thất bại!',
+  REGISTER_DONATION_FAIL_BODY: 'Bạn không đạt đủ yêu cầu để có thể đăng ký hiến máu!',
+  CHECKED_IN_DONATION_SUCCESS: 'Đã Checked In hiến máu thành công!',
   CHECKED_IN_DONATION_BODY: 'Mời bạn đến địa điểm khám sáng lọc để kiểm tra sức khỏe trước khi hiến máu.',
   SUCCESSFULLY_DONATED_BLOOD: 'Hoàn thành hiến máu thành công!',
   MESSAGE_AFTER_SUCCESSFULLY_DONATED_BLOOD:

@@ -4,6 +4,7 @@ import { DonationProcessStatus } from '~/constants/enum'
 import { DONATION_MESSAGES } from '~/constants/messages'
 import {
   CreateDonationRegistrationReqBody,
+  GetAllDonationRegistrationQuery,
   GetDonationHealthProcessByDonationIdReqParams,
   GetDonationProcessIdReqParams,
   GetDonationRegistrationIdReqParams,
@@ -16,7 +17,7 @@ import {
 import { TokenPayload } from '~/models/requests/User.requests'
 import donationService from '~/services/donation.services'
 
-//Donation - Health - Process
+// -- DONATION - HEALTH - PROCESS --
 export const getAllDonationHealthProcessByUserIdController = async (req: Request, res: Response) => {
   const { user_id } = req.decode_authorization as TokenPayload
 
@@ -44,7 +45,8 @@ export const getStatusDonationHealthProcessByDonationIdController = async (
   res.sendSuccess?.(DONATION_MESSAGES.GET_STATUS_DONATION_HEALTH_PROCESS_SUCCESS, { result })
 }
 
-//Donation Registration
+// -- DONATION REGISTRATION --
+// Tạo mới Donation Registration
 export const createDonationRegistrationController = async (
   req: Request<ParamsDictionary, any, CreateDonationRegistrationReqBody>,
   res: Response
@@ -52,18 +54,25 @@ export const createDonationRegistrationController = async (
   const { user_id } = req.decode_authorization as TokenPayload
   const { body } = req
 
-  const result = await donationService.createDonationRegistration({
+  await donationService.createDonationRegistration({
     user_id,
     payload: body
   })
-  res.sendSuccess?.(DONATION_MESSAGES.CREATE_DONATION_REGISTRATION_SUCCESS, { result })
+  res.sendSuccess?.(DONATION_MESSAGES.CREATE_DONATION_REGISTRATION_SUCCESS)
 }
 
-export const getAllDonationRegistrationsController = async (req: Request, res: Response) => {
-  const result = await donationService.getAllDonationRegistration()
-  res.sendSuccess?.(DONATION_MESSAGES.GET_ALL_DONATION_REGISTRATIONS_SUCCESS, { result })
+// Lấy danh sách Donation Registration
+export const getAllDonationRegistrationsController = async (
+  req: Request<ParamsDictionary, any, any, GetAllDonationRegistrationQuery>,
+  res: Response
+) => {
+  const limit = Number(req.query.limit)
+  const page = Number(req.query.page)
+  const result = await donationService.getAllDonationRegistration({ limit, page })
+  res.sendSuccess?.(DONATION_MESSAGES.GET_ALL_DONATION_REGISTRATIONS_SUCCESS, { items: result })
 }
 
+// Lấy danh sách Donation Registration By Id
 export const getDonationRegistrationByIdController = async (
   req: Request<GetDonationRegistrationIdReqParams, any, any>,
   res: Response
@@ -74,6 +83,7 @@ export const getDonationRegistrationByIdController = async (
   res.sendSuccess?.(DONATION_MESSAGES.GET_DONATION_REGISTRATIONS_SUCCESS, { result })
 }
 
+// Lấy danh sách Donation Registration By User Id
 export const getDonationRegistrationByUserIdController = async (req: Request, res: Response) => {
   const { user_id } = req.decode_authorization as TokenPayload
 
@@ -81,21 +91,24 @@ export const getDonationRegistrationByUserIdController = async (req: Request, re
   res.sendSuccess?.(DONATION_MESSAGES.GET_DONATION_REGISTRATIONS_SUCCESS, { result })
 }
 
+// Cập nhật Donation Registration
 export const updateDonationRegistrationController = async (
   req: Request<UpdateDonationRegistrationIdReqParams, any, UpdateDonationRegistrationReqBody>,
   res: Response
 ) => {
   const { id } = req.params
   const { body } = req
+  const { user_id } = req.decode_authorization as TokenPayload
 
   const result = await donationService.updateDonationRegistration({
     id,
-    payload: body
+    payload: body,
+    user_id
   })
   res.sendSuccess?.(DONATION_MESSAGES.UPDATE_DONATION_REGISTRATION_SUCCESS, { result })
 }
 
-//Donation Process
+// DONATION PROCESS
 export const getAllDonationProcessesController = async (req: Request, res: Response) => {
   const filter: any = {}
 

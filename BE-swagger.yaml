@@ -2318,6 +2318,21 @@ components:
               answer:
                 type: boolean
                 example: true
+        citizen_id_number:
+          type: string
+          example: 123123123123
+        full_name:
+          type: string
+          example: Phùng Khánh Nam
+        phone:
+          type: string
+          example: 0987654321
+        gender:
+          $ref: '#/components/schemas/UserGender'
+        date_of_birth:
+          type: string
+          format: date-time
+          example: 2025-05-21T17:48:12.171Z
     DonationRegistration:
       type: object
       properties:

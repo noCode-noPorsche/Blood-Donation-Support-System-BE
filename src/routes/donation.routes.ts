@@ -67,7 +67,7 @@ donationRouter.get(
   wrapAsync(getStatusDonationHealthProcessByDonationIdController)
 )
 
-//Donation Registration
+// -- DONATION REGISTRATION --
 /**
  * Description. Create a new donation registration
  * Path: /donation-registrations
@@ -83,7 +83,12 @@ donationRouter.post(
     'blood_group_id',
     'start_date_donation',
     'donation_type',
-    'answers'
+    'answers',
+    'citizen_id_number',
+    'full_name',
+    'phone',
+    'gender',
+    'date_of_birth'
   ]),
   wrapAsync(createDonationRegistrationController)
 )
@@ -121,7 +126,7 @@ donationRouter.get(
 )
 
 /**
- * Description. Update information a donation registration for customer
+ * Description. Update information a donation registration for customer/staff/admin
  * Path: /donation-registrations/:id
  * METHOD: PATCH
  * Body : { UpdateDonationRegistrationReqBody }
@@ -135,12 +140,13 @@ donationRouter.patch(
     'blood_group_id',
     'start_date_donation',
     'status',
-    'donation_type'
+    'donation_type',
+    'token'
   ]),
   wrapAsync(updateDonationRegistrationController)
 )
 
-//Donation Processes
+// Donation Processes
 /**
  * Description. Get all donation request processes for staff or admin
  * Params: is_separated
