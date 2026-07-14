@@ -7,6 +7,7 @@ import {
   GetAllDonationRegistrationQuery,
   GetDonationHealthProcessByDonationIdReqParams,
   GetDonationProcessIdReqParams,
+  GetDonationRegistrationByUserIdQuery,
   GetDonationRegistrationIdReqParams,
   GetStatusDonationHealthProcessByDonationIdReqParams,
   UpdateDonationProcessReqBody,
@@ -46,7 +47,7 @@ export const getStatusDonationHealthProcessByDonationIdController = async (
 }
 
 // -- DONATION REGISTRATION --
-// Tạo mới Donation Registration
+// Tạo Donation Registration
 export const createDonationRegistrationController = async (
   req: Request<ParamsDictionary, any, CreateDonationRegistrationReqBody>,
   res: Response
@@ -68,8 +69,9 @@ export const getAllDonationRegistrationsController = async (
 ) => {
   const limit = Number(req.query.limit)
   const page = Number(req.query.page)
+
   const result = await donationService.getAllDonationRegistration({ limit, page })
-  res.sendSuccess?.(DONATION_MESSAGES.GET_ALL_DONATION_REGISTRATIONS_SUCCESS, { items: result })
+  res.sendSuccess?.(DONATION_MESSAGES.GET_ALL_DONATION_REGISTRATIONS_SUCCESS, { ...result })
 }
 
 // Lấy danh sách Donation Registration By Id
@@ -80,15 +82,20 @@ export const getDonationRegistrationByIdController = async (
   const { id } = req.params
 
   const result = await donationService.getDonationRegistrationById(id)
-  res.sendSuccess?.(DONATION_MESSAGES.GET_DONATION_REGISTRATIONS_SUCCESS, { result })
+  res.sendSuccess?.(DONATION_MESSAGES.GET_DONATION_REGISTRATIONS_SUCCESS, { ...result })
 }
 
 // Lấy danh sách Donation Registration By User Id
-export const getDonationRegistrationByUserIdController = async (req: Request, res: Response) => {
+export const getDonationRegistrationByUserIdController = async (
+  req: Request<ParamsDictionary, any, any, GetDonationRegistrationByUserIdQuery>,
+  res: Response
+) => {
   const { user_id } = req.decode_authorization as TokenPayload
+  const limit = Number(req.query.limit)
+  const page = Number(req.query.page)
 
-  const result = await donationService.getDonationRegistrationByUserId(user_id)
-  res.sendSuccess?.(DONATION_MESSAGES.GET_DONATION_REGISTRATIONS_SUCCESS, { result })
+  const result = await donationService.getDonationRegistrationByUserId({ limit, page, user_id })
+  res.sendSuccess?.(DONATION_MESSAGES.GET_DONATION_REGISTRATIONS_SUCCESS, { ...result })
 }
 
 // Cập nhật Donation Registration

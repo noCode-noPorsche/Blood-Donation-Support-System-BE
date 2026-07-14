@@ -391,7 +391,7 @@ class DonationService {
   async getAllDonationRegistration({ limit, page }: { limit: number; page: number }) {
     const donationRegistration = await databaseService.donationRegistrations
       .aggregate([
-        // Join blood group
+        // Join Blood Group
         {
           $lookup: {
             from: 'blood_groups',
@@ -401,7 +401,7 @@ class DonationService {
           }
         },
         { $unwind: { path: '$blood_group', preserveNullAndEmptyArrays: true } },
-        // Join user
+        // Join User
         {
           $lookup: {
             from: 'users',
@@ -411,7 +411,26 @@ class DonationService {
           }
         },
         { $unwind: { path: '$user', preserveNullAndEmptyArrays: true } },
-        // Join donation process
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'checked_in_by',
+            foreignField: '_id',
+            as: 'checked_in_user'
+          }
+        },
+        { $unwind: { path: '$checked_in_user', preserveNullAndEmptyArrays: true } },
+        // Join Health Check
+        {
+          $lookup: {
+            from: 'health_checks',
+            localField: 'health_check_id',
+            foreignField: '_id',
+            as: 'health_check'
+          }
+        },
+        { $unwind: { path: '$health_check', preserveNullAndEmptyArrays: true } },
+        // Join Donation Process
         {
           $lookup: {
             from: 'donation_processes',
@@ -421,8 +440,7 @@ class DonationService {
           }
         },
         { $unwind: { path: '$donation_process', preserveNullAndEmptyArrays: true } },
-
-        // Join answers
+        // Join Answers
         {
           $lookup: {
             from: 'answers',
@@ -431,7 +449,6 @@ class DonationService {
             as: 'answers'
           }
         },
-
         // Giải phẳng answers.answers để join question
         {
           $unwind: {
@@ -445,8 +462,7 @@ class DonationService {
             preserveNullAndEmptyArrays: true
           }
         },
-
-        // Join question
+        // Join Question
         {
           $lookup: {
             from: 'questions',
@@ -456,8 +472,7 @@ class DonationService {
           }
         },
         { $unwind: { path: '$question', preserveNullAndEmptyArrays: true } },
-
-        // Final projection
+        // Final Projection
         {
           $group: {
             _id: '$_id',
@@ -470,6 +485,7 @@ class DonationService {
             start_date_donation: { $first: '$start_date_donation' },
             created_at: { $first: '$created_at' },
             updated_at: { $first: '$updated_at' },
+            checked_in_by: { $first: '$checked_in_user.full_name' },
             full_name: { $first: '$user.full_name' },
             citizen_id_number: { $first: '$user.citizen_id_number' },
             phone: { $first: '$user.phone' },
@@ -480,14 +496,15 @@ class DonationService {
                 answer: '$answers.answers.answer'
               }
             },
-            donation_process_status: { $first: '$donation_process.status' }
+            donation_process_status: { $first: '$donation_process.status' },
+            health_check_status: { $first: '$health_check.status' }
           }
         },
         {
           $sort: { created_at: -1 }
         },
         {
-          $skip: limit * (page - 1) // Công thức phân trang
+          $skip: limit * (page - 1)
         },
         {
           $limit: limit
@@ -512,8 +529,7 @@ class DonationService {
     const donationRegistration = await databaseService.donationRegistrations
       .aggregate([
         { $match: { _id: new ObjectId(id) } },
-
-        // Join blood group
+        // Join Blood Group
         {
           $lookup: {
             from: 'blood_groups',
@@ -523,7 +539,6 @@ class DonationService {
           }
         },
         { $unwind: { path: '$blood_group', preserveNullAndEmptyArrays: true } },
-
         // Join user
         {
           $lookup: {
@@ -536,6 +551,26 @@ class DonationService {
         { $unwind: { path: '$user', preserveNullAndEmptyArrays: true } },
         {
           $lookup: {
+            from: 'users',
+            localField: 'checked_in_by',
+            foreignField: '_id',
+            as: 'checked_in_user'
+          }
+        },
+        { $unwind: { path: '$checked_in_user', preserveNullAndEmptyArrays: true } },
+        // Join Health Check
+        {
+          $lookup: {
+            from: 'health_checks',
+            localField: 'health_check_id',
+            foreignField: '_id',
+            as: 'health_check'
+          }
+        },
+        { $unwind: { path: '$health_check', preserveNullAndEmptyArrays: true } },
+        // Join Donation Process
+        {
+          $lookup: {
             from: 'donation_processes',
             localField: 'donation_process_id',
             foreignField: '_id',
@@ -543,8 +578,7 @@ class DonationService {
           }
         },
         { $unwind: { path: '$donation_process', preserveNullAndEmptyArrays: true } },
-
-        // Join answers
+        // Join Answers
         {
           $lookup: {
             from: 'answers',
@@ -555,8 +589,7 @@ class DonationService {
         },
         { $unwind: { path: '$answers', preserveNullAndEmptyArrays: true } },
         { $unwind: { path: '$answers.answers', preserveNullAndEmptyArrays: true } },
-
-        // Join question
+        // Join Question
         {
           $lookup: {
             from: 'questions',
@@ -566,8 +599,7 @@ class DonationService {
           }
         },
         { $unwind: { path: '$question', preserveNullAndEmptyArrays: true } },
-
-        // Group
+        // Final Projection
         {
           $group: {
             _id: '$_id',
@@ -580,6 +612,7 @@ class DonationService {
             start_date_donation: { $first: '$start_date_donation' },
             created_at: { $first: '$created_at' },
             updated_at: { $first: '$updated_at' },
+            checked_in_by: { $first: '$checked_in_user.full_name' },
             full_name: { $first: '$user.full_name' },
             citizen_id_number: { $first: '$user.citizen_id_number' },
             phone: { $first: '$user.phone' },
@@ -590,7 +623,8 @@ class DonationService {
                 answer: '$answers.answers.answer'
               }
             },
-            donation_process_status: { $first: '$donation_process.status' }
+            donation_process_status: { $first: '$donation_process.status' },
+            health_check_status: { $first: '$health_check.status' }
           }
         }
       ])
@@ -607,12 +641,11 @@ class DonationService {
   }
 
   // Lấy danh sách Donation Registration By User Id
-  async getDonationRegistrationByUserId(user_id: string) {
+  async getDonationRegistrationByUserId({ user_id, limit, page }: { user_id: string; limit: number; page: number }) {
     const donationRegistration = await databaseService.donationRegistrations
       .aggregate([
         { $match: { user_id: new ObjectId(user_id) } },
-
-        // Join blood group
+        // Join Blood Group
         {
           $lookup: {
             from: 'blood_groups',
@@ -622,8 +655,7 @@ class DonationService {
           }
         },
         { $unwind: { path: '$blood_group', preserveNullAndEmptyArrays: true } },
-
-        // Join user
+        // Join User
         {
           $lookup: {
             from: 'users',
@@ -635,6 +667,26 @@ class DonationService {
         { $unwind: { path: '$user', preserveNullAndEmptyArrays: true } },
         {
           $lookup: {
+            from: 'users',
+            localField: 'checked_in_by',
+            foreignField: '_id',
+            as: 'checked_in_user'
+          }
+        },
+        { $unwind: { path: '$checked_in_user', preserveNullAndEmptyArrays: true } },
+        // Join Health Check
+        {
+          $lookup: {
+            from: 'health_checks',
+            localField: 'health_check_id',
+            foreignField: '_id',
+            as: 'health_check'
+          }
+        },
+        { $unwind: { path: '$health_check', preserveNullAndEmptyArrays: true } },
+        // Join Donation Process
+        {
+          $lookup: {
             from: 'donation_processes',
             localField: 'donation_process_id',
             foreignField: '_id',
@@ -642,8 +694,7 @@ class DonationService {
           }
         },
         { $unwind: { path: '$donation_process', preserveNullAndEmptyArrays: true } },
-
-        // Join answers
+        // Join Answers
         {
           $lookup: {
             from: 'answers',
@@ -654,8 +705,7 @@ class DonationService {
         },
         { $unwind: { path: '$answers', preserveNullAndEmptyArrays: true } },
         { $unwind: { path: '$answers.answers', preserveNullAndEmptyArrays: true } },
-
-        // Join question
+        // Join Question
         {
           $lookup: {
             from: 'questions',
@@ -665,8 +715,7 @@ class DonationService {
           }
         },
         { $unwind: { path: '$question', preserveNullAndEmptyArrays: true } },
-
-        // Group
+        // Final Projection
         {
           $group: {
             _id: '$_id',
@@ -679,23 +728,43 @@ class DonationService {
             start_date_donation: { $first: '$start_date_donation' },
             created_at: { $first: '$created_at' },
             updated_at: { $first: '$updated_at' },
+            checked_in_by: { $first: '$checked_in_user.full_name' },
             full_name: { $first: '$user.full_name' },
             citizen_id_number: { $first: '$user.citizen_id_number' },
             phone: { $first: '$user.phone' },
-            blood_group_name: { $first: '$blood_group.name' },
+            blood_group: { $first: '$blood_group.name' },
             answers: {
               $push: {
                 question: '$question.name',
                 answer: '$answers.answers.answer'
               }
             },
-            donation_process_status: { $first: '$donation_process.status' }
+            donation_process_status: { $first: '$donation_process.status' },
+            health_check_status: { $first: '$health_check.status' }
           }
+        },
+        {
+          $sort: { created_at: -1 }
+        },
+        {
+          $skip: limit * (page - 1)
+        },
+        {
+          $limit: limit
         }
       ])
       .toArray()
 
-    return donationRegistration
+    const totalItems = await databaseService.donationRegistrations.countDocuments()
+    const totalPages = Math.ceil(totalItems / limit)
+
+    return {
+      totalItems,
+      limit,
+      page,
+      totalPages,
+      items: donationRegistration
+    }
   }
 
   // Cập nhật Donation Registration By Id
@@ -760,7 +829,7 @@ class DonationService {
     const updateFields: Record<string, any> = {
       status: payload.status || donationRegistration.status,
       blood_group_id: bloodGroupId,
-      checked_in_by: payload.status === DonationRegistrationStatus.CheckedIn ? user_id : null
+      checked_in_by: payload.status === DonationRegistrationStatus.CheckedIn ? new ObjectId(user_id) : null
     }
 
     if (bloodGroupId) {

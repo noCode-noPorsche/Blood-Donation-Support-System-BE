@@ -30,7 +30,7 @@ import { wrapAsync } from '~/utils/handler'
 
 const donationRouter = express.Router()
 
-//Donation - Health - Process
+// DONATION - HEALTH - PROCESS
 /**
  * Description. Get all donation registrations - health check - donation process for user now
  * Path: /donation-health-processes/user

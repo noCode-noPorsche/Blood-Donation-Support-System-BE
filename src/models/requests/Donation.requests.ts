@@ -58,3 +58,7 @@ export interface GetStatusDonationHealthProcessByDonationIdReqParams extends Par
 export interface GetAllDonationRegistrationQuery extends Query, Pagination {
   donation_type: string
 }
+
+export interface GetDonationRegistrationByUserIdQuery extends Query, Pagination {
+  donation_type: string
+}
