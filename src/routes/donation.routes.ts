@@ -3,7 +3,7 @@ import {
   createDonationRegistrationController,
   getAllDonationHealthProcessByUserIdController,
   getAllDonationProcessesController,
-  getAllDonationRegistrationsController,
+  getAllDonationRegistrationssController,
   getDonationHealthProcessByDonationIdController,
   getDonationProcessByUserIdController,
   getDonationProcessesByIdController,
@@ -98,7 +98,11 @@ donationRouter.post(
  * METHOD: GET
  * Header: { Authorization: Bearer <access_token>}
  */
-donationRouter.get('/donation-registrations', isStaffOrAdminValidator, wrapAsync(getAllDonationRegistrationsController))
+donationRouter.get(
+  '/donation-registrations',
+  isStaffOrAdminValidator,
+  wrapAsync(getAllDonationRegistrationssController)
+)
 
 /**
  * Description. Get donation registration by user id

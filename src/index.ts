@@ -49,8 +49,8 @@ async function startServer() {
 
   app.use(
     cors({
-      origin: ['https://your-frontend.com', 'https://be-t8i8.onrender.com/'],
-      methods: ['GET', 'POST', 'PUT', 'DELETE'],
+      origin: ['https://your-frontend.com'],
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
       credentials: true
     })
   )

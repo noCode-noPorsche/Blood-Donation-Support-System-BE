@@ -1,5 +1,6 @@
-import { ParamsDictionary } from 'express-serve-static-core'
+import { ParamsDictionary, Query } from 'express-serve-static-core'
 import { DonationType, HealthCheckStatus, RequestType, UnderlyingHealthCondition } from '~/constants/enum'
+import { Pagination } from '~/models/requests/Pagination.requests'
 
 export interface UpdateHealthCheckReqBody {
   blood_group_id?: string
@@ -20,6 +21,14 @@ export interface UpdateHealthCheckReqParams extends ParamsDictionary {
   id: string
 }
 
-export interface GetHealthCheckReqParams extends ParamsDictionary {
+export interface GetHealthCheckByIdReqParams extends ParamsDictionary {
   id: string
+}
+
+export interface GetAllHealthCheckQuery extends Pagination, Query {
+  status: HealthCheckStatus
+}
+
+export interface GetHealthCheckByUserIdQuery extends Pagination, Query {
+  status: HealthCheckStatus
 }

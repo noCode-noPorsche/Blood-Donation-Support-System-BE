@@ -625,7 +625,7 @@ paths:
         - Donation Registrations
       summary: Get All Donation Registrations for Staff or Admin
       description: Get all donation registrations for staff or admin
-      operationId: getAllDonationRegistrations
+      operationId: getAllDonationRegistrationss
       responses:
         default:
           description: Get all donation registrations success

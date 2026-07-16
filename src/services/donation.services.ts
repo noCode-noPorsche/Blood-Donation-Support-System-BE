@@ -388,7 +388,7 @@ class DonationService {
   }
 
   // Lấy danh sách Donation Registration
-  async getAllDonationRegistration({ limit, page }: { limit: number; page: number }) {
+  async getAllDonationRegistrations({ limit, page }: { limit: number; page: number }) {
     const donationRegistration = await databaseService.donationRegistrations
       .aggregate([
         // Join Blood Group
@@ -401,6 +401,15 @@ class DonationService {
           }
         },
         { $unwind: { path: '$blood_group', preserveNullAndEmptyArrays: true } },
+        // Join Blood Component
+        {
+          $lookup: {
+            from: 'blood_components',
+            localField: 'blood_component_ids',
+            foreignField: '_id',
+            as: 'blood_components_docs'
+          }
+        },
         // Join User
         {
           $lookup: {
@@ -476,28 +485,33 @@ class DonationService {
         {
           $group: {
             _id: '$_id',
+            // User
             user_id: { $first: '$user_id' },
-            donation_process_id: { $first: '$donation_process_id' },
-            health_check_id: { $first: '$health_check_id' },
-            status: { $first: '$status' },
-            blood_component_ids: { $first: '$blood_component_ids' },
-            donation_type: { $first: '$donation_type' },
-            start_date_donation: { $first: '$start_date_donation' },
-            created_at: { $first: '$created_at' },
-            updated_at: { $first: '$updated_at' },
-            checked_in_by: { $first: '$checked_in_user.full_name' },
             full_name: { $first: '$user.full_name' },
             citizen_id_number: { $first: '$user.citizen_id_number' },
             phone: { $first: '$user.phone' },
+            // Health Check
+            health_check_id: { $first: '$health_check_id' },
+            health_check_status: { $first: '$health_check.status' },
+            // Donation Process
+            donation_process_id: { $first: '$donation_process_id' },
+            donation_process_status: { $first: '$donation_process.status' },
+            // Main Donation Registration
             blood_group: { $first: '$blood_group.name' },
+            blood_components: { $first: '$blood_components_docs.name' },
+            donation_type: { $first: '$donation_type' },
+            start_date_donation: { $first: '$start_date_donation' },
             answers: {
               $push: {
                 question: '$question.name',
                 answer: '$answers.answers.answer'
               }
             },
-            donation_process_status: { $first: '$donation_process.status' },
-            health_check_status: { $first: '$health_check.status' }
+            // Actor
+            status: { $first: '$status' },
+            checked_in_by: { $first: '$checked_in_user.full_name' },
+            created_at: { $first: '$created_at' },
+            updated_at: { $first: '$updated_at' }
           }
         },
         {
@@ -539,6 +553,15 @@ class DonationService {
           }
         },
         { $unwind: { path: '$blood_group', preserveNullAndEmptyArrays: true } },
+        // Join Blood Component
+        {
+          $lookup: {
+            from: 'blood_components',
+            localField: 'blood_component_ids',
+            foreignField: '_id',
+            as: 'blood_components_docs'
+          }
+        },
         // Join User
         {
           $lookup: {
@@ -603,28 +626,33 @@ class DonationService {
         {
           $group: {
             _id: '$_id',
+            // User
             user_id: { $first: '$user_id' },
-            donation_process_id: { $first: '$donation_process_id' },
-            health_check_id: { $first: '$health_check_id' },
-            status: { $first: '$status' },
-            blood_component_ids: { $first: '$blood_component_ids' },
-            donation_type: { $first: '$donation_type' },
-            start_date_donation: { $first: '$start_date_donation' },
-            created_at: { $first: '$created_at' },
-            updated_at: { $first: '$updated_at' },
-            checked_in_by: { $first: '$checked_in_user.full_name' },
             full_name: { $first: '$user.full_name' },
             citizen_id_number: { $first: '$user.citizen_id_number' },
             phone: { $first: '$user.phone' },
+            // Health Check
+            health_check_id: { $first: '$health_check_id' },
+            health_check_status: { $first: '$health_check.status' },
+            // Donation Process
+            donation_process_id: { $first: '$donation_process_id' },
+            donation_process_status: { $first: '$donation_process.status' },
+            // Main Donation Registration
             blood_group: { $first: '$blood_group.name' },
+            blood_components: { $first: '$blood_components_docs.name' },
+            donation_type: { $first: '$donation_type' },
+            start_date_donation: { $first: '$start_date_donation' },
             answers: {
               $push: {
                 question: '$question.name',
                 answer: '$answers.answers.answer'
               }
             },
-            donation_process_status: { $first: '$donation_process.status' },
-            health_check_status: { $first: '$health_check.status' }
+            // Actor
+            status: { $first: '$status' },
+            checked_in_by: { $first: '$checked_in_user.full_name' },
+            created_at: { $first: '$created_at' },
+            updated_at: { $first: '$updated_at' }
           }
         }
       ])
@@ -652,6 +680,15 @@ class DonationService {
             localField: 'blood_group_id',
             foreignField: '_id',
             as: 'blood_group'
+          }
+        },
+        // Join Blood Component
+        {
+          $lookup: {
+            from: 'blood_components',
+            localField: 'blood_component_ids',
+            foreignField: '_id',
+            as: 'blood_components_docs'
           }
         },
         { $unwind: { path: '$blood_group', preserveNullAndEmptyArrays: true } },
@@ -719,28 +756,33 @@ class DonationService {
         {
           $group: {
             _id: '$_id',
+            // User
             user_id: { $first: '$user_id' },
-            donation_process_id: { $first: '$donation_process_id' },
-            health_check_id: { $first: '$health_check_id' },
-            status: { $first: '$status' },
-            blood_component_ids: { $first: '$blood_component_ids' },
-            donation_type: { $first: '$donation_type' },
-            start_date_donation: { $first: '$start_date_donation' },
-            created_at: { $first: '$created_at' },
-            updated_at: { $first: '$updated_at' },
-            checked_in_by: { $first: '$checked_in_user.full_name' },
             full_name: { $first: '$user.full_name' },
             citizen_id_number: { $first: '$user.citizen_id_number' },
             phone: { $first: '$user.phone' },
+            // Health Check
+            health_check_id: { $first: '$health_check_id' },
+            health_check_status: { $first: '$health_check.status' },
+            // Donation Process
+            donation_process_id: { $first: '$donation_process_id' },
+            donation_process_status: { $first: '$donation_process.status' },
+            // Main Donation Registration
             blood_group: { $first: '$blood_group.name' },
+            blood_components: { $first: '$blood_components_docs.name' },
+            donation_type: { $first: '$donation_type' },
+            start_date_donation: { $first: '$start_date_donation' },
             answers: {
               $push: {
                 question: '$question.name',
                 answer: '$answers.answers.answer'
               }
             },
-            donation_process_status: { $first: '$donation_process.status' },
-            health_check_status: { $first: '$health_check.status' }
+            // Actor
+            status: { $first: '$status' },
+            checked_in_by: { $first: '$checked_in_user.full_name' },
+            created_at: { $first: '$created_at' },
+            updated_at: { $first: '$updated_at' }
           }
         },
         {

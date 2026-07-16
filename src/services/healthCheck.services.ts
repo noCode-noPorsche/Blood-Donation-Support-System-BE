@@ -20,9 +20,11 @@ import databaseService from './database.services'
 config()
 
 class HealthCheckService {
-  async getAllHealthChecks() {
-    const healthCheckList = await databaseService.healthChecks
+  // Lấy danh sách Health Check
+  async getAllHealthChecks({ page, limit }: { page: number; limit: number }) {
+    const healthCheck = await databaseService.healthChecks
       .aggregate([
+        // Join Blood Group
         {
           $lookup: {
             from: 'blood_groups',
@@ -37,6 +39,16 @@ class HealthCheckService {
             preserveNullAndEmptyArrays: true
           }
         },
+        // Join Blood Component
+        {
+          $lookup: {
+            from: 'blood_components',
+            localField: 'blood_component_ids',
+            foreignField: '_id',
+            as: 'blood_components_docs'
+          }
+        },
+        // Join User
         {
           $lookup: {
             from: 'users',
@@ -60,47 +72,73 @@ class HealthCheckService {
           }
         },
         { $unwind: { path: '$user_update', preserveNullAndEmptyArrays: true } },
+        // Final Projection
         {
-          $project: {
-            blood_group_name: '$blood_group.name',
-            full_name: '$user_info.full_name',
-            phone: '$user_info.phone',
-            citizen_id_number: '$user_info.citizen_id_number',
-            // Giữ các trường gốc khác
-            user_id: 1,
-            blood_group_id: 1,
-            blood_component_ids: 1,
-            donation_registration_id: 1,
-            donation_process_id: 1,
-            donation_type: 1,
-            request_registration_id: 1,
-            request_process_id: 1,
-            request_type: 1,
-            weight: 1,
-            temperature: 1,
-            heart_rate: 1,
-            diastolic_blood_pressure: 1,
-            systolic_blood_pressure: 1,
-            underlying_health_condition: 1,
-            hemoglobin: 1,
-            status: 1,
-            description: 1,
-            updated_by: '$user_update.full_name',
-            created_at: 1,
-            updated_at: 1
+          $group: {
+            _id: '$_id',
+            // User
+            user_id: { $first: '$user_id' },
+            citizen_id_number: { $first: '$user_info.citizen_id_number' },
+            full_name: { $first: '$user_info.full_name' },
+            phone: { $first: '$user_info.phone' },
+            // Blood
+            blood_group: { $first: '$blood_group.name' },
+            blood_components: { $first: '$blood_components_docs.name' },
+            // Donation Registration
+            donation_registration_id: { $first: '$donation_registration_id' },
+            donation_process_id: { $first: '$donation_process_id' },
+            donation_type: { $first: '$donation_type' },
+            // Request Registration
+            request_registration_id: { $first: '$request_registration_id' },
+            request_process_id: { $first: '$request_process_id' },
+            request_type: { $first: '$request_type' },
+            // Main Health Check
+            weight: { $first: '$weight' },
+            temperature: { $first: '$temperature' },
+            heart_rate: { $first: '$heart_rate' },
+            diastolic_blood_pressure: { $first: '$diastolic_blood_pressure' },
+            systolic_blood_pressure: { $first: '$systolic_blood_pressure' },
+            underlying_health_condition: { $first: '$underlying_health_condition' },
+            hemoglobin: { $first: '$hemoglobin' },
+            description: { $first: '$description' },
+            // Actor
+            status: { $first: '$status' },
+            updated_by: { $first: '$user_update.full_name' },
+            created_at: { $first: '$created_at' },
+            updated_at: { $first: '$updated_at' }
           }
+        },
+        {
+          $sort: { created_at: -1 }
+        },
+        {
+          $skip: limit * (page - 1)
+        },
+        {
+          $limit: limit
         }
       ])
       .toArray()
-    return healthCheckList
+
+    const totalItems = await databaseService.healthChecks.countDocuments()
+    const totalPages = Math.ceil(totalItems / limit)
+
+    return {
+      totalItems,
+      limit,
+      page,
+      totalPages,
+      items: healthCheck
+    }
   }
 
-  async getHealthCheckByUserId(user_id: string) {
+  async getHealthCheckByUserId({ page, limit, user_id }: { page: number; limit: number; user_id: string }) {
     const healthCheck = await databaseService.healthChecks
       .aggregate([
         {
           $match: { user_id: new ObjectId(user_id) }
         },
+        // Join Blood Group
         {
           $lookup: {
             from: 'blood_groups',
@@ -115,6 +153,16 @@ class HealthCheckService {
             preserveNullAndEmptyArrays: true
           }
         },
+        // Join Blood Component
+        {
+          $lookup: {
+            from: 'blood_components',
+            localField: 'blood_component_ids',
+            foreignField: '_id',
+            as: 'blood_components_docs'
+          }
+        },
+        // Join User
         {
           $lookup: {
             from: 'users',
@@ -138,52 +186,75 @@ class HealthCheckService {
           }
         },
         { $unwind: { path: '$user_update', preserveNullAndEmptyArrays: true } },
+        // Final Projection
         {
-          $project: {
-            blood_group_name: '$blood_group.name',
-            full_name: '$user_info.full_name',
-            phone: '$user_info.phone',
-            citizen_id_number: '$user_info.citizen_id_number',
-            // Giữ các trường gốc khác
-            user_id: 1,
-            blood_group_id: 1,
-            blood_component_ids: 1,
-            donation_registration_id: 1,
-            donation_process_id: 1,
-            donation_type: 1,
-            request_registration_id: 1,
-            request_process_id: 1,
-            request_type: 1,
-            weight: 1,
-            temperature: 1,
-            heart_rate: 1,
-            diastolic_blood_pressure: 1,
-            systolic_blood_pressure: 1,
-            underlying_health_condition: 1,
-            hemoglobin: 1,
-            status: 1,
-            description: 1,
-            updated_by: '$user_update.full_name',
-            created_at: 1,
-            updated_at: 1
+          $group: {
+            _id: '$_id',
+            // User
+            user_id: { $first: '$user_id' },
+            citizen_id_number: { $first: '$user_info.citizen_id_number' },
+            full_name: { $first: '$user_info.full_name' },
+            phone: { $first: '$user_info.phone' },
+            // Blood
+            blood_group: { $first: '$blood_group.name' },
+            blood_components: { $first: '$blood_components_docs.name' },
+            // Donation Registration
+            donation_registration_id: { $first: '$donation_registration_id' },
+            donation_process_id: { $first: '$donation_process_id' },
+            donation_type: { $first: '$donation_type' },
+            // Request Registration
+            request_registration_id: { $first: '$request_registration_id' },
+            request_process_id: { $first: '$request_process_id' },
+            request_type: { $first: '$request_type' },
+            // Main Health Check
+            weight: { $first: '$weight' },
+            temperature: { $first: '$temperature' },
+            heart_rate: { $first: '$heart_rate' },
+            diastolic_blood_pressure: { $first: '$diastolic_blood_pressure' },
+            systolic_blood_pressure: { $first: '$systolic_blood_pressure' },
+            underlying_health_condition: { $first: '$underlying_health_condition' },
+            hemoglobin: { $first: '$hemoglobin' },
+            description: { $first: '$description' },
+            // Actor
+            status: { $first: '$status' },
+            updated_by: { $first: '$user_update.full_name' },
+            created_at: { $first: '$created_at' },
+            updated_at: { $first: '$updated_at' }
           }
+        },
+        {
+          $sort: { created_at: -1 }
+        },
+        {
+          $skip: limit * (page - 1)
+        },
+        {
+          $limit: limit
         }
       ])
       .toArray()
-    if (!healthCheck) {
-      return null
+
+    const totalItems = await databaseService.healthChecks.countDocuments({ user_id: new ObjectId(user_id) })
+    const totalPages = Math.ceil(totalItems / limit)
+
+    return {
+      totalItems,
+      limit,
+      page,
+      totalPages,
+      items: healthCheck
     }
-    return healthCheck
   }
 
   async getHealthCheckById(id: string) {
-    const healthCheckList = await databaseService.healthChecks
+    const healthCheck = await databaseService.healthChecks
       .aggregate([
         {
           $match: {
             _id: new ObjectId(id)
           }
         },
+        // Join Blood Group
         {
           $lookup: {
             from: 'blood_groups',
@@ -198,6 +269,16 @@ class HealthCheckService {
             preserveNullAndEmptyArrays: true
           }
         },
+        // Join Blood Component
+        {
+          $lookup: {
+            from: 'blood_components',
+            localField: 'blood_component_ids',
+            foreignField: '_id',
+            as: 'blood_components_docs'
+          }
+        },
+        // Join User
         {
           $lookup: {
             from: 'users',
@@ -221,47 +302,53 @@ class HealthCheckService {
           }
         },
         { $unwind: { path: '$user_update', preserveNullAndEmptyArrays: true } },
+        // Final Projection
         {
-          $project: {
-            blood_group_name: '$blood_group.name',
-            full_name: '$user_info.full_name',
-            phone: '$user_info.phone',
-            citizen_id_number: '$user_info.citizen_id_number',
-            // Giữ các trường gốc khác
-            user_id: 1,
-            blood_group_id: 1,
-            blood_component_ids: 1,
-            donation_registration_id: 1,
-            donation_process_id: 1,
-            donation_type: 1,
-            request_registration_id: 1,
-            request_process_id: 1,
-            request_type: 1,
-            weight: 1,
-            temperature: 1,
-            heart_rate: 1,
-            diastolic_blood_pressure: 1,
-            systolic_blood_pressure: 1,
-            underlying_health_condition: 1,
-            hemoglobin: 1,
-            status: 1,
-            description: 1,
-            updated_by: '$user_update.full_name',
-            created_at: 1,
-            updated_at: 1
+          $group: {
+            _id: '$_id',
+            // User
+            user_id: { $first: '$user_id' },
+            citizen_id_number: { $first: '$user_info.citizen_id_number' },
+            full_name: { $first: '$user_info.full_name' },
+            phone: { $first: '$user_info.phone' },
+            // Blood
+            blood_group: { $first: '$blood_group.name' },
+            blood_components: { $first: '$blood_components_docs.name' },
+            // Donation Registration
+            donation_registration_id: { $first: '$donation_registration_id' },
+            donation_process_id: { $first: '$donation_process_id' },
+            donation_type: { $first: '$donation_type' },
+            // Request Registration
+            request_registration_id: { $first: '$request_registration_id' },
+            request_process_id: { $first: '$request_process_id' },
+            request_type: { $first: '$request_type' },
+            // Main Health Check
+            weight: { $first: '$weight' },
+            temperature: { $first: '$temperature' },
+            heart_rate: { $first: '$heart_rate' },
+            diastolic_blood_pressure: { $first: '$diastolic_blood_pressure' },
+            systolic_blood_pressure: { $first: '$systolic_blood_pressure' },
+            underlying_health_condition: { $first: '$underlying_health_condition' },
+            hemoglobin: { $first: '$hemoglobin' },
+            description: { $first: '$description' },
+            // Actor
+            status: { $first: '$status' },
+            updated_by: { $first: '$user_update.full_name' },
+            created_at: { $first: '$created_at' },
+            updated_at: { $first: '$updated_at' }
           }
         }
       ])
       .toArray()
 
-    if (!healthCheckList || healthCheckList.length === 0) {
+    if (!healthCheck || healthCheck.length === 0) {
       throw new ErrorWithStatus({
         message: HEALTH_CHECK_MESSAGES.HEALTH_CHECK_NOT_FOUND,
         status: HTTP_STATUS.NOT_FOUND
       })
     }
 
-    return healthCheckList[0]
+    return healthCheck[0]
   }
 
   async updateHealthCheckById({

@@ -64,7 +64,7 @@ export interface GetStatusDonationHealthProcessByDonationIdReqParams extends Par
   id: string
 }
 
-export interface GetAllDonationRegistrationQuery extends Query, Pagination {
+export interface getAllDonationRegistrationsQuery extends Query, Pagination {
   donation_type: string
 }
 

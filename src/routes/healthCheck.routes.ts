@@ -9,7 +9,6 @@ import { filterMiddleware } from '~/middlewares/common.middlewares'
 import { updateHealthCheckValidator } from '~/middlewares/healthCheck.middlewares'
 import { accessTokenValidator, isStaffOrAdminValidator } from '~/middlewares/user.middlewares'
 import { UpdateHealthCheckReqBody } from '~/models/requests/HealthCheck.requests'
-
 import { wrapAsync } from '~/utils/handler'
 
 const healthCheckRouter = express.Router()

@@ -4,7 +4,7 @@ import { DonationProcessStatus } from '~/constants/enum'
 import { DONATION_MESSAGES } from '~/constants/messages'
 import {
   CreateDonationRegistrationReqBody,
-  GetAllDonationRegistrationQuery,
+  getAllDonationRegistrationsQuery,
   GetDonationHealthProcessByDonationIdReqParams,
   GetDonationProcessIdReqParams,
   GetDonationRegistrationByUserIdQuery,
@@ -63,14 +63,14 @@ export const createDonationRegistrationController = async (
 }
 
 // Lấy danh sách Donation Registration
-export const getAllDonationRegistrationsController = async (
-  req: Request<ParamsDictionary, any, any, GetAllDonationRegistrationQuery>,
+export const getAllDonationRegistrationssController = async (
+  req: Request<ParamsDictionary, any, any, getAllDonationRegistrationsQuery>,
   res: Response
 ) => {
   const limit = Number(req.query.limit)
   const page = Number(req.query.page)
 
-  const result = await donationService.getAllDonationRegistration({ limit, page })
+  const result = await donationService.getAllDonationRegistrations({ limit, page })
   res.sendSuccess?.(DONATION_MESSAGES.GET_ALL_DONATION_REGISTRATIONS_SUCCESS, { ...result })
 }
 
