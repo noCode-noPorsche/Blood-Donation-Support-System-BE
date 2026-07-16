@@ -10,7 +10,16 @@ const bloodGroupSchema: ParamSchema = {
   // notEmpty: {
   //   errorMessage: BLOOD_MESSAGES.BLOOD_GROUP_IS_REQUIRED
   // },
-  notEmpty: undefined
+  // notEmpty: undefined,
+  optional: true,
+  custom: {
+    options: async (value: string) => {
+      const isBloodGroupExist = await bloodService.isBloodGroupIdExist(value)
+      if (!isBloodGroupExist) {
+        throw new Error(BLOOD_MESSAGES.BLOOD_GROUP_NOT_FOUND)
+      }
+    }
+  }
   // isString: {
   //   errorMessage: BLOOD_MESSAGES.BLOOD_GROUP_MUST_BE_A_STRING
   // }
@@ -32,6 +41,93 @@ const bloodComponentSchema: ParamSchema = {
   //   options: [Object.values(BloodComponentEnum)],
   //   errorMessage: BLOOD_MESSAGES.BLOOD_COMPONENT_IS_INVALID
   // }
+}
+
+const phoneSchema: ParamSchema = {
+  optional: true,
+  isString: {
+    errorMessage: USER_MESSAGES.PHONE_MUST_BE_A_STRING
+  },
+  isLength: {
+    options: {
+      min: 10,
+      max: 12
+    },
+    errorMessage: USER_MESSAGES.PHONE_IS_WRONG_FORMAT
+  },
+  custom: {
+    options: async (value) => {
+      const isExistPhone = await usersService.checkPhoneExist(value)
+      if (isExistPhone) {
+        throw new Error(USER_MESSAGES.PHONE_ALREADY_EXISTS)
+      }
+      return true
+    }
+  }
+}
+
+const citizenIdNumberSchema: ParamSchema = {
+  optional: true,
+  isLength: {
+    options: { min: 12, max: 12 },
+    errorMessage: USER_MESSAGES.CITIZEN_ID_MUST_BE_EXACTLY_12_DIGITS
+  },
+  matches: {
+    options: [/^\d{12}$/],
+    errorMessage: USER_MESSAGES.CITIZEN_ID_MUST_CONTAIN_ONLY_DIGITS_0_9
+  },
+  trim: true,
+  custom: {
+    options: async (value) => {
+      const isExistCitizen = await usersService.checkCitizenIDNumber(value)
+      if (isExistCitizen) {
+        throw new Error(USER_MESSAGES.CITIZEN_ID_NUMBER_ALREADY_EXIST)
+      }
+      return true
+    }
+  }
+}
+
+const genderSchema: ParamSchema = {
+  optional: true,
+  isIn: {
+    options: [Object.values(UserGender)],
+    errorMessage: USER_MESSAGES.GENDER_MUST_BE_ONE_OF_THE_FOLLOWING_VALUES
+  }
+}
+
+const fullNameSchema: ParamSchema = {
+  optional: true,
+  isString: {
+    errorMessage: USER_MESSAGES.NAME_MUST_BE_A_STRING
+  },
+  isLength: {
+    options: {
+      min: 1,
+      max: 50
+    },
+    errorMessage: USER_MESSAGES.NAME_LENGTH_MUST_BE_FROM_1_TO_50
+  },
+  trim: true
+}
+
+const dateOfBirthSchema: ParamSchema = {
+  optional: true,
+  isISO8601: {
+    options: { strict: true },
+    errorMessage: DONATION_MESSAGES.START_DATE_DONATION_IS_INVALID
+  },
+  custom: {
+    options: (value) => {
+      const inputDate = new Date(value)
+      const now = new Date()
+
+      if (inputDate > now) {
+        throw new Error(USER_MESSAGES.DATE_OF_BIRTH_CANNOT_IN_THE_FUTURE)
+      }
+      return true
+    }
+  }
 }
 
 export const createDonationValidator = validate(
@@ -67,112 +163,15 @@ export const createDonationValidator = validate(
           errorMessage: DONATION_MESSAGES.DONATION_TYPE_IS_INVALID
         }
       },
-      phone: {
-        isString: {
-          errorMessage: USER_MESSAGES.PHONE_MUST_BE_A_STRING
-        },
-        isLength: {
-          options: {
-            min: 10,
-            max: 12
-          },
-          errorMessage: USER_MESSAGES.PHONE_IS_WRONG_FORMAT
-        },
-        custom: {
-          options: async (value) => {
-            const isExistPhone = await usersService.checkPhoneExist(value)
-            if (isExistPhone) {
-              throw new Error(USER_MESSAGES.PHONE_ALREADY_EXISTS)
-            }
-            return true
-          }
-        }
-      },
-      gender: {
-        isIn: {
-          options: [Object.values(UserGender)],
-          errorMessage: USER_MESSAGES.GENDER_MUST_BE_ONE_OF_THE_FOLLOWING_VALUES
-        },
-        optional: true
-      },
-      citizen_id_number: {
-        notEmpty: {
-          errorMessage: USER_MESSAGES.CITIZEN_ID_NUMBER_IS_REQUIRED
-        },
-        isLength: {
-          options: { min: 12, max: 12 },
-          errorMessage: USER_MESSAGES.CITIZEN_ID_MUST_BE_EXACTLY_12_DIGITS
-        },
-        matches: {
-          options: [/^\d{12}$/],
-          errorMessage: USER_MESSAGES.CITIZEN_ID_MUST_CONTAIN_ONLY_DIGITS_0_9
-        },
-        trim: true,
-        custom: {
-          options: async (value) => {
-            const isExistCitizen = await usersService.checkCitizenIDNumber(value)
-            if (isExistCitizen) {
-              throw new Error(USER_MESSAGES.CITIZEN_ID_NUMBER_ALREADY_EXIST)
-            }
-            return true
-          }
-        }
-      },
-      full_name: {
-        isString: {
-          errorMessage: USER_MESSAGES.NAME_MUST_BE_A_STRING
-        },
-        isLength: {
-          options: {
-            min: 1,
-            max: 50
-          },
-          errorMessage: USER_MESSAGES.NAME_LENGTH_MUST_BE_FROM_1_TO_50
-        },
-        trim: true
-      },
-      date_of_birth: {
-        optional: true,
-        isISO8601: {
-          options: { strict: true },
-          errorMessage: DONATION_MESSAGES.START_DATE_DONATION_IS_INVALID
-        },
-        custom: {
-          options: (value) => {
-            const inputDate = new Date(value)
-            const now = new Date()
-
-            if (inputDate > now) {
-              throw new Error(USER_MESSAGES.DATE_OF_BIRTH_CANNOT_IN_THE_FUTURE)
-            }
-            return true
-          }
-        }
-      }
+      phone: phoneSchema,
+      gender: genderSchema,
+      citizen_id_number: citizenIdNumberSchema,
+      full_name: fullNameSchema,
+      date_of_birth: dateOfBirthSchema
     },
     ['body']
   )
 )
-
-// export const updateStatusDonationRegistrationValidator = validate(
-//   checkSchema(
-//     {
-//       status: {
-//         notEmpty: {
-//           errorMessage: DONATION_MESSAGES.STATUS_IS_REQUIRED
-//         },
-//         isString: {
-//           errorMessage: DONATION_MESSAGES.STATUS_MUST_BE_A_STRING
-//         },
-//         isIn: {
-//           options: [Object.values(DonationRegistrationStatus)],
-//           errorMessage: DONATION_MESSAGES.STATUS_IS_INVALID
-//         }
-//       }
-//     },
-//     ['body']
-//   )
-// )
 
 export const updateDonationRegistrationValidator = validate(
   checkSchema(
@@ -189,7 +188,6 @@ export const updateDonationRegistrationValidator = validate(
         }
       },
       start_date_donation: {
-        notEmpty: undefined,
         optional: true,
         isISO8601: {
           options: { strict: true },
@@ -208,9 +206,6 @@ export const updateDonationRegistrationValidator = validate(
         }
       },
       status: {
-        // notEmpty: {
-        //   errorMessage: DONATION_MESSAGES.STATUS_IS_REQUIRED
-        // },
         optional: true,
         isString: {
           errorMessage: DONATION_MESSAGES.STATUS_MUST_BE_A_STRING
@@ -232,15 +227,17 @@ export const updateDonationRegistrationValidator = validate(
         }
       },
       donation_type: {
-        // notEmpty: {
-        //   errorMessage: DONATION_MESSAGES.DONATION_TYPE_IS_REQUIRED
-        // },
         optional: true,
         isIn: {
           options: [Object.values(DonationType)],
           errorMessage: DONATION_MESSAGES.DONATION_TYPE_IS_INVALID
         }
-      }
+      },
+      phone: phoneSchema,
+      gender: genderSchema,
+      citizen_id_number: citizenIdNumberSchema,
+      full_name: fullNameSchema,
+      date_of_birth: dateOfBirthSchema
     },
     ['body']
   )

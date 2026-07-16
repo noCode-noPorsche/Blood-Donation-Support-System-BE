@@ -26,6 +26,15 @@ export interface UpdateDonationRegistrationReqBody {
   status: DonationRegistrationStatus
   donation_type?: DonationType
   token?: string
+  answers?: {
+    question_id: string
+    answer: boolean
+  }[]
+  citizen_id_number?: string
+  full_name?: string
+  phone?: string
+  gender?: string
+  date_of_birth?: string
 }
 
 export interface GetDonationRegistrationIdReqParams extends ParamsDictionary {

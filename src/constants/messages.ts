@@ -264,6 +264,7 @@ export const DASHBOARD_MESSAGES = {
 } as const
 
 export const NOTIFICATION_MESSAGES = {
+  UPDATE_DONATION_SUCCESS: 'Bạn đã cập nhật thành công lịch hiến máu!',
   REGISTER_DONATION_SUCCESS: 'Bạn đã đăng ký lịch hiến máu thành công!',
   REGISTER_DONATION_SUCCESS_BODY: 'Bạn vui lòng tới hiến máu đúng hạn.',
   REGISTER_DONATION_FAIL: 'Bạn đã đăng ký lịch hiến máu thất bại!',

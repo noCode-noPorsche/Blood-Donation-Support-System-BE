@@ -25,7 +25,6 @@ import {
   UpdateDonationProcessReqBody,
   UpdateDonationRegistrationReqBody
 } from '~/models/requests/Donation.requests'
-
 import { wrapAsync } from '~/utils/handler'
 
 const donationRouter = express.Router()
@@ -141,7 +140,13 @@ donationRouter.patch(
     'start_date_donation',
     'status',
     'donation_type',
-    'token'
+    'token',
+    'answers',
+    'citizen_id_number',
+    'full_name',
+    'phone',
+    'gender',
+    'date_of_birth'
   ]),
   wrapAsync(updateDonationRegistrationController)
 )

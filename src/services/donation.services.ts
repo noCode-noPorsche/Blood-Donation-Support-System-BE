@@ -183,7 +183,6 @@ class DonationService {
 
     if (actorUser?.role === UserRole.Admin || actorUser?.role === UserRole.Staff) {
       // Nếu STAFF/ADMIN đang thực hiện:
-
       // Staff/Admin bắt buộc phải truyền CCCD của bệnh nhân
       if (!payload.citizen_id_number) {
         throw new ErrorWithStatus({
@@ -281,7 +280,7 @@ class DonationService {
     // Kiểm tra có câu trả lời TRUE hay không
     const hasRejectedAnswer = answers.some((ans) => ans.answer === true)
 
-    // Tạo mới Donation Registration
+    // Tạo Donation Registration
     const newDonationRegistration = new DonationRegistration({
       ...payload,
       user_id: donatorUser._id as ObjectId,
@@ -354,14 +353,6 @@ class DonationService {
     })
     await databaseService.donationProcesses.insertOne(newDonationProcess)
 
-    // Nếu có câu trả lời true -> quăng lỗi sau khi tạo dữ liệu
-    if (hasRejectedAnswer) {
-      throw new ErrorWithStatus({
-        message: 'Bạn không đạt đủ yêu cầu để có thể đăng ký hiến máu',
-        status: HTTP_STATUS.BAD_REQUEST
-      })
-    }
-
     // Lưu thông báo vào DB
     const titleSuccess = NOTIFICATION_MESSAGES.REGISTER_DONATION_SUCCESS
     const messageSuccess = NOTIFICATION_MESSAGES.REGISTER_DONATION_SUCCESS_BODY
@@ -384,6 +375,15 @@ class DonationService {
         body: hasRejectedAnswer ? messageFail : messageSuccess
       })
     }
+
+    // Nếu có câu trả lời true thì quăng lỗi sau khi tạo dữ liệu
+    // if (hasRejectedAnswer) {
+    //   throw new ErrorWithStatus({
+    //     message: 'Bạn không đạt đủ yêu cầu để có thể đăng ký hiến máu',
+    //     status: HTTP_STATUS.BAD_REQUEST
+    //   })
+    // }
+
     return
   }
 
@@ -539,7 +539,7 @@ class DonationService {
           }
         },
         { $unwind: { path: '$blood_group', preserveNullAndEmptyArrays: true } },
-        // Join user
+        // Join User
         {
           $lookup: {
             from: 'users',
@@ -755,7 +755,9 @@ class DonationService {
       ])
       .toArray()
 
-    const totalItems = await databaseService.donationRegistrations.countDocuments()
+    const totalItems = await databaseService.donationRegistrations.countDocuments({
+      user_id: new ObjectId(user_id)
+    })
     const totalPages = Math.ceil(totalItems / limit)
 
     return {
@@ -778,14 +780,17 @@ class DonationService {
     user_id: string
   }) {
     const donationRegistration = await databaseService.donationRegistrations.findOne({ _id: new ObjectId(id) })
-    const user = await databaseService.users.findOne({ _id: new ObjectId(user_id) })
-
+    // Kiểm tra có tồn tại hay ko
     if (!donationRegistration) {
       throw new ErrorWithStatus({
         message: DONATION_MESSAGES.DONATION_REGISTRATION_NOT_FOUND,
         status: HTTP_STATUS.NOT_FOUND
       })
     }
+
+    const actorUser = await databaseService.users.findOne({ _id: new ObjectId(user_id) })
+    // Kiểm tra role của user
+    const isStaffOrAdmin = actorUser?.role === UserRole.Admin || actorUser?.role === UserRole.Staff
 
     // Nếu status hiện tại là Rejected => không cho phép cập nhật
     if (donationRegistration.status === DonationRegistrationStatus.Rejected) {
@@ -805,14 +810,13 @@ class DonationService {
 
     // Kiểm tra token mã QR
     if (payload.status === DonationRegistrationStatus.CheckedIn) {
-      if (user?.role === UserRole.Customer) {
+      if (!isStaffOrAdmin) {
         throw new ErrorWithStatus({
           message: 'Bạn không thể tự thực hiện hành động Check-in này.',
           status: HTTP_STATUS.FORBIDDEN
         })
       }
 
-      // Kiểm tra token truyền lên từ mã QR có trùng khớp với token trong DB không
       if (!payload.token || payload.token !== donationRegistration.token) {
         throw new ErrorWithStatus({
           message: 'Mã QR Check-in không hợp lệ!',
@@ -821,31 +825,34 @@ class DonationService {
       }
     }
 
+    // Kiểm tra blood_group_id format ObjectId
     const isValidBloodGroupId = ObjectId.isValid(payload.blood_group_id as string)
     const bloodGroupId = isValidBloodGroupId
       ? new ObjectId(payload.blood_group_id)
       : donationRegistration.blood_group_id
 
-    const updateFields: Record<string, any> = {
+    // Tạo object gom các trường Donation Registration cần update đồng bộ
+    const updateDonationRegistrationFields: Record<string, any> = {
       status: payload.status || donationRegistration.status,
       blood_group_id: bloodGroupId,
       checked_in_by: payload.status === DonationRegistrationStatus.CheckedIn ? new ObjectId(user_id) : null
     }
 
+    // Tạo object gom các trường user cần update đồng bộ
+    const updateUserFields: Record<string, any> = {}
+
+    if (donationRegistration.status === DonationRegistrationStatus.Approved && isStaffOrAdmin) {
+      // Chuẩn bị dữ liệu để đồng bộ ngược vào bảng Users
+      if (payload.full_name) updateUserFields.full_name = payload.full_name
+      if (payload.phone) updateUserFields.phone = payload.phone
+      if (payload.citizen_id_number) updateUserFields.citizen_id_number = payload.citizen_id_number
+      if (payload.gender) updateUserFields.gender = payload.gender
+      if (payload.date_of_birth) updateUserFields.date_of_birth = new Date(payload.date_of_birth)
+    }
+
     if (bloodGroupId) {
-      updateFields.blood_group_id = bloodGroupId
-
-      // Cập nhật luôn blood_group_id của user
-      await databaseService.users.updateOne(
-        { _id: donationRegistration.user_id },
-        {
-          $set: {
-            blood_group_id: bloodGroupId
-          },
-          $currentDate: { updated_at: true }
-        }
-      )
-
+      updateDonationRegistrationFields.blood_group_id = bloodGroupId
+      updateUserFields.blood_group_id = bloodGroupId
       // Cập nhật blood_group_id trong Health Checks
       await databaseService.healthChecks.updateOne(
         { donation_registration_id: new ObjectId(id) },
@@ -854,7 +861,6 @@ class DonationService {
           $currentDate: { updated_at: true }
         }
       )
-
       // Cập nhật blood_group_id trong Donation Processes
       await databaseService.donationProcesses.updateOne(
         { donation_registration_id: new ObjectId(id) },
@@ -865,9 +871,21 @@ class DonationService {
       )
     }
 
+    // Thực hiện update bảng Users (Chỉ chạy lệnh khi có ít nhất 1 trường thay đổi)
+    if (Object.keys(updateUserFields).length > 0) {
+      await databaseService.users.updateOne(
+        { _id: donationRegistration.user_id },
+        {
+          $set: updateUserFields,
+          $currentDate: { updated_at: true }
+        }
+      )
+    }
+
+    // Nếu có start_date_donation thì cập nhật
     if (payload.start_date_donation) {
-      updateFields.start_date_donation = new Date(payload.start_date_donation)
-      // Cập nhật donation_date trong Donation Processes
+      updateDonationRegistrationFields.start_date_donation = new Date(payload.start_date_donation)
+      // Cập nhật donation_date trong Donation Process
       await databaseService.donationProcesses.updateOne(
         { donation_registration_id: new ObjectId(id) },
         {
@@ -877,61 +895,131 @@ class DonationService {
       )
     }
 
-    // Nếu có thay đổi loại hiến
+    // Nếu có donation_type thì cập nhật
     let componentIds: ObjectId[] = []
     if (payload.donation_type) {
-      updateFields.donation_type = payload.donation_type
+      updateDonationRegistrationFields.donation_type = payload.donation_type
 
       // Map loại hiến sang các thành phần máu
       const componentNames = convertTypeToComponentMap[payload.donation_type]
       const componentDocs = await databaseService.bloodComponents.find({ name: { $in: componentNames } }).toArray()
 
       componentIds = componentDocs.map((comp) => comp._id)
-      updateFields.blood_component_ids = componentIds
+      updateDonationRegistrationFields.blood_component_ids = componentIds
+    }
+
+    // Nếu có answer thì cập nhật
+    let hasRejectedAnswer = false
+    if (payload.answers && payload.answers.length > 0) {
+      // Kiểm tra xem bộ câu hỏi mới gửi lên có câu nào (true) không
+      hasRejectedAnswer = payload.answers.some((ans) => ans.answer === true)
+
+      // Nếu có câu trả lời vi phạm, ép trạng thái của đơn đăng ký này sang Rejected ngay lập tức
+      if (hasRejectedAnswer) {
+        updateDonationRegistrationFields.status = DonationRegistrationStatus.Rejected
+      }
+
+      const answers = payload.answers.map((ans) => ({
+        question_id: new ObjectId(ans.question_id),
+        answer: ans.answer
+      }))
+
+      // Tìm xem đơn đăng ký này đã từng có bản ghi Answer nào chưa
+      const existedAnswer = await databaseService.answers.findOne({
+        donation_registration_id: donationRegistration._id
+      })
+
+      if (existedAnswer) {
+        // Nếu đã có bản ghi trước đó, cập nhật lại mảng answers mới
+        await databaseService.answers.updateOne(
+          { donation_registration_id: donationRegistration._id },
+          {
+            $set: {
+              answers
+            }
+          }
+        )
+      } else {
+        // Nếu chưa có answer thì tạo mới
+        const newAnswer = new Answer({
+          _id: new ObjectId(),
+          user_id: new ObjectId(user_id),
+          donation_registration_id: donationRegistration._id,
+          answers,
+          created_at: new Date()
+        })
+        await databaseService.answers.insertOne(newAnswer)
+      }
     }
 
     // Cập nhật Donation Registrations
     const result = await databaseService.donationRegistrations.findOneAndUpdate(
       { _id: new ObjectId(id) },
       {
-        $set: updateFields,
+        $set: updateDonationRegistrationFields,
         $currentDate: { updated_at: true }
       },
       { returnDocument: 'after' }
     )
-    // Nếu có thay đổi loại hiến, cập nhật luôn bảng Health Checks
-    if (payload.donation_type && componentIds.length > 0) {
+
+    // Đồng bộ trạng thái Rejected sang Health Check Và Donation Process
+    if (hasRejectedAnswer) {
+      // Cập nhật status Health Check
       await databaseService.healthChecks.updateOne(
-        { donation_registration_id: new ObjectId(id) },
+        { donation_registration_id: donationRegistration._id },
         {
-          $set: {
-            donation_type: payload.donation_type,
-            blood_component_ids: componentIds
-          },
+          $set: { status: HealthCheckStatus.Rejected },
           $currentDate: { updated_at: true }
         }
       )
+
+      // Cập nhật status Donation Process
+      await databaseService.donationProcesses.updateOne(
+        { donation_registration_id: donationRegistration._id },
+        {
+          $set: { status: DonationProcessStatus.Rejected },
+          $currentDate: { updated_at: true }
+        }
+      )
+    } else {
+      // Trường hợp không có câu answer true thì chỉ cập nhật thông tin thành phần máu khi có donation_type đổi
+      if (payload.donation_type && componentIds.length > 0) {
+        await databaseService.healthChecks.updateOne(
+          { donation_registration_id: new ObjectId(id) },
+          {
+            $set: {
+              donation_type: payload.donation_type,
+              blood_component_ids: componentIds
+            },
+            $currentDate: { updated_at: true }
+          }
+        )
+      }
     }
 
     // Gửi thông báo nếu status chuyển sang "Checked In"
-    if (payload.status === DonationRegistrationStatus.CheckedIn) {
+    if (payload.status === DonationRegistrationStatus.CheckedIn || hasRejectedAnswer) {
+      const donatorUser = await databaseService.users.findOne({ _id: donationRegistration.user_id })
       // Lưu thông báo vào DB
-      const title = NOTIFICATION_MESSAGES.CHECKED_IN_DONATION_SUCCESS
-      const message = NOTIFICATION_MESSAGES.CHECKED_IN_DONATION_BODY
+      const titleSuccess = NOTIFICATION_MESSAGES.CHECKED_IN_DONATION_SUCCESS
+      const messageSuccess = NOTIFICATION_MESSAGES.CHECKED_IN_DONATION_BODY
+
+      const titleFail = NOTIFICATION_MESSAGES.UPDATE_DONATION_SUCCESS
+      const messageFail = NOTIFICATION_MESSAGES.REGISTER_DONATION_FAIL_BODY
 
       const notification = new Notification({
-        receiver_id: user?._id as ObjectId,
+        receiver_id: donatorUser?._id as ObjectId,
         donation_registration_id: new ObjectId(id),
-        title,
-        message
+        title: hasRejectedAnswer ? titleFail : titleSuccess,
+        message: hasRejectedAnswer ? messageFail : messageSuccess
       })
       await databaseService.notifications.insertOne(notification)
       // Gửi push notification
-      if (user?.fcm_token) {
+      if (donatorUser?.fcm_token) {
         await sendPushNotification({
-          fcmToken: user.fcm_token,
-          title,
-          body: message
+          fcmToken: donatorUser.fcm_token,
+          title: hasRejectedAnswer ? titleFail : titleSuccess,
+          body: hasRejectedAnswer ? messageFail : messageSuccess
         })
       }
     }

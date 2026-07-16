@@ -55,6 +55,7 @@ export const registerController = async (
 
 export const logoutController = async (req: Request<ParamsDictionary, any, LogoutReqBody>, res: Response) => {
   const { refresh_token } = req.body
+
   const result = await usersService.logout(refresh_token)
   res.sendSuccess?.(result.message)
 }
@@ -75,6 +76,7 @@ export const refreshTokenController = async (
 
 export const getMeController = async (req: Request, res: Response) => {
   const { user_id } = req.decode_authorization as TokenPayload
+
   const result = await usersService.getMe(user_id)
   res.sendSuccess?.(USER_MESSAGES.GET_PROFILE_SUCCESS, {
     user: result
