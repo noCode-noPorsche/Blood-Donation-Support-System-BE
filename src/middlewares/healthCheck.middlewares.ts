@@ -42,6 +42,16 @@ export const updateHealthCheckValidator = validate(
         isIn: {
           options: [Object.values(RequestType)],
           errorMessage: REQUEST_MESSAGES.REQUEST_TYPE_IS_INVALID
+        },
+        custom: {
+          options: (value, { req }) => {
+            // Kiểm tra xem trong body có cùng xuất hiện cả 2 trường không
+            if (value && req.body.donation_type) {
+              throw new Error('Không thể gửi đồng thời cả donation_type và request_type.')
+              // throw new Error(HEALTH_CHECK_MESSAGES.CANNOT_SEND_BOTH_DONATION_AND_REQUEST_TYPE)
+            }
+            return true
+          }
         }
       },
       weight: {
@@ -130,7 +140,7 @@ export const updateHealthCheckValidator = validate(
           errorMessage: HEALTH_CHECK_MESSAGES.HEALTH_CHECK_STATUS_MUST_BE_A_STRING
         },
         isIn: {
-          options: [Object.values(HealthCheckStatus)],
+          options: [Object.values(HealthCheckStatus).filter((status) => status !== HealthCheckStatus.Pending)],
           errorMessage: HEALTH_CHECK_MESSAGES.HEALTH_CHECK_STATUS_MUST_BE_ONE_OF_THE_FOLLOWING_VALUES
         }
       },

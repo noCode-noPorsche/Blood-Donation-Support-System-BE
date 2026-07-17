@@ -351,6 +351,7 @@ class HealthCheckService {
     return healthCheck[0]
   }
 
+  // Cập nhật Health Check
   async updateHealthCheckById({
     user_id,
     id,
@@ -360,50 +361,74 @@ class HealthCheckService {
     id: string
     payload: UpdateHealthCheckReqBody
   }) {
-    const resultHealthCheck = await databaseService.healthChecks.findOne({ _id: new ObjectId(id) })
-
-    if (!resultHealthCheck) {
+    const healthCheck = await databaseService.healthChecks.findOne({ _id: new ObjectId(id) })
+    if (!healthCheck) {
       throw new ErrorWithStatus({
         message: HEALTH_CHECK_MESSAGES.HEALTH_CHECK_NOT_FOUND,
         status: HTTP_STATUS.NOT_FOUND
       })
     }
 
-    // Chặn cập nhật nếu donation_registration chưa checked-in
-    if (resultHealthCheck.donation_registration_id) {
+    // Nếu status Donation Registration khác "Checked In" thì ko được cập nhật
+    if (healthCheck.donation_registration_id) {
       const donationRegistration = await databaseService.donationRegistrations.findOne({
-        _id: new ObjectId(resultHealthCheck.donation_registration_id)
+        _id: new ObjectId(healthCheck.donation_registration_id)
       })
 
       if (donationRegistration?.status !== DonationRegistrationStatus.CheckedIn) {
         throw new ErrorWithStatus({
-          message: HEALTH_CHECK_MESSAGES.UNABLE_TO_UPDATE_HEALTH_CHECK_NOT_CHECKED_IN,
+          message: HEALTH_CHECK_MESSAGES.UNABLE_TO_UPDATE_HEALTH_CHECK_NOT_CHECKED_IN_OR_REJECTED,
           status: HTTP_STATUS.BAD_REQUEST
         })
       }
     }
 
-    // Chặn cập nhật nếu request_registration vẫn còn pending
-    if (resultHealthCheck.request_registration_id) {
-      const requestRegistration = await databaseService.requestRegistrations.findOne({
-        _id: new ObjectId(resultHealthCheck.request_registration_id)
+    // Nếu status Health Check là "Rejected" hoặc status Donation Process là "Rejected" or "Approved" thì ko được cập nhật
+    if (healthCheck.donation_process_id) {
+      const donationProcess = await databaseService.donationProcesses.findOne({
+        _id: new ObjectId(healthCheck.donation_process_id)
       })
 
-      if (requestRegistration?.status === RequestRegistrationStatus.Pending) {
+      if (
+        donationProcess?.status !== DonationProcessStatus.Pending ||
+        healthCheck.status === HealthCheckStatus.Rejected
+      ) {
         throw new ErrorWithStatus({
-          message: HEALTH_CHECK_MESSAGES.UNABLE_TO_UPDATE_HEALTH_CHECK_PENDING_REQUEST,
+          message:
+            HEALTH_CHECK_MESSAGES.UNABLE_TO_UPDATE_HEALTH_CHECK_REJECTED_OR_DONATION_PROCESS_APPROVED_OR_REJECTED,
           status: HTTP_STATUS.BAD_REQUEST
         })
       }
     }
 
-    const resultUser = await databaseService.users.findOne({ _id: new ObjectId(resultHealthCheck?.user_id) })
-
-    if (!resultUser) {
+    const user = await databaseService.users.findOne({ _id: new ObjectId(healthCheck?.user_id) })
+    if (!user) {
       throw new ErrorWithStatus({ message: USER_MESSAGES.USER_NOT_FOUND, status: HTTP_STATUS.NOT_FOUND })
     }
 
-    const finalWeight = payload.weight ?? resultUser.weight
+    const updateHealthCheckFields: Record<string, any> = {
+      blood_group_id: payload.blood_group_id,
+      donation_type: payload.donation_type,
+      request_type: payload.request_type,
+      weight: payload.weight,
+      heart_rate: payload.heart_rate,
+      temperature: payload.temperature,
+      diastolic_blood_pressure: payload.diastolic_blood_pressure,
+      systolic_blood_pressure: payload.systolic_blood_pressure,
+      hemoglobin: payload.hemoglobin,
+      description: payload.description,
+      underlying_health_condition: payload.underlying_health_condition,
+      status: payload.status
+    }
+
+    // Nếu có blood_group_id format ObjectId
+    const isValidBloodGroupId = ObjectId.isValid(payload.blood_group_id as string)
+    const bloodGroupId = isValidBloodGroupId ? new ObjectId(payload.blood_group_id) : healthCheck.blood_group_id
+    updateHealthCheckFields.blood_group_id = bloodGroupId
+
+    // Nếu có weight gửi về ko thì lấy từ user
+    const finalWeight = payload.weight ? payload.weight : user.weight
+    updateHealthCheckFields.weight = finalWeight
 
     // Kiểm tra tình trạng bệnh nền có bị loại trừ không
     const disqualifyingConditions: UnderlyingHealthCondition[] = [
@@ -420,16 +445,18 @@ class HealthCheckService {
       UnderlyingHealthCondition.HIV,
       UnderlyingHealthCondition.HepatitisBorC
     ]
-    const conditions = Array.isArray(payload.underlying_health_condition)
+
+    const underlyingHealthCondition = Array.isArray(payload.underlying_health_condition)
       ? payload.underlying_health_condition
       : [payload.underlying_health_condition]
+    updateHealthCheckFields.underlying_health_condition = underlyingHealthCondition
 
-    const hasDisqualifyingCondition = conditions.some((cond) =>
-      disqualifyingConditions.includes(cond as UnderlyingHealthCondition)
+    const hasDisqualifyingCondition = underlyingHealthCondition.some((unHeCo) =>
+      disqualifyingConditions.includes(unHeCo as UnderlyingHealthCondition)
     )
 
-    // Nếu bị bệnh không đủ điều kiện hoặc dưới 42kg, thì auto reject
-    const isDonationProcess = !!resultHealthCheck.donation_process_id || !!resultHealthCheck.donation_registration_id
+    // Nếu có ít nhất 1 bệnh thì không đủ điều kiện hoặc dưới 42k và tự cập nhật status Rejected
+    const isDonationProcess = !!healthCheck.donation_process_id || !!healthCheck.donation_registration_id
     const shouldReject = (finalWeight < 42 || hasDisqualifyingCondition) && isDonationProcess
     let rejectionReason = ''
     if (shouldReject) {
@@ -438,57 +465,37 @@ class HealthCheckService {
           ? HEALTH_CHECK_MESSAGES.THE_MINIUM_WEIGHT_REQUIRED_TO_DONATION_BLOOD_IS_42KG
           : HEALTH_CHECK_MESSAGES.UNABLE_TO_DONATE_DUE_TO_HEALTH_CONDITION
 
-      // Tự động set status về Rejected và description luôn
-      payload.status = HealthCheckStatus.Rejected
-      payload.description = rejectionReason
+      // Tự động set status về "Rejected" và description
+      updateHealthCheckFields.status = HealthCheckStatus.Rejected
+      updateHealthCheckFields.description = rejectionReason
     }
 
-    // // Kiểm tra trọng lượng có hợp lệ không và chỉ từ chối nếu là quy trình hiến máu
-    // let isRejectedDueToWeight = false
-    // const isDonationProcess = !!resultHealthCheck.donation_process_id || !!resultHealthCheck.donation_registration_id
-
-    // if (finalWeight < 42 && isDonationProcess) {
-    //   payload.status = HealthCheckStatus.Rejected
-    //   isRejectedDueToWeight = true
-    // }
-
-    //Kiểm tra xem có donation_type hoặc request_type không và chuyển đổi sang blood_component_ids
-    let bloodComponentIdsFromType: ObjectId[] = []
+    // Kiểm tra xem có donation_type hoặc request_type ko và chuyển đổi sang blood_component_ids
+    // let bloodComponentIdsFromType: ObjectId[] = []
     if (payload.donation_type) {
       const componentNames = convertTypeToComponentMap[payload.donation_type]
       const componentDocs = await databaseService.bloodComponents.find({ name: { $in: componentNames } }).toArray()
-      bloodComponentIdsFromType = componentDocs.map((comp) => comp._id)
+      const bloodComponentIdsFromType = componentDocs.map((comp) => comp._id)
+
+      updateHealthCheckFields.blood_component_ids = bloodComponentIdsFromType
+      updateHealthCheckFields.donation_type = payload.donation_type
     }
 
     if (payload.request_type) {
       const componentNames = convertTypeToComponentMap[payload.request_type]
       const componentDocs = await databaseService.bloodComponents.find({ name: { $in: componentNames } }).toArray()
-      bloodComponentIdsFromType = componentDocs.map((comp) => comp._id)
+      const bloodComponentIdsFromType = componentDocs.map((comp) => comp._id)
+
+      updateHealthCheckFields.blood_component_ids = bloodComponentIdsFromType
+      updateHealthCheckFields.request_type = payload.request_type
     }
 
-    // Cập nhật health check
+    // Cập nhật Health Check
     const resultHealthCheckUpdate = await databaseService.healthChecks.findOneAndUpdate(
       { _id: new ObjectId(id) },
       {
         $set: {
-          blood_group_id: payload.blood_group_id
-            ? new ObjectId(payload.blood_group_id)
-            : new ObjectId(resultUser?.blood_group_id as ObjectId),
-          blood_component_ids:
-            bloodComponentIdsFromType.length > 0
-              ? bloodComponentIdsFromType
-              : resultHealthCheck.blood_component_ids || [],
-          donation_type: payload.donation_type,
-          request_type: payload.request_type,
-          weight: finalWeight,
-          temperature: payload.temperature,
-          heart_rate: payload.heart_rate,
-          diastolic_blood_pressure: payload.diastolic_blood_pressure,
-          systolic_blood_pressure: payload.systolic_blood_pressure,
-          underlying_health_condition: payload.underlying_health_condition,
-          hemoglobin: payload.hemoglobin,
-          status: payload.status,
-          description: payload.description,
+          ...updateHealthCheckFields,
           updated_by: new ObjectId(user_id)
         },
         $currentDate: {
@@ -501,96 +508,59 @@ class HealthCheckService {
     )
 
     if (resultHealthCheckUpdate) {
-      const userResult = await databaseService.users.findOne({
-        _id: new ObjectId(resultHealthCheckUpdate.user_id)
-      })
-
       if (resultHealthCheckUpdate.donation_registration_id) {
-        // HealthCheck này thuộc quy trình hiến máu - Donation Registration
+        // Cập nhật Donation Registration thuộc quy trình hiến máu
         await databaseService.donationRegistrations.findOneAndUpdate(
           {
             _id: new ObjectId(resultHealthCheckUpdate.donation_registration_id)
           },
           {
             $set: {
-              blood_group_id: payload.blood_group_id
-                ? new ObjectId(payload.blood_group_id)
-                : resultHealthCheckUpdate.blood_group_id,
-              donation_type: payload.donation_type,
+              blood_group_id: updateHealthCheckFields.blood_group_id,
+              donation_type: updateHealthCheckFields.donation_type,
               blood_component_ids:
-                bloodComponentIdsFromType.length > 0
-                  ? bloodComponentIdsFromType
-                  : resultHealthCheck.blood_component_ids || []
+                updateHealthCheckFields.blood_component_ids.length > 0
+                  ? updateHealthCheckFields.blood_component_ids
+                  : healthCheck.blood_component_ids || []
             }
           }
         )
       } else if (resultHealthCheckUpdate.request_registration_id) {
-        // HealthCheck này thuộc quy trình nhận máu - Request Registration
+        // Cập nhật Request Registration thuộc quy trình nhận máu
         await databaseService.requestRegistrations.findOneAndUpdate(
           {
             _id: new ObjectId(resultHealthCheckUpdate.request_registration_id)
           },
           {
             $set: {
-              blood_group_id: payload.blood_group_id
-                ? new ObjectId(payload.blood_group_id)
-                : resultHealthCheckUpdate.blood_group_id,
-              request_type: payload.request_type,
+              blood_group_id: updateHealthCheckFields.blood_group_id,
+              request_type: updateHealthCheckFields.request_type,
               blood_component_ids:
-                bloodComponentIdsFromType.length > 0
-                  ? bloodComponentIdsFromType
-                  : resultHealthCheck.blood_component_ids || []
+                updateHealthCheckFields.blood_component_ids.length > 0
+                  ? updateHealthCheckFields.blood_component_ids
+                  : healthCheck.blood_component_ids || []
             }
           }
         )
       }
-
       // Luôn cập nhật user nếu tìm được
-      if (userResult) {
-        await databaseService.users.findOneAndUpdate(
-          { _id: new ObjectId(userResult._id) },
-          {
-            $set: {
-              blood_group_id: payload.blood_group_id ? new ObjectId(payload.blood_group_id) : userResult.blood_group_id,
-              weight: finalWeight
-            },
-            $currentDate: { updated_at: true }
-          }
-        )
-      }
+      await databaseService.users.findOneAndUpdate(
+        { _id: new ObjectId(user._id) },
+        {
+          $set: {
+            blood_group_id: updateHealthCheckFields.blood_group_id,
+            weight: updateHealthCheckFields.weight
+          },
+          $currentDate: { updated_at: true }
+        }
+      )
     }
-
-    // const donationUpdate: {
-    //   $set: Partial<{
-    //     status: DonationProcessStatus
-    //     volume_collected: number
-    //     blood_group_id: ObjectId
-    //   }>
-    //   $currentDate: {
-    //     updated_at: true
-    //   }
-    // } = {
-    //   $currentDate: { updated_at: true },
-    //   $set: {}
-    // }
-
-    // if (payload.status === HealthCheckStatus.Rejected) {
-    //   donationUpdate.$set.status = DonationProcessStatus.Rejected
-    // } else {
-    //   const volume = calculateDonationVolume(finalWeight)
-    //   donationUpdate.$set.volume_collected = volume
-    //   donationUpdate.$set.blood_group_id = new ObjectId(
-    //     payload.blood_group_id || (resultUser?.blood_group_id as ObjectId)
-    //   )
-    // }
-
-    // await databaseService.donationProcesses.updateOne({ health_check_id: new ObjectId(id) }, donationUpdate)
 
     if (resultHealthCheckUpdate?.donation_process_id) {
       // HealthCheck này thuộc quy trình hiến máu - Donation Process
-      const donationType = resultHealthCheckUpdate.donation_type || payload.donation_type
+      const donationType = resultHealthCheckUpdate.donation_type || updateHealthCheckFields.donation_type
 
-      const donationUpdate: {
+      const donationProcessUpdate: {
         $set: Partial<{
           status: DonationProcessStatus
           volume_collected: number
@@ -602,25 +572,25 @@ class HealthCheckService {
       } = {
         $set: {
           status:
-            payload.status === HealthCheckStatus.Rejected
+            updateHealthCheckFields.status === HealthCheckStatus.Rejected
               ? DonationProcessStatus.Rejected
               : DonationProcessStatus.Pending,
           volume_collected: 0,
-          blood_group_id: new ObjectId(payload.blood_group_id || (resultUser?.blood_group_id as ObjectId))
+          blood_group_id: updateHealthCheckFields.blood_group_id
         },
         $currentDate: {
           updated_at: true
         }
       }
 
-      // Chỉ tính volume nếu là hiến máu toàn phần
+      // Chỉ tính volume nếu là hiến máu toàn phần - Whole Blood
       if (donationType === DonationType.WholeBlood) {
-        donationUpdate.$set.volume_collected = calculateDonationVolume(finalWeight)
+        donationProcessUpdate.$set.volume_collected = calculateDonationVolume(finalWeight)
       }
-
-      await databaseService.donationProcesses.updateOne({ health_check_id: new ObjectId(id) }, donationUpdate)
+      // Cập nhật Donation Process
+      await databaseService.donationProcesses.updateOne({ health_check_id: new ObjectId(id) }, donationProcessUpdate)
     } else if (resultHealthCheckUpdate?.request_process_id) {
-      // HealthCheck này thuộc quy trình nhận máu - Request Process
+      // Health Check này thuộc quy trình nhận máu - Request Process
       const requestUpdate: {
         $set: Partial<{
           status: RequestProcessStatus
@@ -634,36 +604,40 @@ class HealthCheckService {
       } = {
         $set: {
           status:
-            payload.status === HealthCheckStatus.Rejected
+            updateHealthCheckFields.status === HealthCheckStatus.Rejected
               ? RequestProcessStatus.Rejected
               : RequestProcessStatus.Pending,
-          blood_group_id: new ObjectId(payload.blood_group_id || (resultUser?.blood_group_id as ObjectId)),
+          blood_group_id: updateHealthCheckFields.blood_group_id,
           blood_component_ids:
-            bloodComponentIdsFromType.length > 0
-              ? bloodComponentIdsFromType
-              : resultHealthCheck.blood_component_ids || [],
-          request_type: payload.request_type
+            updateHealthCheckFields.blood_component_ids.length > 0
+              ? updateHealthCheckFields.blood_component_ids
+              : healthCheck.blood_component_ids || [],
+          request_type: updateHealthCheckFields.request_type
         },
         $currentDate: {
           updated_at: true
         }
       }
-
+      // Cập nhật Request Process
       await databaseService.requestProcesses.updateOne({ health_check_id: new ObjectId(id) }, requestUpdate)
 
       // Cập nhật request_process_detail nếu có request_process_id
-      if (resultHealthCheckUpdate.request_process_id && payload.request_type && bloodComponentIdsFromType.length > 0) {
+      if (
+        resultHealthCheckUpdate.request_process_id &&
+        updateHealthCheckFields.request_type &&
+        updateHealthCheckFields.blood_component_ids.length > 0
+      ) {
         const requestProcessId = new ObjectId(resultHealthCheckUpdate.request_process_id)
 
         // Xoá các request_process_detail cũ
         await databaseService.requestProcessDetails.deleteMany({ request_process_id: requestProcessId })
 
-        const defaultVolume = 0 // hoặc payload.volume nếu bạn có
+        const defaultVolume = 0
 
-        const detailsToInsert = bloodComponentIdsFromType.map((componentId) => ({
+        const detailsToInsert = (updateHealthCheckFields.blood_component_ids as ObjectId[]).map((componentId) => ({
           request_process_id: requestProcessId,
           blood_component_id: componentId,
-          blood_group_id: new ObjectId(payload.blood_group_id || (resultUser?.blood_group_id as ObjectId)),
+          blood_group_id: new ObjectId(payload.blood_group_id || (user?.blood_group_id as ObjectId)),
           volume_required: defaultVolume,
           status: RequestProcessDetailStatus.Pending,
           updated_by: new ObjectId(user_id),
@@ -680,67 +654,3 @@ class HealthCheckService {
 
 const healthCheckService = new HealthCheckService()
 export default healthCheckService
-
-//Create Request Process Blood
-// if (payload.status === HealthCheckStatus.Approved && result?.request_registration_id) {
-//   const requestProcess = await databaseService.requestProcesses.findOne({
-//     health_check_id: result._id
-//   })
-
-//   if (!requestProcess) {
-//     throw new ErrorWithStatus({
-//       message: REQUEST_MESSAGES.REQUEST_PROCESS_NOT_FOUND,
-//       status: HTTP_STATUS.NOT_FOUND
-//     })
-//   }
-
-//   await databaseService.requestProcessBloods.deleteMany({
-//     request_process_id: requestProcess._id
-//   })
-
-//   // 1. Lấy tất cả túi máu còn dùng được
-//   const allAvailableUnits = await databaseService.bloodUnits
-//     .find({
-//       status: BloodUnitStatus.Available,
-//       volume: { $gt: 0 },
-//       expired_at: { $gt: new Date() }
-//     })
-//     .toArray()
-
-//   // 2. Lọc nhóm máu tương thích
-//   const compatibleUnits = []
-
-//   for (const unit of allAvailableUnits) {
-//     const isCompatible = await isCompatibleDonor(
-//       requestProcess.blood_group_id.toString(),
-//       unit.blood_group_id.toString()
-//     )
-
-//     if (isCompatible) {
-//       compatibleUnits.push(unit)
-//     }
-//   }
-
-//   // 3. Với từng thành phần cần thiết, lọc túi máu tương ứng
-//   for (const componentId of requestProcess.blood_component_ids || []) {
-//     const matchingUnits = compatibleUnits.filter(
-//       (unit) => unit.blood_component_id.toString() === componentId.toString()
-//     )
-
-//     for (const unit of matchingUnits) {
-//       const newMapping: RequestProcessBlood = {
-//         request_process_id: requestProcess._id,
-//         blood_unit_id: unit._id,
-//         blood_component_id: unit.blood_component_id,
-//         blood_group_id: unit.blood_group_id,
-//         volume: unit.volume ?? 0,
-//         status: RequestProcessBloodStatus.Pending,
-//         created_at: new Date(),
-//         updated_at: new Date(),
-//         updated_by: new ObjectId(user_id)
-//       }
-
-//       await databaseService.requestProcessBloods.insertOne(newMapping)
-//     }
-//   }
-// }
