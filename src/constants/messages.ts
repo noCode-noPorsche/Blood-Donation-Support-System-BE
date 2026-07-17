@@ -130,14 +130,16 @@ export const DONATION_MESSAGES = {
   DONATION_DATE_IS_INVALID: 'Donation date is invalid',
   DESCRIPTION_MUST_BE_A_STRING: 'Description must be a string',
   DESCRIPTION_LENGTH_MUST_BE_LESS_THAN_500: 'Description length must be less than 500',
-  BLOOD_DONATION_REQUEST_CANNOT_BE_APPROVED_IF_HEALTH_CHECK_RESULTS_ARE_NOT_SATISFACTORY:
-    'Blood donation request cannot be approved if health check results are not satisfactory',
+  BLOOD_DONATION_PROCESS_CANNOT_BE_APPROVED_IF_HEALTH_CHECK_RESULTS_ARE_NOT_SATISFACTORY:
+    'Blood donation process cannot be approved if health check results are not satisfactory',
   GET_STATUS_DONATION_HEALTH_PROCESS_SUCCESS: 'Get status donation health process success',
   DONATION_TYPE_IS_REQUIRED: 'Donation type is required',
   DONATION_TYPE_IS_INVALID: 'Donation type is invalid',
   VOLUME_COLLECTED_MUST_BE_A_NUMBER_BETWEEN_250_AND_450: 'Volume collected must be a number between 0 and 450',
   DONATION_REGISTRATION_REJECTED_CANNOT_UPDATE: 'Donation registration rejected cannot update',
   DONATION_REGISTRATION_CHECKED_IN_CANNOT_UPDATE: 'Donation registration checked in cannot update',
+  DONATION_PROCESS_REJECTED_CANNOT_UPDATE: 'Donation process has rejected cannot update',
+  DONATION_PROCESS_APPROVED_CANNOT_UPDATE: 'Donation process has approved cannot update',
   START_DATE_DONATION_CANNOT_BE_IN_PAST: 'Start date donation cannot be in past',
   CUSTOMER_CANNOT_CHECK_IN: 'Customer cannot update status Checked In'
 } as const

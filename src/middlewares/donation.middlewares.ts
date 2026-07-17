@@ -254,7 +254,7 @@ export const updateDonationProcessValidator = validate(
           errorMessage: DONATION_MESSAGES.STATUS_MUST_BE_A_STRING
         },
         isIn: {
-          options: [Object.values(DonationProcessStatus)],
+          options: [Object.values(DonationProcessStatus).filter((status) => status !== DonationProcessStatus.Pending)],
           errorMessage: DONATION_MESSAGES.STATUS_IS_INVALID
         }
       },
@@ -263,7 +263,7 @@ export const updateDonationProcessValidator = validate(
           errorMessage: DONATION_MESSAGES.VOLUME_COLLECTED_IS_REQUIRED
         },
         isInt: {
-          options: { min: 0, max: 450 },
+          options: { min: 250, max: 450 },
           errorMessage: DONATION_MESSAGES.VOLUME_COLLECTED_MUST_BE_A_NUMBER_BETWEEN_250_AND_450
         },
         toInt: true
@@ -273,6 +273,17 @@ export const updateDonationProcessValidator = validate(
         isISO8601: {
           options: { strict: true },
           errorMessage: DONATION_MESSAGES.DONATION_DATE_IS_INVALID
+        },
+        custom: {
+          options: (value) => {
+            const inputDate = new Date(value)
+            const now = new Date()
+
+            if (inputDate < now) {
+              throw new Error(DONATION_MESSAGES.START_DATE_DONATION_CANNOT_BE_IN_PAST)
+            }
+            return true
+          }
         }
       },
       description: {

@@ -1,6 +1,9 @@
 import { ParamsDictionary, Query } from 'express-serve-static-core'
+import { ObjectId } from 'mongodb'
 import { DonationProcessStatus, DonationRegistrationStatus, DonationType } from '~/constants/enum'
 import { Pagination } from '~/models/requests/Pagination.requests'
+
+// -- DONATION REGISTRATION --
 export interface CreateDonationRegistrationReqBody {
   blood_group_id?: string
   donation_type: DonationType
@@ -41,6 +44,15 @@ export interface GetDonationRegistrationIdReqParams extends ParamsDictionary {
   id: string
 }
 
+export interface GetAllDonationRegistrationsQuery extends Query, Pagination {
+  donation_type: string
+}
+
+export interface GetDonationRegistrationByUserIdQuery extends Query, Pagination {
+  donation_type: string
+}
+
+// -- DONATION PROCESS --
 export interface GetDonationProcessIdReqParams extends ParamsDictionary {
   id: string
 }
@@ -56,18 +68,27 @@ export interface UpdateDonationProcessReqParams extends ParamsDictionary {
   id: string
 }
 
+export interface GetAllDonationProcessQuery extends Query, Pagination {
+  is_separated: string
+  status: DonationProcessStatus
+}
+
+export interface GetDonationProcessByUserIdQuery extends Query, Pagination {
+  is_separated: string
+  status: DonationProcessStatus
+}
+
+export interface DonationProcessFilter {
+  is_separated?: boolean
+  status?: DonationProcessStatus
+  user_id?: ObjectId
+}
+
+// -- DONATION - HEALTH CHECK - PROCESS
 export interface GetDonationHealthProcessByDonationIdReqParams extends ParamsDictionary {
   id: string
 }
 
 export interface GetStatusDonationHealthProcessByDonationIdReqParams extends ParamsDictionary {
   id: string
-}
-
-export interface getAllDonationRegistrationsQuery extends Query, Pagination {
-  donation_type: string
-}
-
-export interface GetDonationRegistrationByUserIdQuery extends Query, Pagination {
-  donation_type: string
 }
