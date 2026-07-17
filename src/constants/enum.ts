@@ -37,6 +37,7 @@ export enum BloodComponentEnum {
 }
 
 export enum BloodUnitStatus {
+  Pending = 'Pending',
   Available = 'Available',
   Reserved = 'Reserved',
   Used = 'Used',

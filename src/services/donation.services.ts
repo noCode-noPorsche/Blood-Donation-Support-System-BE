@@ -482,7 +482,7 @@ class DonationService {
           }
         },
         { $unwind: { path: '$question', preserveNullAndEmptyArrays: true } },
-        // Final Projection
+        // Final Group
         {
           $group: {
             _id: '$_id',
@@ -623,7 +623,7 @@ class DonationService {
           }
         },
         { $unwind: { path: '$question', preserveNullAndEmptyArrays: true } },
-        // Final Projection
+        // Final Group
         {
           $group: {
             _id: '$_id',
@@ -753,7 +753,7 @@ class DonationService {
           }
         },
         { $unwind: { path: '$question', preserveNullAndEmptyArrays: true } },
-        // Final Projection
+        // Final Group
         {
           $group: {
             _id: '$_id',
@@ -1471,7 +1471,7 @@ class DonationService {
               blood_group_id: resultDonationProcessUpdate.blood_group_id as ObjectId,
               blood_component_id: comp._id,
               updated_by: new ObjectId(user_id),
-              status: BloodUnitStatus.Available,
+              status: BloodUnitStatus.Pending,
               volume: 0
             })
           })

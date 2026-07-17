@@ -98,7 +98,11 @@ export const updateStatusBloodUnitsValidation = validate(
           errorMessage: BLOOD_MESSAGES.BLOOD_UNIT_STATUS_MUST_BE_A_STRING
         },
         isIn: {
-          options: [[BloodUnitStatus.Expired, BloodUnitStatus.Damaged]], // chỉ cho phép 2 giá trị này
+          options: [
+            Object.values(BloodUnitStatus).filter(
+              (status) => status === BloodUnitStatus.Expired || status === BloodUnitStatus.Damaged
+            )
+          ],
           errorMessage: BLOOD_MESSAGES.BLOOD_UNIT_STATUS_MUST_BE_ONE_OF_THE_FOLLOWING_VALUES
         }
       }

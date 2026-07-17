@@ -72,7 +72,7 @@ class HealthCheckService {
           }
         },
         { $unwind: { path: '$user_update', preserveNullAndEmptyArrays: true } },
-        // Final Projection
+        // Final Group
         {
           $group: {
             _id: '$_id',
@@ -186,7 +186,7 @@ class HealthCheckService {
           }
         },
         { $unwind: { path: '$user_update', preserveNullAndEmptyArrays: true } },
-        // Final Projection
+        // Final Group
         {
           $group: {
             _id: '$_id',
@@ -302,7 +302,7 @@ class HealthCheckService {
           }
         },
         { $unwind: { path: '$user_update', preserveNullAndEmptyArrays: true } },
-        // Final Projection
+        // Final Group
         {
           $group: {
             _id: '$_id',
@@ -426,7 +426,7 @@ class HealthCheckService {
     const bloodGroupId = isValidBloodGroupId ? new ObjectId(payload.blood_group_id) : healthCheck.blood_group_id
     updateHealthCheckFields.blood_group_id = bloodGroupId
 
-    // Nếu có weight gửi về ko thì lấy từ user
+    // Nếu có weight gửi về ko thì lấy từ User
     const finalWeight = payload.weight ? payload.weight : user.weight
     updateHealthCheckFields.weight = finalWeight
 

@@ -3,7 +3,7 @@ import {
   getAllBloodUnitsController,
   getAllBloodUnitsRelativeController,
   getBloodUnitByDonationProcessIdController,
-  updateBloodUnitsController,
+  updateBloodUnitsFromDonationProcessController,
   updateStatusBloodUnitsController
 } from '~/controllers/bloodUnit.controllers'
 import { updateStatusBloodUnitsValidation } from '~/middlewares/bloodUnit.middlewares'
@@ -16,17 +16,17 @@ const bloodUnitRouter = express.Router()
 
 /**
  * Description. Update blood units by donation process id for staff or admin
- * Path: /:id
+ * Path: /donation-processes/:id
  * Method: PATCH
  * Body: { UpdateBloodUnitsReqBody }
  * Header: { Authorization: Bearer <access_token>}
  */
 bloodUnitRouter.patch(
-  '/:id',
+  '/donation-processes/:id',
   isStaffOrAdminValidator,
   //   updateBloodUnitsValidation,
   //   filterMiddleware<UpdateBloodUnitsReqBody>(['blood_component_id', 'blood_group_id', 'status', 'volume']),
-  wrapAsync(updateBloodUnitsController)
+  wrapAsync(updateBloodUnitsFromDonationProcessController)
 )
 
 /**
@@ -46,11 +46,15 @@ bloodUnitRouter.patch(
 
 /**
  * Description. Get blood unit by donation process id for staff or admin
- * Path: /:id
+ * Path: /donation-processes/:id
  * Method: GET
  * Header: { Authorization: Bearer <access_token>}
  */
-bloodUnitRouter.get('/:id', isStaffOrAdminValidator, wrapAsync(getBloodUnitByDonationProcessIdController))
+bloodUnitRouter.get(
+  '/donation-processes/:id',
+  isStaffOrAdminValidator,
+  wrapAsync(getBloodUnitByDonationProcessIdController)
+)
 
 /**
  * Description. Get all blood unit for staff or admin

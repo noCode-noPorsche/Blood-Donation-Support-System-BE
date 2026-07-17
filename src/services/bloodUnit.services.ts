@@ -1,24 +1,29 @@
 import { config } from 'dotenv'
-import { ObjectId } from 'mongodb'
+import { Filter, ObjectId } from 'mongodb'
 import { BloodComponentEnum, BloodUnitStatus } from '~/constants/enum'
 import { HTTP_STATUS } from '~/constants/httpStatus'
 import { BLOOD_MESSAGES, DONATION_MESSAGES } from '~/constants/messages'
 import { ErrorWithStatus } from '~/models/Error'
-import { UpdateBloodUnitsReqBody, UpdateStatusBloodUnitsReqBody } from '~/models/requests/BloodUnit.requests'
+import {
+  BloodUnitsFilter,
+  UpdateBloodUnitsFromDonationReqBody,
+  UpdateStatusBloodUnitsReqBody
+} from '~/models/requests/BloodUnit.requests'
 import { bloodGroupMap, getExpirationDateByComponent } from '~/utils/utils'
 import { UserRole } from '../constants/enum'
 import bloodService from './blood.services'
 import databaseService from './database.services'
+import BloodUnit from '~/models/schemas/BloodUnit.schemas'
 config()
 
 class BloodUnitService {
-  async updateBloodUnitsFromDonation({
+  async updateBloodUnitsFromDonationProcess({
     id,
     payload,
     user_id
   }: {
     id: string
-    payload: UpdateBloodUnitsReqBody[]
+    payload: UpdateBloodUnitsFromDonationReqBody[]
     user_id: string
   }) {
     const bloodUnitsList = await databaseService.bloodUnits.find({ donation_process_id: new ObjectId(id) }).toArray()
@@ -109,11 +114,23 @@ class BloodUnitService {
     return updatedBloodUnits
   }
 
-  async getBloodUnitsByDonationProcessId(id: string) {
+  // Lấy danh Blood Unit By Donation Process Id
+  async getBloodUnitsByDonationProcessId({
+    id,
+    filter,
+    limit,
+    page
+  }: {
+    id: string
+    filter: BloodUnitsFilter
+    limit: number
+    page: number
+  }) {
     const donationProcess = await databaseService.donationProcesses.findOne({
       _id: new ObjectId(id)
     })
 
+    // Kiểm tra có tồn tại ko
     if (!donationProcess) {
       throw new ErrorWithStatus({
         message: DONATION_MESSAGES.DONATION_PROCESS_NOT_FOUND,
@@ -121,251 +138,377 @@ class BloodUnitService {
       })
     }
 
-    const bloodUnitResults = await databaseService.bloodUnits
+    const finalFilter = {
+      ...filter,
+      donation_process_id: new ObjectId(id)
+    }
+
+    const bloodUnits = await databaseService.bloodUnits
       .aggregate([
-        // 1. Match theo donation_process_id
         {
-          $match: {
-            donation_process_id: new ObjectId(id)
-          }
+          $match: finalFilter
         },
-
-        // 2. Join blood_groups
-        {
-          $lookup: {
-            from: 'blood_groups',
-            localField: 'blood_group_id',
-            foreignField: '_id',
-            as: 'blood_group_info'
-          }
-        },
-        {
-          $unwind: {
-            path: '$blood_group_info',
-            preserveNullAndEmptyArrays: true
-          }
-        },
-
-        // 3. Join blood_components
-        {
-          $lookup: {
-            from: 'blood_components',
-            localField: 'blood_component_id',
-            foreignField: '_id',
-            as: 'blood_component_info'
-          }
-        },
-        {
-          $unwind: {
-            path: '$blood_component_info',
-            preserveNullAndEmptyArrays: true
-          }
-        },
-
-        {
-          $lookup: {
-            from: 'health_checks',
-            localField: 'donation_process_id',
-            foreignField: 'donation_process_id',
-            as: 'health_check_info'
-          }
-        },
-        {
-          $unwind: {
-            path: '$health_check_info',
-            preserveNullAndEmptyArrays: true
-          }
-        },
-
-        // 4. Project kết quả mong muốn
-        {
-          $project: {
-            _id: 1,
-            donation_process_id: 1,
-            request_process_id: 1,
-            blood_group_id: 1,
-            blood_component_id: 1,
-            status: 1,
-            expired_at: 1,
-            volume: 1,
-            note: 1,
-            updated_by: 1,
-            created_at: 1,
-            updated_at: 1,
-            storage_temperature: 1,
-            // bổ sung tên nhóm máu và thành phần máu
-            blood_group_name: '$blood_group_info.name',
-            blood_component_name: '$blood_component_info.name',
-            donation_type: '$health_check_info.donation_type'
-          }
-        }
-      ])
-      .toArray()
-
-    return bloodUnitResults
-  }
-
-  async getAllBloodUnits() {
-    const bloodUnitResults = await databaseService.bloodUnits
-      .aggregate([
-        // Join blood_groups để lấy tên nhóm máu
-        {
-          $lookup: {
-            from: 'blood_groups',
-            localField: 'blood_group_id',
-            foreignField: '_id',
-            as: 'blood_group_info'
-          }
-        },
-        {
-          $unwind: {
-            path: '$blood_group_info',
-            preserveNullAndEmptyArrays: true
-          }
-        },
-
-        // Join blood_components để lấy tên thành phần máu
-        {
-          $lookup: {
-            from: 'blood_components',
-            localField: 'blood_component_id',
-            foreignField: '_id',
-            as: 'blood_component_info'
-          }
-        },
-        {
-          $unwind: {
-            path: '$blood_component_info',
-            preserveNullAndEmptyArrays: true
-          }
-        },
-
+        // Join User
         {
           $lookup: {
             from: 'users',
             localField: 'updated_by',
             foreignField: '_id',
-            as: 'updated_by_info'
+            as: 'user_update'
+          }
+        },
+        { $unwind: { path: '$user_update', preserveNullAndEmptyArrays: true } },
+        // Join Blood Group
+        {
+          $lookup: {
+            from: 'blood_groups',
+            localField: 'blood_group_id',
+            foreignField: '_id',
+            as: 'blood_group'
           }
         },
         {
           $unwind: {
-            path: '$updated_by_info',
+            path: '$blood_group',
             preserveNullAndEmptyArrays: true
           }
         },
-
-        // Project kết quả trả về
+        // Join Blood Components
         {
-          $project: {
-            _id: 1,
-            donation_process_id: 1,
-            request_process_id: 1,
-            blood_group_id: 1,
-            blood_component_id: 1,
-            status: 1,
-            expired_at: 1,
-            volume: 1,
-            update_by: '$updated_by_info.full_name',
-            updated_by: 1,
-            created_at: 1,
-            updated_at: 1,
-
-            // Thêm tên vào kết quả
-            blood_group_name: '$blood_group_info.name',
-            blood_component_name: '$blood_component_info.name'
+          $lookup: {
+            from: 'blood_components',
+            localField: 'blood_component_id',
+            foreignField: '_id',
+            as: 'blood_component'
           }
+        },
+        {
+          $unwind: {
+            path: '$blood_component',
+            preserveNullAndEmptyArrays: true
+          }
+        },
+        // Join Health Check
+        {
+          $lookup: {
+            from: 'health_checks',
+            localField: 'donation_process_id',
+            foreignField: 'donation_process_id',
+            as: 'health_check'
+          }
+        },
+        {
+          $unwind: {
+            path: '$health_check',
+            preserveNullAndEmptyArrays: true
+          }
+        },
+        // Final Group
+        {
+          $group: {
+            _id: '$_id',
+            // Donation Process
+            donation_process_id: { $first: '$donation_process_id' },
+            // Request Process
+            request_process_id: { $first: '$request_process_id' },
+            // Blood Group
+            blood_group_id: { $first: '$blood_group_id' },
+            blood_group: { $first: '$blood_group.name' },
+            // Blood Component
+            blood_component_id: { $first: '$blood_component_id' },
+            blood_component: { $first: '$blood_component.name' },
+            // Main Blood Unit
+            donation_type: { $first: '$health_check.donation_type' },
+            volume: { $first: '$volume' },
+            expired_at: { $first: '$expired_at' },
+            storage_temperature: { $first: '$storage_temperature' },
+            note: { $first: '$note' },
+            status: { $first: '$status' },
+            // Actor
+            updated_by: { $first: '$user_update.full_name' },
+            created_at: { $first: '$created_at' },
+            updated_at: { $first: '$updated_at' }
+          }
+        },
+        {
+          $sort: { created_at: -1 }
+        },
+        {
+          $skip: limit * (page - 1)
+        },
+        {
+          $limit: limit
         }
       ])
       .toArray()
 
-    if (!bloodUnitResults) {
-      throw new ErrorWithStatus({
-        message: BLOOD_MESSAGES.GET_BLOOD_UNITS_FAIL,
-        status: 404
-      })
-    }
+    const totalItems = await databaseService.bloodUnits.countDocuments(finalFilter)
+    const totalPages = Math.ceil(totalItems / limit)
 
-    return bloodUnitResults
+    return {
+      totalItems,
+      limit,
+      page,
+      totalPages,
+      items: bloodUnits
+    }
+  }
+
+  async getAllBloodUnits({ filter, limit, page }: { filter: BloodUnitsFilter; limit: number; page: number }) {
+    const bloodUnits = await databaseService.bloodUnits
+      .aggregate([
+        {
+          $match: filter
+        },
+        // Join User
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'updated_by',
+            foreignField: '_id',
+            as: 'user_update'
+          }
+        },
+        { $unwind: { path: '$user_update', preserveNullAndEmptyArrays: true } },
+        // Join Blood Group
+        {
+          $lookup: {
+            from: 'blood_groups',
+            localField: 'blood_group_id',
+            foreignField: '_id',
+            as: 'blood_group'
+          }
+        },
+        {
+          $unwind: {
+            path: '$blood_group',
+            preserveNullAndEmptyArrays: true
+          }
+        },
+        // Join Blood Components
+        {
+          $lookup: {
+            from: 'blood_components',
+            localField: 'blood_component_id',
+            foreignField: '_id',
+            as: 'blood_component'
+          }
+        },
+        {
+          $unwind: {
+            path: '$blood_component',
+            preserveNullAndEmptyArrays: true
+          }
+        },
+        // Join Health Check
+        {
+          $lookup: {
+            from: 'health_checks',
+            localField: 'donation_process_id',
+            foreignField: 'donation_process_id',
+            as: 'health_check'
+          }
+        },
+        {
+          $unwind: {
+            path: '$health_check',
+            preserveNullAndEmptyArrays: true
+          }
+        },
+        // Final Group
+        {
+          $group: {
+            _id: '$_id',
+            // Donation Process
+            donation_process_id: { $first: '$donation_process_id' },
+            // Request Process
+            request_process_id: { $first: '$request_process_id' },
+            // Blood Group
+            blood_group_id: { $first: '$blood_group_id' },
+            blood_group: { $first: '$blood_group.name' },
+            // Blood Component
+            blood_component_id: { $first: '$blood_component_id' },
+            blood_component: { $first: '$blood_component.name' },
+            // Main Blood Unit
+            donation_type: { $first: '$health_check.donation_type' },
+            volume: { $first: '$volume' },
+            expired_at: { $first: '$expired_at' },
+            storage_temperature: { $first: '$storage_temperature' },
+            note: { $first: '$note' },
+            status: { $first: '$status' },
+            // Actor
+            updated_by: { $first: '$user_update.full_name' },
+            created_at: { $first: '$created_at' },
+            updated_at: { $first: '$updated_at' }
+          }
+        },
+        {
+          $sort: { created_at: -1 }
+        },
+        {
+          $skip: limit * (page - 1)
+        },
+        {
+          $limit: limit
+        }
+      ])
+      .toArray()
+
+    const totalItems = await databaseService.bloodUnits.countDocuments(filter)
+    const totalPages = Math.ceil(totalItems / limit)
+
+    return {
+      totalItems,
+      limit,
+      page,
+      totalPages,
+      items: bloodUnits
+    }
   }
 
   async getAllBloodUnitsRelative({
     blood_group_id,
-    blood_component_ids
+    blood_component_ids,
+    filter,
+    limit,
+    page
   }: {
     blood_group_id: string
     blood_component_ids: string[]
+    filter: BloodUnitsFilter
+    limit: number
+    page: number
   }) {
-    // 1. Lấy tên nhóm máu người nhận
+    // Lấy tên nhóm máu người nhận
     const receiverName = await bloodService.getBloodGroupNameById(blood_group_id)
 
-    // 2. Dò map tương thích
+    // Dò map máu tương thích
     const compatibleDonorNames = bloodGroupMap[receiverName] || []
 
-    // 3. Lấy danh sách nhóm máu tương thích từ DB
+    // Lấy danh sách nhóm máu tương thích từ DB
     const compatibleDonorGroups = await databaseService.bloodGroups
       .find({ name: { $in: compatibleDonorNames as any } })
       .toArray()
 
     const compatibleGroupIds = compatibleDonorGroups.map((g) => g._id)
 
-    // 4. Aggregation để lấy túi máu phù hợp
-    const result = await databaseService.bloodUnits
+    // Tạo bộ lọc
+    const finalFilter: Filter<BloodUnit> = {
+      ...filter,
+      status: BloodUnitStatus.Available,
+      blood_group_id: { $in: compatibleGroupIds },
+      blood_component_id: { $in: blood_component_ids.map((id) => new ObjectId(id)) }
+    }
+
+    const bloodUnits = await databaseService.bloodUnits
       .aggregate([
         {
-          $match: {
-            status: BloodUnitStatus.Available,
-            blood_group_id: { $in: compatibleGroupIds },
-            blood_component_id: { $in: blood_component_ids.map((id) => new ObjectId(id)) }
+          $match: finalFilter
+        },
+        // Join User
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'updated_by',
+            foreignField: '_id',
+            as: 'user_update'
           }
         },
+        { $unwind: { path: '$user_update', preserveNullAndEmptyArrays: true } },
+        // Join Blood Group
         {
           $lookup: {
             from: 'blood_groups',
             localField: 'blood_group_id',
             foreignField: '_id',
-            as: 'blood_group_info'
+            as: 'blood_group'
           }
         },
         {
           $unwind: {
-            path: '$blood_group_info',
+            path: '$blood_group',
             preserveNullAndEmptyArrays: true
           }
         },
+        // Join Blood Components
         {
           $lookup: {
             from: 'blood_components',
             localField: 'blood_component_id',
             foreignField: '_id',
-            as: 'blood_component_info'
+            as: 'blood_component'
           }
         },
         {
           $unwind: {
-            path: '$blood_component_info',
+            path: '$blood_component',
             preserveNullAndEmptyArrays: true
           }
         },
+        // Join Health Check
         {
-          $project: {
-            _id: 1,
-            donation_process_id: 1,
-            blood_group_id: 1,
-            blood_group_name: '$blood_group_info.name',
-            blood_component_id: 1,
-            blood_component_name: '$blood_component_info.name',
-            status: 1,
-            volume: 1,
-            expired_at: 1,
-            created_at: 1,
-            updated_at: 1
+          $lookup: {
+            from: 'health_checks',
+            localField: 'donation_process_id',
+            foreignField: 'donation_process_id',
+            as: 'health_check'
           }
+        },
+        {
+          $unwind: {
+            path: '$health_check',
+            preserveNullAndEmptyArrays: true
+          }
+        },
+        // Final Group
+        {
+          $group: {
+            _id: '$_id',
+            // Donation Process
+            donation_process_id: { $first: '$donation_process_id' },
+            // Request Process
+            request_process_id: { $first: '$request_process_id' },
+            // Blood Group
+            blood_group_id: { $first: '$blood_group_id' },
+            blood_group: { $first: '$blood_group.name' },
+            // Blood Component
+            blood_component_id: { $first: '$blood_component_id' },
+            blood_component: { $first: '$blood_component.name' },
+            // Main Blood Unit
+            donation_type: { $first: '$health_check.donation_type' },
+            volume: { $first: '$volume' },
+            expired_at: { $first: '$expired_at' },
+            storage_temperature: { $first: '$storage_temperature' },
+            note: { $first: '$note' },
+            status: { $first: '$status' },
+            // Actor
+            updated_by: { $first: '$user_update.full_name' },
+            created_at: { $first: '$created_at' },
+            updated_at: { $first: '$updated_at' }
+          }
+        },
+        {
+          $sort: { created_at: -1 }
+        },
+        {
+          $skip: limit * (page - 1)
+        },
+        {
+          $limit: limit
         }
       ])
       .toArray()
 
-    return result
+    const totalItems = await databaseService.bloodUnits.countDocuments(finalFilter)
+    const totalPages = Math.ceil(totalItems / limit)
+
+    return {
+      totalItems,
+      limit,
+      page,
+      totalPages,
+      items: bloodUnits
+    }
   }
 
   async updateStatusBloodUnits({
@@ -386,7 +529,7 @@ class BloodUnitService {
       })
     }
 
-    const result = await databaseService.bloodUnits.findOneAndUpdate(
+    const bloodUnitsUpdate = await databaseService.bloodUnits.findOneAndUpdate(
       { _id: new ObjectId(id) },
       {
         $set: {
@@ -401,16 +544,16 @@ class BloodUnitService {
     // Lấy thông tin người cập nhật
     const updatedByUser = await databaseService.users.findOne({ _id: new ObjectId(user_id) })
 
-    // Lấy danh sách tất cả Admin và StaffWarehouse
+    // Lấy danh sách tất cả Admin/StaffWarehouse/Staff
     const notifyUsers = await databaseService.users
-      .find({ role: { $in: [UserRole.Admin, UserRole.StaffWarehouse] } })
+      .find({ role: { $in: [UserRole.Admin, UserRole.StaffWarehouse, UserRole.Staff] } })
       .toArray()
 
     const now = new Date()
 
     // Tạo nội dung thông báo
     const title = `Trạng thái túi máu đã được cập nhật`
-    const message = `Túi máu có ID ${id} đã được cập nhật thành trạng thái bị hư bởi ${updatedByUser?.full_name || 'người dùng không xác định'}.`
+    const message = `Túi máu có ID ${id} đã được cập nhật thành trạng thái bị hư bởi ${updatedByUser?.full_name}.`
 
     // Gửi thông báo đến từng người
     await Promise.all(
@@ -427,7 +570,7 @@ class BloodUnitService {
       )
     )
 
-    return result
+    return bloodUnitsUpdate
   }
 }
 
