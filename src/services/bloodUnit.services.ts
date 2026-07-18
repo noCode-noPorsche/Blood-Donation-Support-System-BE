@@ -17,6 +17,7 @@ import BloodUnit from '~/models/schemas/BloodUnit.schemas'
 config()
 
 class BloodUnitService {
+  // Cập nhật Blood Units From Donation Process
   async updateBloodUnitsFromDonationProcess({
     id,
     payload,
@@ -26,14 +27,12 @@ class BloodUnitService {
     payload: UpdateBloodUnitsFromDonationReqBody[]
     user_id: string
   }) {
-    const bloodUnitsList = await databaseService.bloodUnits.find({ donation_process_id: new ObjectId(id) }).toArray()
-
-    const totalVolume = payload.reduce((sum, p) => sum + p.volume, 0)
+    const bloodUnits = await databaseService.bloodUnits.find({ donation_process_id: new ObjectId(id) }).toArray()
 
     const donationProcess = await databaseService.donationProcesses.findOne({
       _id: new ObjectId(id)
     })
-
+    // Kiểm tra có tồn tại ko
     if (!donationProcess) {
       throw new ErrorWithStatus({
         message: DONATION_MESSAGES.DONATION_PROCESS_NOT_FOUND,
@@ -41,23 +40,24 @@ class BloodUnitService {
       })
     }
 
+    // Kiểm tra thể tích nhập về có bằng với thể tích lấy được từ Donation Process
+    const totalVolume = payload.reduce((sum, p) => sum + p.volume, 0)
+
     if (totalVolume !== donationProcess.volume_collected) {
       throw new ErrorWithStatus({
-        message: 'Tổng thể tích không khớp với lượng máu đã lấy',
+        message: BLOOD_MESSAGES.TOTAL_VOLUME_NOT_EQUAL_VOLUME_COLLECTED,
         status: HTTP_STATUS.BAD_REQUEST
       })
     }
 
-    const allComponents = await databaseService.bloodComponents.find().toArray()
-    const componentIdToNameMap = new Map(allComponents.map((c) => [c._id.toString(), c.name]))
+    const bloodComponents = await databaseService.bloodComponents.find().toArray()
+    const componentIdToNameMap = new Map(bloodComponents.map((c) => [c._id.toString(), c.name]))
 
     // Tiến hành cập nhật từng blood unit
     const updatedBloodUnits = []
 
     for (const updateItem of payload) {
-      const targetUnit = bloodUnitsList.find(
-        (unit) => unit.blood_component_id.toString() === updateItem.blood_component_id
-      )
+      const targetUnit = bloodUnits.find((unit) => unit.blood_component_id.toString() === updateItem.blood_component_id)
 
       if (!targetUnit) {
         throw new ErrorWithStatus({
@@ -77,7 +77,7 @@ class BloodUnitService {
         })
       }
 
-      const result = await databaseService.bloodUnits.findOneAndUpdate(
+      const resultBloodUnitsUpdate = await databaseService.bloodUnits.findOneAndUpdate(
         { _id: targetUnit._id },
         {
           $set: {
@@ -96,12 +96,12 @@ class BloodUnitService {
         }
       )
 
-      if (result) {
-        updatedBloodUnits.push(result)
+      if (resultBloodUnitsUpdate) {
+        updatedBloodUnits.push(resultBloodUnitsUpdate)
       }
     }
 
-    // Cập nhật is_separated = true cho donation process
+    // Cập nhật is_separated = TRUE cho Donation Process
     await databaseService.donationProcesses.updateOne(
       { _id: new ObjectId(id) },
       {
@@ -114,7 +114,7 @@ class BloodUnitService {
     return updatedBloodUnits
   }
 
-  // Lấy danh Blood Unit By Donation Process Id
+  // Lấy danh sách Blood Unit By Donation Process Id
   async getBloodUnitsByDonationProcessId({
     id,
     filter,
@@ -254,6 +254,7 @@ class BloodUnitService {
     }
   }
 
+  // Lấy danh sách Blood Units
   async getAllBloodUnits({ filter, limit, page }: { filter: BloodUnitsFilter; limit: number; page: number }) {
     const bloodUnits = await databaseService.bloodUnits
       .aggregate([
@@ -366,6 +367,7 @@ class BloodUnitService {
     }
   }
 
+  // Lấy danh sách Blood Units Relative
   async getAllBloodUnitsRelative({
     blood_group_id,
     blood_component_ids,
@@ -511,6 +513,7 @@ class BloodUnitService {
     }
   }
 
+  // Cập nhật Status Blood Units
   async updateStatusBloodUnits({
     id,
     payload,

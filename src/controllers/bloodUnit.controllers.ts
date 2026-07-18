@@ -27,7 +27,7 @@ export const updateBloodUnitsFromDonationProcessController = async (
   const { body } = req
 
   const result = await bloodUnitService.updateBloodUnitsFromDonationProcess({ id, payload: body, user_id })
-  res.sendSuccess?.(BLOOD_MESSAGES.UPDATE_BLOOD_UNITS_SUCCESS, { result })
+  res.sendSuccess?.(BLOOD_MESSAGES.UPDATE_BLOOD_UNITS_SUCCESS, result)
 }
 
 // Lấy danh sách Blood Unit By Donation Process Id

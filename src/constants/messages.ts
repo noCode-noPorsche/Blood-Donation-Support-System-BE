@@ -96,7 +96,8 @@ export const BLOOD_MESSAGES = {
   BLOOD_UNIT_NOT_FOUND: 'Blood unit not found',
   GET_BLOOD_INVENTORY_THRESHOLD_SUCCESS: 'Get blood inventory threshold success',
   UPDATE_BLOOD_INVENTORY_THRESHOLD_SUCCESS: 'Update blood inventory threshold success',
-  BLOOD_INVENTORY_THRESHOLD_NOT_FOUND: 'Blood inventory threshold not found'
+  BLOOD_INVENTORY_THRESHOLD_NOT_FOUND: 'Blood inventory threshold not found',
+  TOTAL_VOLUME_NOT_EQUAL_VOLUME_COLLECTED: 'Total volume not equal volume collected'
 } as const
 
 export const DONATION_MESSAGES = {
