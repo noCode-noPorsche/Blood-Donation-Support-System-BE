@@ -47,10 +47,7 @@ export const registerController = async (
   next: NextFunction
 ) => {
   const result = await usersService.register(req.body)
-  res.sendSuccess?.(USER_MESSAGES.REGISTER_SUCCESS, {
-    access_token: result.access_token,
-    refresh_token: result.refresh_token
-  })
+  res.sendSuccess?.(result.message)
 }
 
 export const logoutController = async (req: Request<ParamsDictionary, any, LogoutReqBody>, res: Response) => {
@@ -79,7 +76,7 @@ export const getMeController = async (req: Request, res: Response) => {
 
   const result = await usersService.getMe(user_id)
   res.sendSuccess?.(USER_MESSAGES.GET_PROFILE_SUCCESS, {
-    user: result
+    ...result
   })
 }
 
@@ -103,7 +100,7 @@ export const updateMeController = async (req: Request<ParamsDictionary, any, Upd
   const { body } = req
 
   const result = await usersService.updateMe(user_id, body)
-  res.sendSuccess?.(USER_MESSAGES.UPDATE_PROFILE_SUCCESS, { result })
+  res.sendSuccess?.(USER_MESSAGES.UPDATE_PROFILE_SUCCESS, result)
 }
 
 export const changePasswordController = async (

@@ -49,7 +49,7 @@ async function startServer() {
 
   app.use(
     cors({
-      origin: ['https://your-frontend.com'],
+      origin: ['https://your-frontend.com', 'http://localhost:5173'],
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
       credentials: true
     })

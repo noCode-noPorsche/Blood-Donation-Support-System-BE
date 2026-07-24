@@ -70,19 +70,22 @@ class UsersService {
       is_active: true
     })
 
-    const result = await databaseService.users.insertOne(newUser)
-    const user_id = result.insertedId.toString()
+    await databaseService.users.insertOne(newUser)
+    // const user_id = result.insertedId.toString()
 
-    const [access_token, refresh_token] = await this.signAccessAndRefreshToken(user_id, newUser.role)
-    await databaseService.refreshToken.insertOne(
-      new RefreshToken({
-        user_id: new ObjectId(user_id),
-        token: refresh_token
-      })
-    )
+    // const [access_token, refresh_token] = await this.signAccessAndRefreshToken(user_id, newUser.role)
+    // await databaseService.refreshToken.insertOne(
+    //   new RefreshToken({
+    //     user_id: new ObjectId(user_id),
+    //     token: refresh_token
+    //   })
+    // )
+    // return {
+    //   access_token,
+    //   refresh_token
+    // }
     return {
-      access_token,
-      refresh_token
+      message: USER_MESSAGES.REGISTER_SUCCESS
     }
   }
 
@@ -297,11 +300,8 @@ class UsersService {
       bloodGroupName = bloodGroupInfo?.name || ''
     }
 
-    // Bóc tách bằng JS (tốc độ CPU tính bằng nano-giây, không lo ảnh hưởng performance)
-    const { blood_group_id, ...restUser } = user
-
     return {
-      ...restUser,
+      ...user,
       blood_group: bloodGroupName
     }
   }

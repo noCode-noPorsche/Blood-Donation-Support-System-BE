@@ -58,7 +58,7 @@ usersRouter.post('/register', registerValidator, wrapAsync(registerController))
  * Header: { Authorization: Bearer <access_token>}
  * Body : { refresh_token: string }
  */
-usersRouter.post('/logout', accessTokenValidator, refreshTokenValidator, wrapAsync(logoutController))
+usersRouter.post('/logout', refreshTokenValidator, wrapAsync(logoutController))
 
 /**
  * Description. Refresh Token
@@ -94,13 +94,13 @@ usersRouter.get('/:citizen_id_number', accessTokenValidator, wrapAsync(getProfil
 
 /**
  * Description. Update My Profile
- * Path: /update-me
+ * Path: /me
  * METHOD: PATCH
  * Header: { Authorization: Bearer <access_token>}
  * Body : UserSchema
  */
 usersRouter.patch(
-  '/update-me',
+  '/me',
   accessTokenValidator,
   updateMeValidator,
   filterMiddleware<UpdateMeReqBody>([

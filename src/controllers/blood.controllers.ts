@@ -6,7 +6,7 @@ import bloodService from '~/services/blood.services'
 
 export const getBloodGroupsController = async (req: Request, res: Response) => {
   const result = await bloodService.getBloodGroups()
-  res.sendSuccess?.(BLOOD_MESSAGES.GET_BLOOD_GROUPS_SUCCESS, { result })
+  res.sendSuccess?.(BLOOD_MESSAGES.GET_BLOOD_GROUPS_SUCCESS, result)
 }
 
 export const createBloodGroupController = async (
@@ -21,7 +21,7 @@ export const createBloodGroupController = async (
 
 export const getBloodComponentsController = async (req: Request, res: Response) => {
   const result = await bloodService.getBloodComponents()
-  res.sendSuccess?.(BLOOD_MESSAGES.GET_BLOOD_COMPONENTS_SUCCESS, { result })
+  res.sendSuccess?.(BLOOD_MESSAGES.GET_BLOOD_COMPONENTS_SUCCESS, result)
 }
 
 export const createBloodComponentController = async (

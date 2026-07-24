@@ -12,7 +12,7 @@ config()
 class BloodService {
   async getBloodGroups() {
     const bloodGroups = await databaseService.bloodGroups.find({}).toArray()
-    return bloodGroups
+    return { items: bloodGroups }
   }
 
   async getBloodGroupNameById(id: string) {
@@ -33,7 +33,7 @@ class BloodService {
 
   async getBloodComponents() {
     const bloodComponents = await databaseService.bloodComponents.find({}).toArray()
-    return bloodComponents
+    return { items: bloodComponents }
   }
 
   async getBloodComponentNameById(id: string) {
